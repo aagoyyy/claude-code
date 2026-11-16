@@ -1,5 +1,7 @@
 # Generator → layers → animation (toolkit/)
 
+Fastest start: `bash toolkit/bootstrap.sh ./svg-motion` (installs Remotion, copies the toolkit, generates `Layers.tsx`, renders a verification still).
+
 1. `py/scene.py: build(doc, anim=True)` returns `(LAYERS, META)`: ordered named layers (wall, table, stove, pot, flame, lid, glass, placemat, bowl, noodles,
    each topping, lip, chopsticks, tag, fx) and the pivot position of each topping. Dynamic things (flame, steam, bubbles, puffs) are **omitted** in anim mode.
 2. `py/emit_ts.py` converts every layer to JSX (`stroke-width`→`strokeWidth` …) → `src/mie/layers/Layers.tsx` (`Defs`, `LAYERS`, `META`).

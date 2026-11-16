@@ -19,5 +19,5 @@ def assemble(doc, L, cam=(540, 960, 1.0, 0), dof=None):
 if __name__ == '__main__':
     doc = Doc(1); L = scene.build(doc)
     svg = assemble(doc, L)
-    open('/home/user/editorial-motion/frame/frame3.svg', 'w').write(svg)
+    open('./frame3.svg', 'w').write(svg)
     print('ok', len(svg))

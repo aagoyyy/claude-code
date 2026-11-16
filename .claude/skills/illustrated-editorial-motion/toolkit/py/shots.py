@@ -13,8 +13,8 @@ SHOTS = {   # name: (camera (cx, cy, zoom, roll), depth-of-field blur (wall, mid
 if __name__ == '__main__':
     for name, (cam, dof) in SHOTS.items():
         doc = Doc(1); L = scene.build(doc)
-        open(f'/home/user/editorial-motion/frame/shot_{name}.svg', 'w').write(assemble(doc, L, cam, dof))
+        open(f'./shot_{name}.svg', 'w').write(assemble(doc, L, cam, dof))
     doc = Doc(2); top = topdown.build_top(doc)
-    open('/home/user/editorial-motion/frame/shot_top_down.svg', 'w').write(
+    open('./shot_top_down.svg', 'w').write(
         f'<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920"><defs>{"".join(doc.defs)}</defs>{"".join(top)}</svg>')
     print('shots ok')

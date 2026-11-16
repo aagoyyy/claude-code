@@ -1,5 +1,7 @@
 import re, json, sys, os
-sys.path.insert(0, '/home/user/editorial-motion/frame')
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+OUT = os.environ.get('LAYERS_OUT', os.path.join(os.getcwd(), 'src/mie/layers/Layers.tsx'))   # default: ./src/mie/layers/Layers.tsx
 from kit import *
 import scene
 
@@ -20,6 +22,6 @@ for name, lst in layers:
     out.append(f"  {name}: () => (<g>{body}</g>),")
 out.append('};')
 out.append('export const META: Record<string, [number, number]> = ' + json.dumps(meta) + ';')
-os.makedirs('/home/user/editorial-motion/editorial-motion/src/mie/layers', exist_ok=True)
-open('/home/user/editorial-motion/editorial-motion/src/mie/layers/Layers.tsx', 'w').write('\n'.join(out))
+os.makedirs(os.path.dirname(OUT), exist_ok=True)
+open(OUT, 'w').write('\n'.join(out))
 print('layers', len(layers), 'bytes', sum(len(x) for x in out))
