@@ -13,7 +13,9 @@ Dua proyek Remotion (React + TS + SVG), 24 fps, 1080x1920. Video hasil render TI
   npx remotion render src/index.ts Part1 out/part1.mp4 --browser-executable=<chrome-headless-shell> --concurrency=$(nproc)   # 22 s, beat 1-4
   ```
 - `src/mie/Script1.tsx` = timeline beat 1-4 (0-5 s identik master, lalu kamera pindah ke tiap bahan). Angka dari objek `DATA`; build gagal kalau HPP != 7.000 atau margin < 40%.
-- BELUM dibuat: beat 5-7 (biaya operasional, 15 vs 80 mangkuk + es teh, cuan 5-7 jt, CTA) dan audio/VO.
+- `src/mie/Script2.tsx` = beat 5-7 (komposisi `Part2`, 22 s, lanjutan Part1 di dunia yang sama): operasional, 15 vs 80 mangkuk + es teh, cuan 5-7 jt, CTA. Render: `npx remotion render src/index.ts Part2 out/part2.mp4`.
+- Catatan script: 80 mangkuk x margin Rp5.000 x 30 hari jauh di atas "cuan 5-7 jt"; angka ditampilkan apa adanya dari script, user perlu konfirmasi.
+- BELUM dibuat: audio/VO dan backsound.
 
 ## 2. `editorial-motion/`: library V1-V6 (banyak eksperimen)
 - `src/v6/` = gaya BERSIH ivory-grid, tanpa tangan dan tanpa tekstur (`data.ts` sumber angka, `Board.tsx` papan 6 komposisi, `Demo.tsx`, `Full.tsx` 15 s, `Open.tsx` pembuka script).

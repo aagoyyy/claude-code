@@ -16,7 +16,7 @@ const prog = (f: number, a: number, b: number) => clamp((f - a) / (b - a));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const eio = (t: number) => { t = clamp(t); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
 const eo = (t: number) => 1 - Math.pow(1 - clamp(t), 3);
-const fmt = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+export const fmt = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 /** single source of truth for every figure in this part */
 export const DATA = {packet: 3000, low: 10000, high: 15000, price: 12000, items: [
@@ -26,8 +26,8 @@ export const HPP = DATA.items.reduce((a, b) => a + b.v, 0);
 export const MARGIN = Math.round(((DATA.price - HPP) / DATA.price) * 100);
 if (HPP !== 7000 || MARGIN < 40) throw new Error('script data inconsistent');
 
-const FONT = "'Inter Display','Inter','Helvetica Neue',Arial,sans-serif";
-const INK = '#2E2019', NAVY = '#1F2A37', RED = '#D54F48', GREEN = '#4E8A5A', CREAM = '#FFFBF0';
+export const FONT = "'Inter Display','Inter','Helvetica Neue',Arial,sans-serif";
+export const INK = '#2E2019', NAVY = '#1F2A37', RED = '#D54F48', GREEN = '#4E8A5A', CREAM = '#FFFBF0';
 
 /* ---------------- camera: every stop is a world point placed at a chosen screen height ---------------- */
 type Stop = {f: number; wx: number; wy: number; z: number; sy?: number};
@@ -57,7 +57,7 @@ const cam: CamFn = (f) => {
 };
 
 /* ---------------- typography (screen space, paper pill so it reads on wood/wall) ---------------- */
-const Pill: React.FC<{lines: [string, string?][]; y: number; o?: number; dy?: number; size?: number}> = ({lines, y, o = 1, dy = 0, size = 64}) => (
+export const Pill: React.FC<{lines: [string, string?][]; y: number; o?: number; dy?: number; size?: number}> = ({lines, y, o = 1, dy = 0, size = 64}) => (
   <div style={{position: 'absolute', left: 540, top: y, transform: `translate(-50%,0) translateY(${dy}px)`, opacity: o, background: CREAM, border: `4px solid ${INK}`, borderRadius: 26, padding: '16px 36px', textAlign: 'center', fontFamily: FONT, fontWeight: 900, fontSize: size, lineHeight: 1.08, color: NAVY, whiteSpace: 'nowrap', boxShadow: '0 8px 0 rgba(46,32,25,0.22)'}}>
     {lines.map(([t, hi], i) => <div key={i}>{t}{hi && <span style={{color: RED}}> {hi}</span>}</div>)}
   </div>
