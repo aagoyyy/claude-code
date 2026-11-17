@@ -54,15 +54,45 @@ def cable(doc, pts, w=7, col='#1B1B1F'):
     return f'<path d="{d}" stroke="{INKC}" stroke-width="{w + 4}" fill="none" stroke-linecap="round"/><path d="{d}" stroke="{col}" stroke-width="{w}" fill="none" stroke-linecap="round"/><path d="{d}" stroke="#fff" stroke-width="1.6" fill="none" opacity=".25" transform="translate(-1.5 -1.5)"/>'
 
 def scooter(doc, x, y, s=1.0, col='#D9544A'):
-    """parked scooter, side view; (x,y) = ground under the rear wheel centre"""
-    def W_(cx, cy, r):
-        o = f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#1B1B1F" stroke="{INKC}" stroke-width="5"/><circle cx="{cx}" cy="{cy}" r="{r * .62:.0f}" fill="{P(doc, "#E8ECEF", "#7D8791")}" stroke="{INKC}" stroke-width="4"/>'
-        o += ''.join(f'<line x1="{cx}" y1="{cy}" x2="{cx + r * .6 * math.cos(math.radians(a)):.0f}" y2="{cy + r * .6 * math.sin(math.radians(a)):.0f}" stroke="#5B6773" stroke-width="4"/>' for a in range(0, 360, 60))
-        return o + f'<circle cx="{cx}" cy="{cy}" r="{r * .16:.0f}" fill="#3A4047"/>'
-    o = shadow(doc, x + 120 * s, y + 6, 190 * s, 14, .5, 8)
-    o += G(W_(0, -44, 44), x, y, 0, s) + G(W_(0, -44, 44), x + 230 * s, y, 0, s)
-    body = bez((-30, -60), (-40, -130), (60, -150), (150, -118), 14)[:-1] + bez((150, -118), (200, -140), (230, -150), (250, -112), 12)[:-1] + bez((250, -112), (262, -80), (236, -44), (214, -44), 10)[:-1] + bez((214, -44), (170, -50), (80, -56), (30, -48), 12)[:-1] + bez((30, -48), (0, -44), (-30, -44), (-30, -60), 8)
-    o += G(O(doc, tr(body, 0, 0, 1), P(doc, mix(col, '#FFFFFF', .28), col, mix(col, '#2A1020', .5)), 'fg', f'<path d="M40,-120 Q110,-140 170,-124" stroke="#fff" stroke-width="8" fill="none" opacity=".5" stroke-linecap="round"/>', 7, 1.0), x, y, 0, s)
-    o += G(O(doc, R(10, -150, 120, -128, 12, 1, 8), P(doc, '#3A2A24', '#1B1210'), 'fg', '', 8, .9), x, y, 0, s)           # seat
-    o += G(f'<path d="M228,-148 L214,-208 M196,-212 L236,-206" stroke="{INKC}" stroke-width="14" stroke-linecap="round"/><path d="M228,-148 L214,-208" stroke="#8E98A3" stroke-width="7" stroke-linecap="round"/><ellipse cx="248" cy="-190" rx="14" ry="22" fill="#FFF3C4" stroke="{INKC}" stroke-width="4"/>', x, y, 0, s)
-    return o
+    """parked automatic scooter, side view facing right; (x,y) = ground contact under the rear wheel"""
+    body_g = P(doc, mix(col, '#FFFFFF', .30), col, mix(col, '#2A1020', .55))
+    dark_g = P(doc, '#4A4F57', '#23262B', '#101215')
+    def wheel(cx, cy, r, disc=False):
+        o = O(doc, E(cx, cy, r, r, .6, int(cx) % 50 + 1), '#1B1B1F', 'fg', f'<circle cx="{cx}" cy="{cy}" r="{r * .88:.0f}" fill="none" stroke="#3A3F46" stroke-width="3" opacity=".8"/>', int(cx) % 50 + 1, .9)
+        o += O(doc, E(cx, cy, r * .66, r * .66, .5, 3), RG(doc, (0, '#F4F6F7'), (.6, '#B9C1C8'), (1, '#6E7882'), c=(.35, .3), r=.9), 'mid', '', 3, .8)
+        for a in range(0, 360, 72):
+            a0, a1 = math.radians(a - 16), math.radians(a + 16)
+            o += f'<path d="M{cx + r * .18 * math.cos(a0):.1f},{cy + r * .18 * math.sin(a0):.1f} L{cx + r * .6 * math.cos(a0):.1f},{cy + r * .6 * math.sin(a0):.1f} L{cx + r * .6 * math.cos(a1):.1f},{cy + r * .6 * math.sin(a1):.1f} L{cx + r * .18 * math.cos(a1):.1f},{cy + r * .18 * math.sin(a1):.1f}Z" fill="#4A525B" opacity=".85"/>'
+        if disc: o += f'<circle cx="{cx}" cy="{cy}" r="{r * .5:.0f}" fill="none" stroke="#2A2F35" stroke-width="3" stroke-dasharray="6 5"/>'
+        return o + f'<circle cx="{cx}" cy="{cy}" r="{r * .16:.0f}" fill="#E8ECEF" stroke="{INKC}" stroke-width="3"/>'
+    o = ''
+    o += wheel(0, -54, 54)
+    # exhaust (muffler) under the rear body
+    o += O(doc, Pl([(30, -50), (150, -56), (160, -38), (160, -26), (30, -26)], 14, .8, 11), P(doc, '#D5DBE0', '#7E8A96', '#3A4047'), 'mid', f'<rect x="40" y="-52" width="110" height="9" fill="#fff" opacity=".5"/><rect x="110" y="-58" width="42" height="34" fill="#23262B" opacity=".55"/>', 11, .9)
+    # rear shock
+    o += f'<path d="M20,-150 L8,-66" stroke="{INKC}" stroke-width="12" stroke-linecap="round"/><path d="M20,-150 L8,-66" stroke="#E8C25A" stroke-width="7" stroke-linecap="round" stroke-dasharray="6 4"/>'
+    # rear cowl / side cover (big sweeping body over the rear wheel)
+    cowl = bez((-62, -88), (-70, -150), (-30, -180), (40, -176), 14)[:-1] + bez((40, -176), (90, -174), (130, -168), (176, -150), 12)[:-1] + bez((176, -150), (168, -112), (160, -86), (150, -70), 10)[:-1] + bez((150, -70), (96, -78), (60, -100), (48, -92), 10)[:-1] + bez((48, -92), (36, -72), (-10, -62), (-62, -88), 10)
+    o += O(doc, Pl(cowl, 16, 1.0, 12), body_g, 'fg', f'<path d="M-30,-150 Q40,-176 150,-158" fill="none" stroke="#fff" stroke-width="9" opacity=".5" stroke-linecap="round"/><path d="M-20,-102 Q50,-84 140,-96" fill="none" stroke="{mix(col, "#2A1020", .5)}" stroke-width="4" opacity=".7"/><rect x="60" y="-150" width="80" height="26" rx="6" fill="{mix(col, "#2A1020", .35)}" opacity=".35"/>', 12, 1.0)
+    o += O(doc, R(-72, -140, -56, -112, 6, .8, 13), P(doc, '#FF6A5A', '#B8281F'), 'fg', '', 13, .8)                                           # tail light
+    # seat
+    seat = bez((-16, -176), (0, -196), (110, -200), (170, -186), 14)[:-1] + bez((170, -186), (180, -176), (176, -166), (160, -164), 6)[:-1] + bez((160, -164), (90, -170), (20, -170), (-10, -166), 10)
+    o += O(doc, Pl(seat, 14, .8, 14), P(doc, '#4A3A34', '#2A1E1A', '#120D0B'), 'fg', f'<path d="M0,-190 Q80,-198 160,-184" stroke="#fff" stroke-width="5" fill="none" opacity=".25" stroke-linecap="round"/>', 14, .9)
+    # floorboard
+    o += O(doc, R(150, -72, 232, -52, 8, .8, 15), P(doc, '#4A4F57', '#1E2227'), 'fg', ''.join(f'<line x1="{160 + k * 14}" y1="-70" x2="{160 + k * 14}" y2="-54" stroke="#8E98A3" stroke-width="3" opacity=".6"/>' for k in range(5)), 15, .8)
+    # front wheel, fork, fender
+    o += wheel(262, -54, 54, True)
+    o += f'<path d="M232,-196 L262,-54" stroke="{INKC}" stroke-width="18" stroke-linecap="round"/><path d="M232,-196 L262,-54" stroke="{P(doc, "#E8ECEF", "#7E8A96", h=True)}" stroke-width="11" stroke-linecap="round"/>'
+    fend = bez((222, -70), (232, -108), (296, -112), (312, -74), 12)
+    o += O(doc, Pl(fend + [(300, -62), (234, -62)], 12, .6, 16), body_g, 'fg', '', 16, .9)
+    # leg shield + front cowl
+    shield = bez((190, -72), (196, -150), (206, -208), (240, -214), 14)[:-1] + bez((240, -214), (276, -214), (286, -170), (282, -128), 10)[:-1] + bez((282, -128), (280, -100), (262, -80), (244, -72), 8)
+    o += O(doc, Pl(shield, 14, .9, 17), body_g, 'fg', f'<path d="M205,-170 Q214,-204 238,-206" fill="none" stroke="#fff" stroke-width="8" opacity=".5" stroke-linecap="round"/><path d="M214,-100 Q250,-92 272,-112" fill="none" stroke="{mix(col, "#2A1020", .5)}" stroke-width="4" opacity=".7"/>', 17, 1.0)
+    # handlebar, grip, mirror, headlight, dash
+    o += f'<path d="M238,-212 L226,-246" stroke="{INKC}" stroke-width="14" stroke-linecap="round"/><path d="M238,-212 L226,-246" stroke="#8E98A3" stroke-width="7" stroke-linecap="round"/>'
+    o += O(doc, R(196, -258, 250, -240, 8, .8, 18), P(doc, '#4A4F57', '#101215'), 'fg', '', 18, .8)
+    o += f'<path d="M232,-250 L252,-300" stroke="{INKC}" stroke-width="6" stroke-linecap="round"/>' + O(doc, E(260, -306, 22, 14, .6, 19), P(doc, '#E8ECEF', '#7E8A96'), 'mid', f'<ellipse cx="256" cy="-308" rx="12" ry="6" fill="#fff" opacity=".6"/>', 19, .7)
+    o += O(doc, E(286, -202, 17, 23, .8, 20), RG(doc, (0, '#FFFFFF'), (.5, '#FFF3C4'), (1, '#E8C25A'), c=(.4, .4), r=.8), 'fg', '', 20, .9)
+    o += O(doc, R(212, -246, 240, -228, 6, .6, 21), P(doc, '#23262B', '#101215'), 'mid', f'<circle cx="226" cy="-237" r="6" fill="#3A6FA8"/>', 21, .6)
+    o += glow(doc, 300, -202, 50, '#FFE8A8', .4)
+    return shadow(doc, x + 140 * s, y + 6, 230 * s, 14 * s, .5, 8) + G(o, x, y, 0, s)

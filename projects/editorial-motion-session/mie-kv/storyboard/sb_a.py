@@ -115,7 +115,7 @@ def panel2():
     b.append(cable(doc, [(20, 540), (120, 620), (230, 700)], 6) + cable(doc, [(1060, 560), (980, 640), (900, 700)], 6))
     b.append(f'<g opacity=".5">' + ''.join(f'<rect x="{x}" y="1510" width="{w}" height="{h}" fill="{RG(doc, (0, "#FFD58A", .5), (1, "#FFD58A", 0))}"/>' for x, w, h in ((300, 60, 330), (500, 80, 380), (700, 60, 330))) + '</g>')
     b.append(plant(doc, 100, 1500, 1.0, 5) + plant(doc, 990, 1500, .9, 6))
-    b.append(scooter(doc, 30, 1760, 1.5, '#4F7CAC'))
+    b.append(scooter(doc, 70, 1760, 1.5, '#4F7CAC'))
     b.append(O(doc, R(700, 1470, 880, 1500, 6, 1, 43), P(doc, '#5C86C9', '#2F4A7A'), 'mid', '', 43, .8) + O(doc, R(710, 1380, 870, 1472, 16, 1.4, 44), P(doc, '#E8F3FA', '#8FB8D8'), 'mid', f'<path d="M722,1392 L722,1458" stroke="#fff" stroke-width="8" opacity=".6"/>', 44, .8))
     for sx in (150, 940):
         b.append(shadow(doc, sx, 1560, 70, 14, .5, 6))
