@@ -1,4 +1,5 @@
 from sb_common import *
+from sb_props import *
 
 # ============================================================ 1. HOOK: top-down, a pack of instant noodles on a warung counter
 def panel1():
@@ -6,6 +7,16 @@ def panel1():
     s, _ = wood_table(doc, (540, -100000), 0, H, [-300, 120, 420, 700, 1000, 1400], ['#D9A56C', '#E5BC8A', '#CFA06A'], 0, 5, -400, 1500)
     b.append(s)
     b.append(f'<rect width="{W}" height="{H}" fill="{RG(doc, (0, "#FFEBC6", .35), (1, "#FFEBC6", 0), c=(.3, .2), r=.8)}"/>')
+    # ---- detail layer: a finished bowl, sambal dish, eggs, chopsticks, checkered cloth, crumbs
+    b.append(G(f'<rect x="-190" y="-120" width="380" height="240" fill="#F6F0E4"/>' + ''.join(f'<rect x="{-190 + i * 40}" y="{-120 + j * 40}" width="40" height="40" fill="{RED}" opacity=".18"/>' for i in range(10) for j in range(6) if (i + j) % 2 == 0) + f'<rect x="-190" y="-120" width="380" height="240" fill="none" stroke="{INKC}" stroke-width="4"/>', 180, 1480, -8) if False else '')
+    b.append(bowl_top(doc, 860, 250, 170, 4))
+    for (x0, y0, x1, y1) in ((690, 470, 1010, 150), (720, 490, 1040, 190)):
+        b.append(f'<path d="M{x0},{y0} L{x1},{y1}" stroke="{INKC}" stroke-width="16" stroke-linecap="round"/><path d="M{x0},{y0} L{x1},{y1}" stroke="{P(doc, "#E8C98A", "#B8803E")}" stroke-width="10" stroke-linecap="round"/>')
+    b.append(shadow(doc, 200, 290, 110, 100, .4, 8) + O(doc, E(190, 270, 100, 100, 1.4, 4), RG(doc, (0, '#FFFFFF'), (1, '#CDBB93'), c=(.35, .3), r=.9), 'fg', f'<circle cx="190" cy="270" r="72" fill="{RG(doc, (0, "#E8453A"), (.7, "#B8281F"), (1, "#7A140F"))}"/><circle cx="170" cy="250" r="22" fill="#fff" opacity=".35"/>' + ''.join(f'<circle cx="{190 + 40 * math.cos(k * 1.3):.0f}" cy="{270 + 34 * math.sin(k * 1.7):.0f}" r="5" fill="#FFB36B" opacity=".8"/>' for k in range(9)), 4, .9))
+    for k, (ex, ey, rot) in enumerate(((120, 520, -20), (230, 600, 30))):
+        b.append(G(shadow(doc, 14, 16, 40, 54, .4, 5) + O(doc, E(0, 0, 40, 54, 1, 30 + k), RG(doc, (0, '#FFF8EA'), (.6, '#F3DCB4'), (1, '#C9A06A'), c=(.34, .28), r=.9), 'fg', f'<ellipse cx="-12" cy="-22" rx="9" ry="16" fill="#fff" opacity=".8"/>', 30 + k, .8), ex, ey, rot))
+    rr = random.Random(9)
+    for _ in range(40): b.append(f'<path d="M{rr.uniform(120, 960):.0f},{rr.uniform(1380, 1900):.0f} q6,-8 14,-2" stroke="#E8C25A" stroke-width="4" stroke-linecap="round" fill="none" opacity=".7"/>')
     # pack (top-down, pillow shape with crimped fins), rotated
     pk = []
     body = bez((-250, -300), (-268, -120), (-268, 120), (-250, 300), 20)[:-1] + bez((250, 300), (268, 120), (268, -120), (250, -300), 20)
@@ -98,6 +109,14 @@ def panel2():
     b.append(glow(doc, 940, 1050, 90, '#FF6A5A', .35))
     b.append(O(doc, R(868, 1010, 1012, 1090, 16, 2, 31), '#2A1B2A', 'fg', f'<rect x="878" y="1020" width="124" height="60" rx="10" fill="none" stroke="#FF6A5A" stroke-width="5"/>' + T(940, 1066, 'BUKA', 40, '#FFD6CF', 900, 'middle', 0, 6), 31, 1.0))
     b.append(O(doc, E(760, 1306, 26, 10, .8, 7), P(doc, '#F6E7A8', '#B8923A'), 'fg', '', 7, .8) + f'<path d="M744,1306 Q760,1276 776,1306" fill="#F6E7A8" stroke="{INKC}" stroke-width="4"/>')
+    # ---- detail layer: bricks, posters, cables, scooter, plants, galon, cooler, wet-road reflections
+    b.append(f'<g opacity=".9">{bricks(doc, 70, 1372, 1010, 1500, 6, "#B9704E", 42, 100)}</g>')
+    b.append(O(doc, R(890, 1110, 990, 1250, 4, 1.4, 41), P(doc, '#F6E7A8', '#E8C25A'), 'mid', T(940, 1170, 'ES', 34, RED, 900) + T(940, 1208, 'TEH', 34, RED, 900) + T(940, 1238, '3rb', 24, INKC, 800), 41, .6))
+    b.append(cable(doc, [(20, 540), (120, 620), (230, 700)], 6) + cable(doc, [(1060, 560), (980, 640), (900, 700)], 6))
+    b.append(f'<g opacity=".5">' + ''.join(f'<rect x="{x}" y="1510" width="{w}" height="{h}" fill="{RG(doc, (0, "#FFD58A", .5), (1, "#FFD58A", 0))}"/>' for x, w, h in ((300, 60, 330), (500, 80, 380), (700, 60, 330))) + '</g>')
+    b.append(plant(doc, 100, 1500, 1.0, 5) + plant(doc, 990, 1500, .9, 6))
+    b.append(scooter(doc, 30, 1760, 1.5, '#4F7CAC'))
+    b.append(O(doc, R(700, 1470, 880, 1500, 6, 1, 43), P(doc, '#5C86C9', '#2F4A7A'), 'mid', '', 43, .8) + O(doc, R(710, 1380, 870, 1472, 16, 1.4, 44), P(doc, '#E8F3FA', '#8FB8D8'), 'mid', f'<path d="M722,1392 L722,1458" stroke="#fff" stroke-width="8" opacity=".6"/>', 44, .8))
     for sx in (150, 940):
         b.append(shadow(doc, sx, 1560, 70, 14, .5, 6))
         b.append(O(doc, R(sx - 56, 1470, sx + 56, 1500, 14, 1.2, sx), P(doc, '#F0B454', '#C97E2A'), 'fg', '', sx, .9) + f'<path d="M{sx - 36},1500 L{sx - 56},1570 M{sx + 36},1500 L{sx + 56},1570" stroke="{INKC}" stroke-width="9" stroke-linecap="round"/>')
@@ -132,10 +151,16 @@ def panel3():
         bw = bez((bx - 130, by - 40), (bx - 120, by + 50), (bx - 50, by + 54), (bx, by + 54), 14)[:-1] + bez((bx, by + 54), (bx + 50, by + 54), (bx + 120, by + 50), (bx + 130, by - 40), 14)
         bowls.append(O(doc, bw + [(bx - 130, by - 40)], P(doc, '#FFFFFF', '#EBDFC6', '#BFAA82'), 'fg', f'<path d="M{bx - 118},{by + 6} Q{bx},{by + 40} {bx + 118},{by + 6}" stroke="{RED}" stroke-width="12" fill="none" opacity=".9"/>', 13 + k, 1.0))
         bowls.append(f'<ellipse cx="{bx}" cy="{by - 40}" rx="130" ry="34" fill="#C58A2A"/>' + f'<g clip-path="url(#{doc.clip(d_smooth(ell(bx, by - 40, 122, 29, 40)))})"><g transform="translate({bx - 540} {by - 1450 + 30 - 40 + 40})">{noodle_strands(30 + k, bx - 140 + 540 - 540 + 0, bx + 140 + 0, 1432, 1470, 26, 0)}</g></g>' if False else '')
-        bowls.append(f'<ellipse cx="{bx}" cy="{by - 40}" rx="130" ry="34" fill="{RG(doc, (0, "#F4C86A"), (1, "#B8761E"))}"/><ellipse cx="{bx - 30}" cy="{by - 44}" rx="48" ry="12" fill="#FFE7A0" opacity=".7"/>' + egg_half(doc, bx - 28, by - 46, 38, 22, 5 + k) + f'<ellipse cx="{bx + 52}" cy="{by - 40}" rx="24" ry="10" fill="#4E9158"/>')
+        bowls.append(f'<ellipse cx="{bx}" cy="{by - 40}" rx="130" ry="34" fill="{RG(doc, (0, "#F4C86A"), (1, "#B8761E"))}"/><g clip-path="url(#{doc.clip(d_smooth(ell(bx, by - 40, 124, 30, 50)))})"><g transform="translate({bx} {by - 40}) scale(.62 .17)">{noodle_strands(70 + k, -210, 210, -210, 210, 60, 0)}</g></g><ellipse cx="{bx - 30}" cy="{by - 44}" rx="48" ry="12" fill="#FFE7A0" opacity=".25"/>' + egg_half(doc, bx - 28, by - 46, 38, 22, 5 + k) + f'<ellipse cx="{bx + 52}" cy="{by - 40}" rx="24" ry="10" fill="#4E9158"/>')
         bowls.append(smoke(doc, [(bx - 20, by - 60, 220, 18), (bx + 40, by - 60, 190, 16)], 3 + k, .6, 16, 28, 3))
     b.append(''.join(bowls))
     # customers (backs, big, in the foreground) — silhouettes against the warm room
+    # ---- detail layer: wall clock, menu board, counter props, floor
+    b.insert(len(b) - 6, O(doc, E(930, 650, 80, 80, 1, 60), RG(doc, (0, '#FFFFFF'), (1, '#E0D6C2'), c=(.4, .3), r=.9), 'fg', ''.join(f'<line x1="{930 + 62 * math.cos(math.radians(k * 30)):.0f}" y1="{650 + 62 * math.sin(math.radians(k * 30)):.0f}" x2="{930 + 72 * math.cos(math.radians(k * 30)):.0f}" y2="{650 + 72 * math.sin(math.radians(k * 30)):.0f}" stroke="{INKC}" stroke-width="4"/>' for k in range(12)) + f'<line x1="930" y1="650" x2="930" y2="596" stroke="{INKC}" stroke-width="5" stroke-linecap="round"/><line x1="930" y1="650" x2="968" y2="668" stroke="{INKC}" stroke-width="7" stroke-linecap="round"/><circle cx="930" cy="650" r="7" fill="{RED}"/>', 60, 1.0))
+    b.insert(len(b) - 6, O(doc, R(90, 800, 330, 1000, 8, 1.6, 61), '#2F3A34', 'fg', T(210, 850, 'MENU', 36, '#F4EBD4', 900, 'middle', 0, 6) + ''.join(T(210, 900 + k * 34, t, 24, '#EADFC4', 700) for k, t in enumerate(('Mie Rebus  10rb', 'Mie Goreng  12rb', 'Telur  +2rb'))), 61, .9))
+    b.append(bottle(doc, 90, 1180, 90, 200, '#5A3622', 'KECAP', '#C9473F', 3) + bottle(doc, 200, 1180, 84, 180, '#C2301F', 'SAMBAL', '#2A1B15', 4))
+    b.append(O(doc, R(860, 1090, 940, 1180, 10, 1.4, 62), P(doc, '#E8ECEF', '#8E98A3', h=True), 'fg', ''.join(f'<rect x="{868 + k * 12}" y="1060" width="7" height="46" fill="{["#E8C98A", "#B8803E"][k % 2]}" stroke="{INKC}" stroke-width="2"/>' for k in range(5)), 62, .8))
+    b.append(f'<g opacity=".45">' + ''.join(f'<rect x="{x}" y="1860" width="{w}" height="60" fill="#B88A55"/><line x1="{x}" y1="1860" x2="{x}" y2="1920" stroke="{INKC}" stroke-width="3" opacity=".5"/>' for x, w in ((0, 200), (200, 280), (480, 220), (700, 250), (950, 130))) + '</g>')
     # utensil rack on the tiled wall (where the cook used to stand)
     b.insert(len(b) - 6, f'<path d="M190,560 L890,560" stroke="{INKC}" stroke-width="12" stroke-linecap="round"/><path d="M190,560 L890,560" stroke="{P(doc, "#E8ECEF", "#8E98A3")}" stroke-width="6" stroke-linecap="round"/>')
     for k_, x_ in enumerate((260, 400, 540, 680, 820)):

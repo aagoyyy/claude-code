@@ -1,4 +1,5 @@
 from sb_common import *
+from sb_props import *
 
 def bowl_side(doc, cx, by, w, seed=1, filled=False):
     """side-view bowl: by = bottom of the foot. returns svg."""
@@ -37,6 +38,12 @@ def panel7():
         b.append(shadow(doc, gx + 14, 1752, 50, 12, .4, 4))
         b.append(glass_cyl(doc, gx - 40, gx + 40, 1560, 1750, 0, ('#E6A24B', '#C2701F', '#8A4710'), 1600, True, 8 + k, 14))
         b.append(f'<path d="M{gx + 14},1500 L{gx + 6},1630" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/><path d="M{gx + 14},1500 L{gx + 6},1630" stroke="{RED}" stroke-width="4" stroke-dasharray="12 12" stroke-linecap="round"/>')
+    # ---- detail layer: wall shelf with bottles and bowls, window light, plant, napkin box, chopstick cup, bell
+    b.insert(3, f'<polygon points="0,0 420,0 820,1120 160,1120" fill="#fff" opacity=".08"/>')
+    b.insert(4, O(doc, R(30, 620, 520, 656, 4, 1.4, 91), P(doc, '#C99B66', '#8A5A32'), 'fg', f'<rect x="30" y="620" width="490" height="8" fill="#FFEBC6" opacity=".7"/>', 91, 1.0) + bottle(doc, 110, 620, 80, 190, '#5A3622', 'KECAP', '#C9473F', 92) + bottle(doc, 220, 620, 72, 160, '#C2301F', 'SAMBAL', '#2A1B15', 93) + bottle(doc, 330, 620, 72, 150, '#E8C25A', 'MINYAK', '#8A5A32', 94) + bowl_side(doc, 440, 618, 110, 95, False))
+    b.append(plant(doc, 80, 1130, 1.1, 99))
+    b.append(O(doc, R(540, 1030, 640, 1124, 8, 1.4, 96), P(doc, '#E8ECEF', '#8E98A3', h=True), 'fg', ''.join(f'<rect x="{548 + k_ * 12}" y="990" width="7" height="50" fill="{["#E8C98A", "#B8803E"][k_ % 2]}" stroke="{INKC}" stroke-width="2"/>' for k_ in range(7)), 96, .8))
+    b.append(O(doc, R(660, 1050, 770, 1124, 8, 1.4, 97), P(doc, '#F6F0E4', '#CDBB93', h=True), 'fg', T(715, 1096, 'TISU', 26, RED, 900), 97, .8))
     # order-ticket spike (right edge)
     b.append(f'<path d="M1000,1700 L1000,1500" stroke="{INKC}" stroke-width="10" stroke-linecap="round"/>' + f'<ellipse cx="1000" cy="1706" rx="50" ry="14" fill="#6E7782" stroke="{INKC}" stroke-width="5"/>')
     for k in range(6): b.append(G(O(doc, R(960, 1650 - k * 22, 1050, 1690 - k * 22, 2, 1, 40 + k), P(doc, '#FFFFFF', '#F3EAD6'), 'mid', ''.join(f'<line x1="970" y1="{1662 - k * 22 + i * 10}" x2="{1040 - i * 8}" y2="{1662 - k * 22 + i * 10}" stroke="#8A7F72" stroke-width="2"/>' for i in range(3)), 40 + k, .5), 0, 0, k * 4 - 10, 1, 1000, 1670))
@@ -68,6 +75,9 @@ def panel8():
         x0 = bx0 + 44 + i * (cw + 20)
         b.append(f'<rect x="{x0}" y="{by0 + 44}" width="{cw}" height="{(by1 - by0) * .62}" rx="10" fill="#241810" opacity=".7"/>')
         for k in range(6): b.append(note(doc, x0 + cw / 2 + (k % 2 - .5) * 6, by0 + 190 + k * 52 - (k % 2) * 3, cw - 24, 150, cols[i][0], (k % 3 - 1) * 1.6, 60 + i * 9 + k))
+    for i in range(3):
+        x0_ = bx0 + 44 + i * (cw + 20)
+        b.append(f'<rect x="{x0_ + cw / 2 - 34:.0f}" y="{by0 + 230}" width="68" height="260" fill="#F6F0E4" stroke="{INKC}" stroke-width="3" opacity=".92"/>' + T(x0_ + cw / 2, by0 + 372, '100', 30, INKC, 800))
     # coin tray
     b.append(f'<rect x="{bx0 + 44}" y="{by0 + 530}" width="{bx1 - bx0 - 88}" height="190" rx="14" fill="#241810" opacity=".8"/>')
     for k in range(14): b.append(coin(doc, bx0 + 100 + (k % 7) * 118, by0 + 590 + (k // 7) * 84, 40, '#D8B454' if k % 3 else '#C9CED2', k * 20, '500' if k % 3 else '1000'))
@@ -92,6 +102,9 @@ def panel8():
     gx, gy = 930, 1790
     b.append(shadow(doc, gx + 24, gy + 20, 100, 100, .4, 10) + O(doc, E(gx, gy, 96, 96, 1.4, 12), RG(doc, (0, '#F4C58A'), (.7, '#C2701F'), (1, '#8A4710'), c=(.4, .35), r=.8), 'fg',
              f'<circle cx="{gx}" cy="{gy}" r="76" fill="none" stroke="#fff" stroke-width="5" opacity=".6"/><circle cx="{gx - 24}" cy="{gy - 18}" r="30" fill="#F4FBFF" opacity=".6" stroke="#fff" stroke-width="3"/><circle cx="{gx + 28}" cy="{gy + 20}" r="26" fill="#F4FBFF" opacity=".55" stroke="#fff" stroke-width="3"/><circle cx="{gx}" cy="{gy}" r="9" fill="{RED}"/><path d="M{gx},{gy} L{gx + 56},{gy - 70}" stroke="{RED}" stroke-width="9" stroke-linecap="round"/>', 12, .9))
+    for i, col in enumerate(('#D8B454', '#C9CED2', '#D8B454')):
+        b.append(O(doc, R(80 + i * 300, 100, 340 + i * 300, 160, 24, 1.2, 70 + i), P(doc, mix(col, '#FFFFFF', .3), col, mix(col, '#3A1C26', .45)), 'fg', ''.join(f'<line x1="{100 + i * 300 + k_ * 20}" y1="100" x2="{100 + i * 300 + k_ * 20}" y2="160" stroke="#6A4A10" stroke-width="2" opacity=".4"/>' for k_ in range(12)) + f'<rect x="{80 + i * 300}" y="124" width="260" height="12" fill="{RED}" opacity=".85"/>', 70 + i, .8))
+    b.append(G(O(doc, E(0, 0, 40, 40, 1, 77), P(doc, '#F6E7A8', '#C9A24A', '#8A6A20'), 'fg', f'<circle cx="0" cy="0" r="16" fill="#EADCC3" stroke="{INKC}" stroke-width="4"/>', 77, .9) + O(doc, R(-12, 40, 12, 190, 5, .8, 78), P(doc, '#F6E7A8', '#B8923A', h=True), 'fg', '', 78, .7) + O(doc, [(12, 150), (50, 150), (50, 176), (30, 176), (30, 190), (12, 190)], P(doc, '#F6E7A8', '#B8923A'), 'fg', '', 79, .7), 560, 1770, 28))
     return page(doc, ''.join(b), grain_and_vignette(doc, .34))
 
 # ============================================================ 9. CTA: phone with the comment thread, resting on the counter beside a glass of es teh
@@ -116,8 +129,13 @@ def panel9():
         ui += f'<rect x="{px + 160}" y="{y - 6}" width="{pw - 240 if not hi else 350}" height="96" rx="30" fill="{"#FFE9E7" if hi else "#F4EFE6"}" stroke="{RED if hi else "none"}" stroke-width="5"/>'
         ui += T(px + 190, y + 56, txt, 32 if not hi else 52, RED if hi else INKC, 800 if hi else 600, 'start')
         ui += f'<path d="M{px + pw - 98},{y + 30} c-12,-14 -34,0 -22,18 l22,22 l22,-22 c12,-18 -10,-32 -22,-18z" fill="{RED if hi else "#D8D0C2"}"/>'
+    ui += T(px + 80, py + 64, '9:41', 28, INKC, 800, 'start') + T(px + pw - 80, py + 64, '100%', 24, INKC, 800, 'end') + ''.join(T(px + 192, py + 350 + i * 164 + 118, 'Balas  ·  ' + ('2j', '3j', '5j', '8j', '1h')[i], 22, '#8A7F72', 600, 'start') for i in range(5))
     ui += f'<rect x="{px + 60}" y="{py + ph - 230}" width="{pw - 120}" height="110" rx="55" fill="{INKC}"/>' + T(px + pw / 2, py + ph - 160, 'klik link di bio', 44, '#fff', 800, 'middle', 0, 1)
     ui += f'<path d="M{px + 90},{py + ph - 180} l10,-16 l10,16" stroke="#fff" stroke-width="0" fill="none"/>'
+    r2_ = random.Random(11)
+    for k_ in range(18):
+        hx_, hy_ = r2_.choice([r2_.uniform(20, 160), r2_.uniform(920, 1060)]), r2_.uniform(80, 1860); hs_ = r2_.uniform(22, 54)
+        b.append(f'<path d="M{hx_:.0f},{hy_ + hs_ * .35:.0f} c-{hs_:.0f},-{hs_ * .8:.0f} -{hs_ * .2:.0f},-{hs_ * 1.2:.0f} 0,-{hs_ * .55:.0f} c{hs_ * .2:.0f},-{hs_ * .65:.0f} {hs_:.0f},-{hs_ * .25:.0f} 0,{hs_ * .55:.0f}z" fill="#fff" opacity="{r2_.uniform(.14, .32):.2f}"/>')
     phone = R(px, py, px + pw, py + ph, 70, 1.6, 6)
     b.append(O(doc, phone, P(doc, '#2D2A33', '#14121A'), 'fg', '', 6, 1.2))
     cid = doc.clip(d_smooth(scr))

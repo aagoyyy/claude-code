@@ -1,4 +1,5 @@
 from sb_common import *
+from sb_props import *
 
 # ============================================================ 5. HPP: top-down flat lay, four ingredients each with its own price tag
 def panel5():
@@ -11,6 +12,12 @@ def panel5():
     b.append(O(doc, cloth, '#EADFC8', 'mid', linen(doc, cloth, 0, 21), 5, .8))
     b.append(f'<path d="{d_smooth(tr(cloth, 0, 0, 1))}" fill="none" stroke="{RED}" stroke-width="3" stroke-dasharray="14 10" opacity=".0"/>')
     it = []
+    # ---- detail layer: chopping board with a knife under the greens, stitched cloth edge, wooden spoon, garlic
+    board = Pl([(60, 960), (530, 940), (550, 1500), (80, 1520)], 40, 2, 71)
+    it.append(shadow(doc, 310, 1240, 270, 300, .35, 14) + O(doc, board, P(doc, '#E5BC8A', '#C99B66'), 'fg', ''.join(f'<path d="M{70 + k * 60},{950 + k} L{90 + k * 60},1515" stroke="#8A5A32" stroke-width="2.4" opacity=".3"/>' for k in range(8)) + f'<ellipse cx="500" cy="990" rx="16" ry="10" fill="#4E3A28" opacity=".6"/>', 71, 1.0))
+    it.append(G(O(doc, R(-14, -150, 14, 30, 8, 1, 72), P(doc, '#9A5B2E', '#6A3A1C', h=True), 'fg', '', 72, .8) + O(doc, Pl([(-14, 30), (14, 30), (20, 250), (-14, 250)], 30, 1, 73), P(doc, '#E8ECEF', '#8E98A3', h=True), 'fg', f'<path d="M-8,40 L-8,240" stroke="#fff" stroke-width="5" opacity=".7"/>', 73, .8), 470, 1180, 28))
+    for k_, (gx_, gy_) in enumerate(((120, 1060), (180, 1090), (140, 1140))):
+        it.append(O(doc, E(gx_, gy_, 28, 22, 1, 80 + k_), RG(doc, (0, '#FFFFFF'), (1, '#D9CFB8'), c=(.35, .3), r=.9), 'mid', f'<path d="M{gx_ - 4},{gy_ - 20} Q{gx_ + 6},{gy_ - 40} {gx_ + 10},{gy_ - 24}" stroke="#B8A27A" stroke-width="3" fill="none"/>', 80 + k_, .6))
     # ---- (a) noodle brick in a clear wrapper (top-left)
     brick = []
     bx, by = 290, 640
@@ -53,6 +60,7 @@ def panel5():
     # ---- total plate, hand-written style
     tot = R(260, 1700, 860, 1850, 26, 2, 16)
     b.append(shadow(doc, 560, 1790, 330, 90, .4, 14) + O(doc, tot, P(doc, '#E85A4F', RED, '#A3302C'), 'fg', f'<rect x="260" y="1700" width="600" height="34" fill="#fff" opacity=".16"/>' + T(560, 1744, 'TOTAL HPP', 34, '#FFE6D0', 800, 'middle', 0, 8) + T(560, 1832, 'Rp 7.000', 84, '#FFFFFF', 900), 16, 1.1))
+    b.append(f'<path d="{d_smooth(Pl([(48, 338), (1032, 366), (1022, 1632), (58, 1612)], 50, 3, 4))}" fill="none" stroke="#B8503E" stroke-width="3" stroke-dasharray="14 10" opacity=".7" transform="translate(0 0)"/>')
     return page(doc, ''.join(b), grain_and_vignette(doc, .32))
 
 # ============================================================ 6. Operating costs: the kios wall (meter, tap, calendar, key)
@@ -114,4 +122,10 @@ def panel6():
     # price-note stuck to the wall
     note = R(70, 1010, 250, 1160, 4, 2, 14)
     b.append(G(shadow(doc, 14, 18, 100, 80, .3, 6) + O(doc, note, P(doc, '#FFF3A8', '#F6DC62'), 'mid', T(160, 1068, 'LISTRIK', 26, '#7A5A10', 800) + T(160, 1098, '&amp; AIR', 26, '#7A5A10', 800) + T(160, 1140, '500rb', 40, RED, 900), 14, .7), 0, 0, -5, 1, 160, 1085))
+    # ---- detail layer: ledge items, cables, mop, plant, wall stain
+    b.append(bottle(doc, 380, 1180, 80, 170, '#4E8A5A', 'SABUN', '#FFFBF0', 81) + bottle(doc, 480, 1180, 70, 140, '#6A8FB5', 'PEL', '#2A1B15', 82))
+    b.append(plant(doc, 590, 1180, .8, 83))
+    b.append(cable(doc, [(mx, my - 400), (mx + 120, my - 470), (mx + 380, my - 440), (W, my - 470)], 8) + cable(doc, [(mx + 190, my + 200), (mx + 260, my + 300), (mx + 200, my + 420)], 6))
+    b.append(f'<path d="M960,700 L930,1180" stroke="{INKC}" stroke-width="16" stroke-linecap="round"/><path d="M960,700 L930,1180" stroke="#C9A26A" stroke-width="9" stroke-linecap="round"/>' + O(doc, Pl([(880, 1150), (990, 1160), (980, 1200), (872, 1190)], 20, 1, 84), P(doc, '#E8E0D2', '#B8AE9A'), 'fg', ''.join(f'<line x1="{880 + k_ * 12}" y1="1150" x2="{872 + k_ * 12}" y2="1195" stroke="#8A7F72" stroke-width="2.4"/>' for k_ in range(9)), 84, .8))
+    b.append(f'<ellipse cx="860" cy="860" rx="90" ry="46" fill="#8A6A40" opacity=".12" filter="url(#{doc.blur(14)})"/>')
     return page(doc, ''.join(b), grain_and_vignette(doc, .34))

@@ -1,6 +1,6 @@
 # Storyboard video penuh "Bedah bisnis warmindo": 13 panel, tanpa orang
 
-Gaya = key visual dapur (kit `../kit`): satu sumber cahaya kiri-atas, outline tebal-tipis mengikuti cahaya, tekstur kayu/linen/kaca. SVG 1080x1920 (`svg/p*.svg`); panel 04 = key visual dapur (render Remotion). Teks di gambar hanya teks yang ada di dunia (tag, papan, label). Pill/subtitle ditambahkan di Remotion seperti Part1/Part2.
+Gaya = key visual dapur (dengan lapisan detail: benda sekunder, tekstur, kedalaman; pustaka properti di `sb_props.py`) (kit `../kit`): satu sumber cahaya kiri-atas, outline tebal-tipis mengikuti cahaya, tekstur kayu/linen/kaca. SVG 1080x1920 (`svg/p*.svg`); panel 04 = key visual dapur (render Remotion). Teks di gambar hanya teks yang ada di dunia (tag, papan, label). Pill/subtitle ditambahkan di Remotion seperti Part1/Part2.
 Regenerasi: `python3 -I render.py [nomor...]` lalu `node shot.mjs [nomor...]`.
 
 | # | file | Beat script | Lokasi / sudut | Objek utama | Gerak yang disarankan | ± detik |
