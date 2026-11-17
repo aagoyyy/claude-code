@@ -9,7 +9,7 @@ from board import *
 from board2 import SPG2_X, CUST1_X, CUST2_X, CUST3_X, SPG3_X, X
 from full2 import SPG1_L, SPG3_L, CUST2_L, CROWD2
 
-BR = "/home/user/aagoyyy/claude-code/projects/prochiz/assets/brand/"
+BR = A + "brand/"
 LOGO_P = Image.open(BR + "logo.png").convert("RGBA")
 GOLD_P = Image.open(BR + "gold_slices.png").convert("RGBA")
 BOX_P = Image.open(BR + "premium_cheddar.png").convert("RGBA")

@@ -1,6 +1,8 @@
 # Handoff: video Prochiz "strategi gerilya rak roti tawar" (key visual gaya editorial)
 
-Status: **v5 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v5.mp4`, 41,7 s, 1080x1920, 30 fps, audio = VO user). Siap dilanjutkan dengan revisi per scene.
+Status: **v6 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v6.mp4`, 41,7 s, 1080x1920, 30 fps, audio = VO user). v5 (`Prochiz-keyvisual-v5.mp4`) = versi sebelum label nama dan progress bar. Siap dilanjutkan dengan revisi per scene.
+
+Use case: iklan SEMINAR; salah satu pembicara = co-founder Prochiz (**Agustina**, perempuan berbaju merah di video; foto asli yang dipoles AI oleh user). Target market user: owner bisnis menengah-besar (omzet Rp1 M - Rp10 T/tahun). **Info target market itu panduan untuk menilai hook/retention, BUKAN teks untuk ditaruh di video** (sempat salah dimasukkan lalu dihapus).
 
 ## Brief user
 - Naskah (7 kalimat) tentang Prochiz masuk lewat rak roti tawar, bukan rak keju. VO sudah direkam user: `assets/vo.mp3` (41,7 s).
@@ -12,12 +14,18 @@ Status: **v5 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v5.mp4`, 41
 - Scene 2 memakai TEKS "PROCHIZ" (bukan logo). Logo asli di scene 3, 13, 15; kemasan di scene 7, 10, 12.
 - Tanggal Masterclass "Kamis, 10 Desember 2026" (logo Gratyo) hanya relevan untuk video lama `Prochiz-gerilya-full.mp4`, bukan v5.
 
+## Perubahan v6 (dari v5)
+- Label nama `Agustina / CO-FOUNDER PROCHIZ` di scene 2 (kemunculan pertama), 13, 15 (`src/board4.py`, fungsi `name_tag`).
+- Hook: elemen scene 1 sudah terisi di frame pertama (`base0=-0.28` untuk scene 1 di `src/anim6.py`).
+- Progress bar tipis merah di atas layar (y=236..244) yang terisi sampai akhir, untuk retention. Ide Claude, user belum konfirmasi; mudah dihapus di `anim6.py`.
+- Tetap: TANPA CTA / kartu akhir (user minta ditunda).
+
 ## Struktur
 ```
 keyvisual/
   Prochiz-keyvisual-v5.mp4      hasil final
   HANDOFF.md
-  src/    render.py  full.py  full2.py  board.py  board2.py  board3.py  anim5.py
+  src/    render.py  full.py  full2.py  board.py  board2.py  board3.py  board4.py  anim5.py  anim6.py
   fonts/  Anton.ttf  SpaceMono(.Bold).ttf   (OFL, dari @fontsource)
   assets/ originals/ (13 foto AI dari user: SPG, customer, kerumunan, produk, lorong)
           cutouts/   (cutout transparan hasil potong otomatis)
@@ -28,14 +36,14 @@ keyvisual/
 ```
 
 ## Cara render ulang
-Path di `src/render.py` dan `src/full.py` masih menunjuk ke folder kerja lama (variabel `R`, `A`, `FONT`, `SRC`, path `images/1.webp` untuk logo Gratyo lama, dan `BR` di `board3.py`). **Sesuaikan dulu** ke lokasi repo ini: `R` = folder yang berisi `fonts/` dan `assets_zip/prochiz/` (= `assets/originals`), `A` = `assets/`.
+Path sekarang relatif ke repo (`KV` = folder `keyvisual`; output scratch ke `_work/`, git-ignored; buat dulu `mkdir -p _work/prochiz_test`).
 ```
 pip install pillow numpy opencv-python-headless
-python3 -I src/board3.py                 # 15 frame statis + sheet (cek safe zone: "violations: 0")
-python3 -I src/anim5.py preview 0.5 2.6 ...   # sheet cuplikan animasi
-python3 -I src/anim5.py video out.mp4    # render penuh ~1m45s (4 core), audio dari assets/vo.mp3
+python3 -I src/board4.py                       # 15 frame statis versi v6 + cek safe zone ("violations: 0")
+python3 -I src/anim6.py preview 0.0 0.8 2.6 ... # sheet cuplikan animasi
+python3 -I src/anim6.py video _work/out.mp4    # render penuh ~1m50s (4 core), audio dari assets/vo.mp3
 ```
-Arsitektur: `board.py` = 15 tata letak (b01..b15, state akhir), `board2.py` = tata ulang scene tokoh-kecil (n03/n05/n07/n11/n12/n15), `board3.py` = versi brand (m02, m03, m07, m10, m12, m13, m15) + dict `ALL` (urutan final). `anim5.py` mem-patch fungsi gambar di board* sehingga tiap elemen masuk berurutan (judul per kata, kartu pop, tokoh naik, stempel menghantam + shake, titik berdenyut, garis tergambar), kamera zoom pelan, keluar = slide 0,14 s.
+Arsitektur: `board.py` = 15 tata letak (b01..b15, state akhir), `board2.py` = tata ulang scene tokoh-kecil (n03/n05/n07/n11/n12/n15), `board3.py` = versi brand (m02, m03, m07, m10, m12, m13, m15) + dict `ALL` (urutan final). `board4.py` = v6 (label nama; ALL = urutan final). `anim6.py` (turunan `anim5.py`) mem-patch fungsi gambar di board* sehingga tiap elemen masuk berurutan (judul per kata, kartu pop, tokoh naik, stempel menghantam + shake, titik berdenyut, garis tergambar), kamera zoom pelan, keluar = slide 0,14 s.
 
 ## Timeline scene (detik, dari jeda audio VO)
 1: 0-1.96 | 2: 1.96-4.24 | 3: 4.24-7.15 | 4: 7.15-9.5 | 5: 9.5-12.3 | 6: 12.3-15.1 | 7: 15.1-17.4 | 8: 17.4-20.1 | 9: 20.1-23.18 | 10: 23.18-26.8 | 11: 26.8-31.78 | 12: 31.78-35.72 | 13: 35.72-38.33 | 14: 38.33-39.95 | 15: 39.95-41.72

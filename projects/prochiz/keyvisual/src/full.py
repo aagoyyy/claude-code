@@ -121,7 +121,7 @@ def arrow(layer, p0, p1, t, t0, dur=0.3, col=RED, w=14, head=34):
 CARD_KEJU = duotone_card(A + "aisle/aisle_keju.png", 800, (14, 22, 96), (226, 232, 255))
 CARD_ROTI = duotone_card(A + "aisle/aisle_roti.png", 560, (60, 12, 8), (252, 228, 214))
 CARD_ROTI_L = duotone_card(A + "aisle/aisle_roti.png", 820, (60, 12, 8), (252, 228, 214))
-SRC = R + "assets_zip/prochiz/"
+SRC = A + "originals/"
 SPG1 = cut_halftone(A + "cutouts/spg1.png", 800, cell=4, mix=0.10, color=True, fill_holes=True, src=SRC + "SPG-1 menyapa.png")
 SPG2 = cut_halftone(A + "cutouts/spg2.png", 740, cell=4, mix=0.10, color=True, fill_holes=True, src=SRC + "SPG-2 menawarkan sampel.png")
 SPG3 = cut_halftone(A + "cutouts/spg3.png", 640, cell=4, mix=0.10, color=True, fill_holes=True, src=SRC + "SPG-3 setengah badan.png")
@@ -135,7 +135,7 @@ CROWD = cut_halftone(A + "cutouts/crowd.png", 720, cell=5, fill_holes=True, src=
 P_ROTI = cut_halftone(A + "cutouts/prod_roti.png", 300, cell=4, mix=0.08, color=True, src=SRC + "PROD-ROTI.png", whitekey=True)
 P_KEJU = cut_halftone(A + "cutouts/prod_keju_pack.png", 300, cell=4, mix=0.08, color=True, src=SRC + "PROD-KEJU-PACK.png", whitekey=True)
 P_BLOK = cut_halftone(A + "cutouts/prod_keju_blok.png", 300, cell=4, mix=0.08, color=True, src=SRC + "PROD-KEJU-BLOK.png", whitekey=True)
-LOGO = Image.open("/tmp/claude-0/-home-user/e0579038-0d3b-5b6d-a6ef-1c4c728d1b68/images/1.webp").convert("RGBA")
+LOGO = Image.open(A + "brand/gratyo_logo.webp").convert("RGBA")
 LOGO = LOGO.crop(LOGO.getchannel("A").getbbox())
 
 def fade_bottom(im, px=90):

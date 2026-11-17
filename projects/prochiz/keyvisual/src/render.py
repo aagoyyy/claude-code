@@ -3,9 +3,11 @@ import math, sys, os, random, subprocess
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
-R = "/tmp/claude-0/-home-user/e0579038-0d3b-5b6d-a6ef-1c4c728d1b68/scratchpad/"
-A = "/home/user/aagoyyy/claude-code/projects/prochiz/assets/"
-FONT = R + "fonts/"
+import os as _os
+KV = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))   # .../keyvisual
+R = KV + "/_work/"           # scratch/output folder (git-ignored)
+A = KV + "/assets/"
+FONT = KV + "/fonts/"
 W, H, FPS = 1080, 1920, 30
 IVORY = (230, 225, 210); INK = (37, 38, 39); RED = (166, 47, 47); BLUE = (58, 76, 240); PAPER = (255, 250, 231)   # brand: red #A62F2F, cream #FFFAE7, charcoal #252627
 
@@ -187,7 +189,7 @@ BG = make_bg()
 F_H = F("Anton.ttf", 150); F_H3 = F("Anton.ttf", 136); F_H2 = F("Anton.ttf", 132); F_M = F("SpaceMono-Bold.ttf", 28); F_ST = F("Anton.ttf", 76)
 CARD_KEJU = duotone_card(A + "aisle/aisle_keju.png", 900, (14, 22, 96), (226, 232, 255))
 CARD_ROTI = duotone_card(A + "aisle/aisle_roti.png", 820, (60, 12, 8), (252, 228, 214))
-SPG = cut_halftone(A + "cutouts/spg1.png", 1040, cell=4, mix=0.10, color=True, fill_holes=True, src=R + "assets_zip/prochiz/SPG-1 menyapa.png")
+SPG = cut_halftone(A + "cutouts/spg1.png", 1040, cell=4, mix=0.10, color=True, fill_holes=True, src=A + "originals/SPG-1 menyapa.png")
 CUST = [cut_halftone(A + "cutouts/cust2.png", 640, keep_red=True, cell=5)]
 CHIP_KEJU = chip("RAK KEJU  ·  SUPERMARKET", F_M)
 CHIP_ROTI = chip("RAK ROTI TAWAR  ·  SUPERMARKET", F_M, bg=RED)
