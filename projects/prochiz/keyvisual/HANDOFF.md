@@ -1,6 +1,8 @@
 # Handoff: video Prochiz "strategi gerilya rak roti tawar" (key visual gaya editorial)
 
-Status: **v6 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v6.mp4`, 41,7 s, 1080x1920, 30 fps, audio = VO user). v5 (`Prochiz-keyvisual-v5.mp4`) = versi sebelum label nama dan progress bar. Siap dilanjutkan dengan revisi per scene.
+Status TERBARU: **v8** (`Prochiz-keyvisual-v8.mp4`, 14,8 MB, 41,7 s) = gaya referensi, opsi A (satu latar beige kertas milimeter, aksen merah, subjek monokrom + blazer merah, prop artefak asli). Source: `src/board6.py` (15 layout), `src/anim8.py` (animasi). Render: `python3 -I src/anim8.py video _work/out.mp4`, lalu re-encode `ffmpeg -crf 22 -preset slow` (hasil mentah crf16 = 78 MB). Elemen ditangkap satu per satu lewat recorder (selisih piksel per helper) dan dijadwalkan sesuai posisi kata (proporsional suku kata di antara jeda VO; BUKAN transkrip asli). Latar grid SENGAJA tidak ikut kamera zoom (menyebabkan moire). Tanpa progress bar, tanpa SFX. Belum dikonfirmasi user: merah grafis #D63426 vs brand #A62F2F, beige referensi vs krem brand #FFFAE7, wajah Agustina monokrom.
+
+Riwayat: v6 (di bawah) sebelumnya: **v6 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v6.mp4`, 41,7 s, 1080x1920, 30 fps, audio = VO user). v5 (`Prochiz-keyvisual-v5.mp4`) = versi sebelum label nama dan progress bar. Siap dilanjutkan dengan revisi per scene.
 
 Use case: iklan SEMINAR; salah satu pembicara = co-founder Prochiz (**Agustina**, perempuan berbaju merah di video; foto asli yang dipoles AI oleh user). Target market user: owner bisnis menengah-besar (omzet Rp1 M - Rp10 T/tahun). **Info target market itu panduan untuk menilai hook/retention, BUKAN teks untuk ditaruh di video** (sempat salah dimasukkan lalu dihapus).
 
