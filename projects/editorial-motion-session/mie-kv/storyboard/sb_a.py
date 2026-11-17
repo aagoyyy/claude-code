@@ -1,4 +1,5 @@
 from sb_common import *
+from sb_people import person_back, cook_front
 
 # ============================================================ 1. HOOK: top-down, a pack of instant noodles on a warung counter
 def panel1():
@@ -95,8 +96,8 @@ def panel2():
     b.append(f'<path d="M0,1500 L1080,1500" stroke="#FFD58A" stroke-width="3" opacity=".5"/>')
     for k in range(5): b.append(f'<rect x="{80 + k * 220}" y="{1720 + (k % 2) * 40}" width="120" height="10" rx="5" fill="#FFD58A" opacity=".25"/>')
     # queue of customers at the window (backs) + stools
-    for (cx, by, sc, col) in ((330, 1480, .62, '#4F7CAC'), (560, 1490, .68, '#D9A441'), (780, 1480, .62, '#8A5A9C')):
-        b.append(person_back(doc, cx, by, sc, col, seed=int(cx), hair=['#1A100C', '#2A1B15', '#3A2418'][int(cx) % 3], cap='#222222' if cx == 560 else None))
+    for (cx, by, sc, col, kd) in ((330, 1480, .62, '#4F7CAC', 'short'), (560, 1490, .68, '#D9A441', 'cap'), (780, 1480, .62, '#8A5A9C', 'long')):
+        b.append(person_back(doc, cx, by, sc, col, seed=int(cx), hair=['#1A100C', '#2A1B15', '#3A2418'][int(cx) % 3], kind=kd, cap='#2F6FA8'))
     for sx in (150, 940):
         b.append(shadow(doc, sx, 1560, 70, 14, .5, 6))
         b.append(O(doc, R(sx - 56, 1470, sx + 56, 1500, 14, 1.2, sx), P(doc, '#F0B454', '#C97E2A'), 'fg', '', sx, .9) + f'<path d="M{sx - 36},1500 L{sx - 56},1570 M{sx + 36},1500 L{sx + 56},1570" stroke="{INKC}" stroke-width="9" stroke-linecap="round"/>')
@@ -116,14 +117,7 @@ def panel3():
     # hanging lamp
     b.append(f'<path d="M540,0 L540,250" stroke="{INKC}" stroke-width="5"/>' + O(doc, [(470, 330), (610, 330), (570, 258), (510, 258)], P(doc, '#F2E8D2', '#BFAE8E'), 'fg', '', 5, .9) + glow(doc, 540, 340, 190, '#FFE8A8', 1))
     # cook: frontal waist-up behind the counter
-    cook = []
-    cook.append(O(doc, wob(bez((330, 1100), (320, 860), (360, 740), (440, 700), 14)[:-1] + bez((440, 700), (500, 676), (580, 676), (640, 700), 10)[:-1] + bez((640, 700), (720, 740), (760, 860), (750, 1100), 14), 2.4, 6, False) + [(330, 1100)],
-                  P(doc, '#F1E9D8', '#CFC2A5', h=True), 'mid', f'<rect x="452" y="770" width="176" height="340" rx="22" fill="{RED}"/><path d="M452,800 q88,34 176,0" stroke="#fff" stroke-width="4" fill="none" opacity=".5"/><rect x="490" y="900" width="100" height="60" rx="8" fill="#B8383A"/>', 7, .9))
-    cook.append(O(doc, R(512, 640, 568, 700, 10, 1, 8), P(doc, '#D8A57A', '#B07C58'), 'mid', '', 8, .7))
-    cook.append(O(doc, E(540, 580, 70, 84, 2, 9), RG(doc, (0, '#F0C79F'), (.6, '#D8A57A'), (1, '#9C6A48'), c=(.35, .3), r=.9), 'mid',
-                  f'<ellipse cx="516" cy="582" rx="7" ry="5" fill="{INKC}"/><ellipse cx="566" cy="582" rx="7" ry="5" fill="{INKC}"/><path d="M510,624 q30,22 60,0" stroke="{INKC}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M502,560 q14,-12 28,0 M552,560 q14,-12 28,0" stroke="{INKC}" stroke-width="4" fill="none"/><ellipse cx="502" cy="606" rx="14" ry="8" fill="#E88A7A" opacity=".55"/><ellipse cx="578" cy="606" rx="14" ry="8" fill="#E88A7A" opacity=".55"/>', 9, .9))
-    cook.append(O(doc, wob(bez((462, 540), (462, 470), (620, 470), (620, 540), 14) + [(634, 548), (448, 548)], 1.4, 10), P(doc, '#FFFFFF', '#E3D6B8'), 'mid', '', 10, .9))
-    b.append(''.join(cook))
+    b.append(cook_front(doc, 540, 1170, 1.25, 3))
     # wok + flame
     b.append(flame_ring(doc, 540, 1150, 110, 26, 22, 1.2, 4))
     wk = bez((350, 1060), (370, 1200), (470, 1230), (540, 1230), 14)[:-1] + bez((540, 1230), (610, 1230), (710, 1200), (730, 1060), 14)
@@ -143,7 +137,7 @@ def panel3():
         bowls.append(smoke(doc, [(bx - 20, by - 60, 220, 18), (bx + 40, by - 60, 190, 16)], 3 + k, .6, 16, 28, 3))
     b.append(''.join(bowls))
     # customers (backs, big, in the foreground) — silhouettes against the warm room
-    b.append(person_back(doc, 110, 2040, 1.55, '#3E5A86', seed=21, hair='#1A100C'))
-    b.append(person_back(doc, 560, 2090, 1.7, '#B24A4A', seed=22, hair='#2A1B15', cap='#2A2F3A'))
-    b.append(person_back(doc, 1010, 2040, 1.55, '#4A7A5A', seed=23, hair='#3A2418'))
+    b.append(person_back(doc, 110, 2040, 1.55, '#3E5A86', seed=21, hair='#1A100C', kind='short'))
+    b.append(person_back(doc, 560, 2090, 1.7, '#B24A4A', seed=22, hair='#2A1B15', kind='cap', cap='#2A2F3A'))
+    b.append(person_back(doc, 1010, 2040, 1.55, '#4A7A5A', seed=23, hair='#3A2418', kind='hijab'))
     return page(doc, ''.join(b), grain_and_vignette(doc, .45))
