@@ -1,18 +1,22 @@
-# Storyboard "Bedah bisnis warmindo": 9 panel, 9 lokasi/sudut berbeda
+# Storyboard video penuh "Bedah bisnis warmindo": 13 panel, tanpa orang
 
-Semua panel = SVG 1080x1920 (`svg/p1..p9.svg`), kit yang sama dengan key visual dapur (`../kit`): satu sumber cahaya kiri-atas, outline tebal-tipis mengikuti cahaya, nada 5 tingkat, tekstur kayu/linen/kaca. Panel 4 = key visual dapur (render Remotion, bukan SVG statis).
-Regenerasi: `python3 -I render.py [nomor...]` lalu `node shot.mjs [nomor...]` (PNG di `png/`). Teks dalam gambar hanya teks yang ada di dunia (label, tag harga, papan). Pill/subtitle ditambahkan di Remotion seperti Part1/Part2.
+Gaya = key visual dapur (kit `../kit`): satu sumber cahaya kiri-atas, outline tebal-tipis mengikuti cahaya, tekstur kayu/linen/kaca. SVG 1080x1920 (`svg/p*.svg`); panel 04 = key visual dapur (render Remotion). Teks di gambar hanya teks yang ada di dunia (tag, papan, label). Pill/subtitle ditambahkan di Remotion seperti Part1/Part2.
+Regenerasi: `python3 -I render.py [nomor...]` lalu `node shot.mjs [nomor...]`.
 
-| # | Beat script | Lokasi & sudut kamera | Objek utama | Gerak yang disarankan | Transisi masuk |
-|---|---|---|---|---|---|
-| 1 | "Mie instan di warung cuma Rp3.000" | Meja kayu, top-down (flat lay) | Bungkus mie, tag Rp 3.000, koin, struk | Bungkus jatuh + miring, tag ayun, koin menyusul | wipe merah |
-| 2 | "...di Warmindo bisa laku Rp10.000-15.000" | Jalan malam, wide frontal | Kios WARMINDO, lampu hias, papan menu, 3 pembeli | Lampu berkedip, uap panci, kamera push-in ke jendela | rack |
-| 3 | "Kenapa warung mie nggak pernah sepi?" | Dalam warung, eye-level, punggung pembeli di depan | Koki di wajan, 3 mangkuk panas | Api wajan, uap naik, kamera geser ke mangkuk | rack |
-| 4 | "Satu porsi komplit Rp12.000" | Dapur (key visual) | Mangkuk + tag Rp 12.000 | Pakai gerak Part1 (beat 3) | flash |
-| 5 | "Modal asli ... total HPP Rp7.000" | Top-down di alas linen | Mie, telur, sayur+bumbu, tabung gas, tag per item, plat TOTAL HPP | Item masuk satu per satu, tag mengayun, plat total jatuh terakhir | rack |
-| 6 | "Pengeluaran terbesar: sewa kios, listrik & air" | Dinding kios, medium frontal | Meteran listrik, keran+ember, kalender, kunci + tag sewa, catatan | Jarum meteran berputar, tetes air, lingkaran merah di kalender | wipe |
-| 7 | "Minimal 15 mangkuk/hari ... tembus 80 + es teh" | Meja, low-angle, bokeh | Tumpukan kecil vs menara mangkuk, 3 es teh, papan "15 / hari" | Tumpukan kecil naik pelan, menara menjulang melewati frame, es teh pop | rack |
-| 8 | "Cuan bersih 5-7 juta sebulan" | Laci kasir, top-down 3/4 | Uang 3 pecahan, koin, buku kas, kalkulator, es teh | Lembar uang bertambah, angka kalkulator berhitung, pulpen menulis | rack |
-| 9 | CTA "Komen 'mulai'... klik link di bio" | Latar merah, HP tegak | Thread komentar, komentar "mulai" disorot, tombol link | Komentar naik satu per satu, "mulai" membesar + hati | iris |
+| # | file | Beat script | Lokasi / sudut | Objek utama | Gerak yang disarankan | ± detik |
+|---|---|---|---|---|---|---|
+| 01 | p1 | Mie instan di warung Rp3.000 | Meja kayu, top-down | Bungkus mie, tag Rp 3.000, koin, struk | Bungkus jatuh + miring, tag ayun, koin menyusul | 5 |
+| 02 | p2 | Dimasak di Warmindo laku Rp10-15rb | Kios malam, wide frontal | Papan WARMINDO, lampu hias, mangkuk mengepul, papan menu, neon BUKA | Lampu berkedip, uap naik, push-in ke jendela | 7 |
+| 03 | p3 | Kenapa warung mie nggak pernah sepi? | Dalam warung, eye-level | Wajan berapi, 3 mangkuk, tumpukan nota pesanan, bangku kosong | Api wajan, uap, nota bertambah satu per satu | 7 |
+| 04 | KV | Satu porsi komplit Rp12.000 | Dapur (key visual) | Mangkuk + tag Rp 12.000 | Gerak Part1 beat 3 | 6 |
+| 05 | p5 | Modal asli: mie 3.500, telur 2.000, sayur 500, gas 1.000 = HPP 7.000 | Flat lay di linen | 4 bahan + tag tiap item, plat TOTAL HPP | Item masuk satu per satu, plat total terakhir | 10 |
+| 06 | p10 | Margin kotor > 40% | Meja, timbangan kuningan | Mangkuk Rp 12.000 (berat) vs bahan Rp 7.000 | Timbangan miring turun di sisi mangkuk | 6 |
+| 07 | p11 | Kuncinya: perputaran dan jam buka | Fasad kios pagi, rolling door | Jam dinding 07:00, rolling door naik, tanda BUKA, uap | Rolling door naik, jarum jam bergerak | 5 |
+| 08 | p6 | Sewa kios 1,5 jt, listrik & air 500rb per bulan | Dinding kios | Meteran listrik, keran + ember, kalender, kunci + tag sewa | Jarum meteran, tetes air, lingkaran kalender | 8 |
+| 09 | p12 | Biaya operasional harian ± Rp70.000 | Top-down, nota di meja | Nota BIAYA HARIAN, stempel merah, pulpen, koin | Stempel jatuh, angka total muncul | 7 |
+| 10 | p7 | Minimal 15 mangkuk/hari, sampai 80 mangkuk | Meja, low-angle | Tumpukan kecil vs menara mangkuk, papan "15 / hari" | Tumpukan naik, menara menjulang | 7 |
+| 11 | p13 | ...plus es teh manis | Meja, close-up | Dispenser es teh, irisan lemon, 3 gelas bersedotan | Es dan lemon bergoyang, tetes dari keran | 5 |
+| 12 | p8 | Cuan bersih 5-7 juta/bulan | Laci kasir, top-down | Uang 3 pecahan, koin, buku kas, kalkulator | Lembar uang bertambah, angka kalkulator berhitung | 7 |
+| 13 | p9 | CTA: komen "mulai", klik link di bio | Latar merah, HP tegak | Thread komentar, "mulai" disorot, tombol link | Komentar naik satu per satu, "mulai" membesar + hati | 8 |
 
-Catatan: angka ("5.500.000" di kalkulator, "5-7 jt" di buku kas) mengikuti script; angka 5-7 juta belum cocok dengan hitungan 80 mangkuk (lihat HANDOFF).
+Total ± 88 detik. Catatan: angka 5-7 juta/bulan diambil apa adanya dari script, dan belum cocok dengan hitungan 80 mangkuk x margin Rp5.000 x 30 hari (lihat HANDOFF).

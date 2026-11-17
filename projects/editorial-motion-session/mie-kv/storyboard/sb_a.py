@@ -1,5 +1,4 @@
 from sb_common import *
-from sb_people import person_back, cook_front
 
 # ============================================================ 1. HOOK: top-down, a pack of instant noodles on a warung counter
 def panel1():
@@ -95,9 +94,10 @@ def panel2():
     b.append(f'<ellipse cx="540" cy="1560" rx="520" ry="90" fill="{RG(doc, (0, "#FFB35C", .6), (1, "#FFB35C", 0))}"/>')
     b.append(f'<path d="M0,1500 L1080,1500" stroke="#FFD58A" stroke-width="3" opacity=".5"/>')
     for k in range(5): b.append(f'<rect x="{80 + k * 220}" y="{1720 + (k % 2) * 40}" width="120" height="10" rx="5" fill="#FFD58A" opacity=".25"/>')
-    # queue of customers at the window (backs) + stools
-    for (cx, by, sc, col, kd) in ((330, 1480, .62, '#4F7CAC', 'short'), (560, 1490, .68, '#D9A441', 'cap'), (780, 1480, .62, '#8A5A9C', 'long')):
-        b.append(person_back(doc, cx, by, sc, col, seed=int(cx), hair=['#1A100C', '#2A1B15', '#3A2418'][int(cx) % 3], kind=kd, cap='#2F6FA8'))
+    # no people: a neon BUKA sign beside the window and a service bell on the counter
+    b.append(glow(doc, 940, 1050, 90, '#FF6A5A', .35))
+    b.append(O(doc, R(868, 1010, 1012, 1090, 16, 2, 31), '#2A1B2A', 'fg', f'<rect x="878" y="1020" width="124" height="60" rx="10" fill="none" stroke="#FF6A5A" stroke-width="5"/>' + T(940, 1066, 'BUKA', 40, '#FFD6CF', 900, 'middle', 0, 6), 31, 1.0))
+    b.append(O(doc, E(760, 1306, 26, 10, .8, 7), P(doc, '#F6E7A8', '#B8923A'), 'fg', '', 7, .8) + f'<path d="M744,1306 Q760,1276 776,1306" fill="#F6E7A8" stroke="{INKC}" stroke-width="4"/>')
     for sx in (150, 940):
         b.append(shadow(doc, sx, 1560, 70, 14, .5, 6))
         b.append(O(doc, R(sx - 56, 1470, sx + 56, 1500, 14, 1.2, sx), P(doc, '#F0B454', '#C97E2A'), 'fg', '', sx, .9) + f'<path d="M{sx - 36},1500 L{sx - 56},1570 M{sx + 36},1500 L{sx + 56},1570" stroke="{INKC}" stroke-width="9" stroke-linecap="round"/>')
@@ -117,7 +117,6 @@ def panel3():
     # hanging lamp
     b.append(f'<path d="M540,0 L540,250" stroke="{INKC}" stroke-width="5"/>' + O(doc, [(470, 330), (610, 330), (570, 258), (510, 258)], P(doc, '#F2E8D2', '#BFAE8E'), 'fg', '', 5, .9) + glow(doc, 540, 340, 190, '#FFE8A8', 1))
     # cook: frontal waist-up behind the counter
-    b.append(cook_front(doc, 540, 1170, 1.25, 3))
     # wok + flame
     b.append(flame_ring(doc, 540, 1150, 110, 26, 22, 1.2, 4))
     wk = bez((350, 1060), (370, 1200), (470, 1230), (540, 1230), 14)[:-1] + bez((540, 1230), (610, 1230), (710, 1200), (730, 1060), 14)
@@ -137,7 +136,15 @@ def panel3():
         bowls.append(smoke(doc, [(bx - 20, by - 60, 220, 18), (bx + 40, by - 60, 190, 16)], 3 + k, .6, 16, 28, 3))
     b.append(''.join(bowls))
     # customers (backs, big, in the foreground) — silhouettes against the warm room
-    b.append(person_back(doc, 110, 2040, 1.55, '#3E5A86', seed=21, hair='#1A100C', kind='short'))
-    b.append(person_back(doc, 560, 2090, 1.7, '#B24A4A', seed=22, hair='#2A1B15', kind='cap', cap='#2A2F3A'))
-    b.append(person_back(doc, 1010, 2040, 1.55, '#4A7A5A', seed=23, hair='#3A2418', kind='hijab'))
+    # utensil rack on the tiled wall (where the cook used to stand)
+    b.insert(len(b) - 6, f'<path d="M190,560 L890,560" stroke="{INKC}" stroke-width="12" stroke-linecap="round"/><path d="M190,560 L890,560" stroke="{P(doc, "#E8ECEF", "#8E98A3")}" stroke-width="6" stroke-linecap="round"/>')
+    for k_, x_ in enumerate((260, 400, 540, 680, 820)):
+        b.insert(len(b) - 6, f'<path d="M{x_},560 L{x_},700" stroke="{INKC}" stroke-width="9" stroke-linecap="round"/><path d="M{x_},560 L{x_},700" stroke="#9A5B2E" stroke-width="5" stroke-linecap="round"/>' + O(doc, E(x_, 744, 34, 42, 1, 40 + k_), P(doc, '#E8ECEF', '#8E98A3', h=True), 'mid', f'<ellipse cx="{x_ - 8}" cy="738" rx="10" ry="22" fill="#fff" opacity=".55"/>', 40 + k_, .8))
+    # order-ticket spike + service bell on the counter, empty stools in the foreground
+    b.append(f'<path d="M960,1180 L960,1020" stroke="{INKC}" stroke-width="10" stroke-linecap="round"/><ellipse cx="960" cy="1186" rx="46" ry="12" fill="#6E7782" stroke="{INKC}" stroke-width="5"/>')
+    for k_ in range(7): b.append(G(O(doc, R(920, 1150 - k_ * 20, 1010, 1186 - k_ * 20, 2, 1, 50 + k_), P(doc, '#FFFFFF', '#F3EAD6'), 'mid', ''.join(f'<line x1="930" y1="{1162 - k_ * 20 + i_ * 9}" x2="{1000 - i_ * 8}" y2="{1162 - k_ * 20 + i_ * 9}" stroke="#8A7F72" stroke-width="2"/>' for i_ in range(3)), 50 + k_, .5), 0, 0, k_ * 3 - 9, 1, 960, 1170))
+    for sx in (200, 540, 880):
+        b.append(shadow(doc, sx + 14, 1850, 120, 20, .5, 8))
+        b.append(O(doc, E(sx, 1700, 120, 34, 1.5, sx), P(doc, '#F0B454', '#C97E2A'), 'fg', f'<ellipse cx="{sx - 30}" cy="1694" rx="50" ry="10" fill="#fff" opacity=".35"/>', sx, 1.0))
+        b.append(f'<path d="M{sx - 90},1722 L{sx - 110},1860 M{sx + 90},1722 L{sx + 110},1860 M{sx},1730 L{sx},1860" stroke="{INKC}" stroke-width="14" stroke-linecap="round"/><path d="M{sx - 90},1722 L{sx - 110},1860 M{sx + 90},1722 L{sx + 110},1860" stroke="#8E98A3" stroke-width="7" stroke-linecap="round"/>')
     return page(doc, ''.join(b), grain_and_vignette(doc, .45))

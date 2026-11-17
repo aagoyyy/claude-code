@@ -4,7 +4,7 @@ const here = path.dirname(new URL(import.meta.url).pathname); fs.mkdirSync(path.
 const want = process.argv.slice(2);
 const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
 for (const f of fs.readdirSync(path.join(here, 'svg')).filter(f => f.endsWith('.svg'))) {
-  const n = f.replace('.svg', ''); if (want.length && !want.includes(n.slice(1))) continue;
+  const n = f.replace('.svg', ''); if (want.length && !want.includes(n.replace(/^p/, ''))) continue;
   await p.goto('file://' + path.join(here, 'svg', f)); await p.waitForTimeout(300);
   await p.screenshot({ path: path.join(here, 'png', n + '.png') }); console.log(n);
 }
