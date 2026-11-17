@@ -200,7 +200,7 @@ def s12(L):
         place(L, c, 420, y, rot=(1, -1, 1)[items.index((y, tag, ic))])
 
 def s13(L):
-    ttl(L, [[("STRATEGI", INKK)]], 280, 140); rule(L, (SL + 18, 450), (SR, 450), INKK, 6); ttl(L, [[("GERILYA", RED)]], 460, 140)
+    ttl(L, [[("STRATEGI", INKK)]], 280, 140); rule(L, (90, 450), (90 + int(an(140).getlength("STRATEGI")), 450), INKK, 6); ttl(L, [[("GERILYA", RED)]], 460, 140)
     sp = agus(3, 800, 1.0); ac(L, sp, (int(CX - sp.width / 2) + 100, 1480 - sp.height + 10))
     ac(L, wfit(LOGO_P, 300), (90, 860))
 
