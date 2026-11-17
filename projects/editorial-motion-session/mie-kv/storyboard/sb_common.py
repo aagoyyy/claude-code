@@ -52,7 +52,7 @@ def grain_and_vignette(doc, strength=.38, grain=.18):
 
 def page(doc, body, overlay=''):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><defs>{"".join(doc.defs)}</defs>'
-            f'<rect width="{W}" height="{H}" fill="#EADCC3"/>{body}{overlay}</svg>')
+            f'<rect width="{W}" height="{H}" fill="#EADCC3"/><!--BODY-->{body}<!--OVERLAY-->{overlay}</svg>')
 
 def person_back(doc, cx, by, s, shirt, skin='#C98F63', hair='#241612', seed=1, cap=None):
     """seated/standing figure seen from behind. by = baseline (bottom of torso). ~520*s tall."""

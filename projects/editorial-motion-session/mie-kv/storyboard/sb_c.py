@@ -29,6 +29,7 @@ def panel7():
     s, _ = wood_table(doc, (540, -1100), 1120, H, [-300, 120, 420, 700, 1000, 1400], ['#D9A56C', '#E5BC8A', '#CFA06A'], .0, 6, -2000, 3000)
     b.append(s)
     b.append(f'<rect y="1120" width="{W}" height="10" fill="#FFEBC6" opacity=".8"/>')
+    b.append('<!--FG-->')
     # small stack (left): 5 bowls with a chalk board "15"
     for k in range(5): b.append(bowl_side(doc, 250, 1600 - k * 66, 300 - k * 4, 10 + k, False))
     # huge stack (right): tall, runs off the top
@@ -64,6 +65,7 @@ def panel8():
     s, _ = wood_table(doc, (540, -100000), 0, H, [-300, 150, 460, 760, 1060, 1400], ['#CBA070', '#D9B386', '#C29463'], 0, 9, -400, 1500)
     b.append(s)
     b.append(f'<rect width="{W}" height="{H}" fill="{RG(doc, (0, "#FFEBC6", .35), (1, "#FFEBC6", 0), c=(.25, .15), r=.9)}"/>')
+    b.append('<!--FG-->')
     # cash box: top-down, open, with 4 compartments
     bx0, by0, bx1, by1 = 70, 240, 1010, 1020
     box = R(bx0, by0, bx1, by1, 26, 2, 5)
@@ -113,6 +115,7 @@ def panel9():
     b.append(f'<rect width="{W}" height="{H}" fill="{P(doc, "#E85A4F", RED, "#A3302C")}"/>')
     r = random.Random(5)
     for k in range(5): b.append(f'<ellipse cx="{r.uniform(0, W):.0f}" cy="{r.uniform(0, H):.0f}" rx="{r.uniform(160, 360):.0f}" ry="{r.uniform(100, 240):.0f}" fill="{r.choice(["#FF8A7E", "#7A1F1C"])}" opacity=".25" filter="url(#{doc.blur(60)})"/>')
+    b.append('<!--FG-->')
     px, py, pw, ph = 190, 200, 700, 1420
     b.append(shadow(doc, px + pw / 2 + 28, py + ph / 2 + 60, pw / 2 + 30, ph / 2, .5, 30))
     scr = R(px + 28, py + 30, px + pw - 28, py + ph - 30, 44, 1.2, 4)

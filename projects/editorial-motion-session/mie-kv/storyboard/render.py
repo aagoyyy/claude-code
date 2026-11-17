@@ -9,3 +9,10 @@ for key, (m, fns) in mods.items():
     for n, fn in fns.items():
         if n in want:
             s = getattr(mod, fn)(); open(f'svg/p{n}.svg', 'w').write(s); print('p' + n, len(s) // 1024, 'KB')
+            if '<!--FG-->' in s:
+                head_defs = s[:s.index('<rect width=')]
+                body = s[s.index('<!--BODY-->') + 11:s.index('<!--OVERLAY-->')]
+                bg, fg = body.split('<!--FG-->', 1)
+                base = '<rect width="1080" height="1920" fill="#EADCC3"/>'
+                open(f'svg/p{n}_bg.svg', 'w').write(head_defs + base + bg + '</svg>')
+                open(f'svg/p{n}_fg.svg', 'w').write(head_defs + fg + '</svg>')

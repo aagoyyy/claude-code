@@ -8,6 +8,7 @@ import {ChefTestV3} from './flat/ChefTestV3';
 import {ChefTestMaster} from './flat/ChefTestMaster';
 import {ChefTestMasterV2} from './flat/ChefTestMasterV2';
 import {CookingDemoTest} from './flat/CookingDemoTest';
+import {Story, STORY_TOTAL} from './story/Story';
 export const Root: React.FC = () => <><Composition id="MieScene" component={MieScene} durationInFrames={SCENE.total} fps={SCENE.fps} width={1080} height={1920} />
   <Composition id="Part1" component={Part1} durationInFrames={PART1.total} fps={PART1.fps} width={1080} height={1920} />
   <Composition id="Part2" component={Part2} durationInFrames={PART2.total} fps={PART2.fps} width={1080} height={1920} />
@@ -18,4 +19,5 @@ export const Root: React.FC = () => <><Composition id="MieScene" component={MieS
   <Composition id="ChefTestMaster" component={ChefTestMaster} durationInFrames={96} fps={24} width={1080} height={1920} />
   <Composition id="ChefTestMasterV2" component={ChefTestMasterV2} durationInFrames={96} fps={24} width={1080} height={1920} />
   <Composition id="CookingDemo" component={CookingDemoTest} durationInFrames={96} fps={24} width={1080} height={1920} />
+  <Composition id="Story" component={Story} durationInFrames={STORY_TOTAL} fps={24} width={1080} height={1920} />
   </>;

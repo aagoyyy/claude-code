@@ -11,6 +11,7 @@ def panel5():
     b.append(shadow(doc, 560, 1000, 520, 640, .35, 24))
     b.append(O(doc, cloth, '#EADFC8', 'mid', linen(doc, cloth, 0, 21), 5, .8))
     b.append(f'<path d="{d_smooth(tr(cloth, 0, 0, 1))}" fill="none" stroke="{RED}" stroke-width="3" stroke-dasharray="14 10" opacity=".0"/>')
+    b.append('<!--FG-->')
     it = []
     # ---- detail layer: chopping board with a knife under the greens, stitched cloth edge, wooden spoon, garlic
     board = Pl([(60, 960), (530, 940), (550, 1500), (80, 1520)], 40, 2, 71)
@@ -74,6 +75,7 @@ def panel6():
     for y in range(1180, 1920, 92):
         for x in range(-40, 1120, 92): b.append(f'<rect x="{x + ((y - 1180) // 92 % 2) * 46}" y="{y}" width="88" height="88" rx="5" fill="{P(doc, "#EEF4EE", "#CFDCCF")}" stroke="#A9B8A9" stroke-width="2"/>')
     b.append(f'<rect y="1180" width="{W}" height="26" fill="{P(doc, "#B87B48", "#8A5A32")}"/><rect y="1180" width="{W}" height="6" fill="#FFE2B0" opacity=".7"/>')
+    b.append('<!--FG-->')
     # --- electricity meter (left)
     mx, my = 270, 560
     box = R(mx - 190, my - 270, mx + 190, my + 290, 26, 2, 3)

@@ -23,6 +23,7 @@ def panel10():
     b.append(plant(doc, 50, 1300, 1.0, 98))
     for k_, (wx_, ws_) in enumerate(((930, 70), (1000, 54), (880, 46))):
         b.append(O(doc, Pl([(wx_ - ws_, 1290), (wx_ + ws_, 1290), (wx_ + ws_ * .8, 1290 - ws_ * 1.1), (wx_ - ws_ * .8, 1290 - ws_ * 1.1)], 20, .8, 100 + k_), P(doc, '#F6E7A8', '#C9A24A', '#8A6A20', h=True), 'fg', T(wx_, 1290 - ws_ * .4, '1 kg' if ws_ > 60 else '500', ws_ * .5, '#6A4A10', 900), 100 + k_, .8))
+    b.append('<!--FG-->')
     cx = 540; ty = 760; tilt = -9                       # beam tilts down on the left (price > cost)
     brass = P(doc, '#F6E7A8', '#C9A24A', '#8A6A20', h=True)
     b.append(shadow(doc, cx + 20, 1310, 260, 26, .4, 12))
@@ -70,6 +71,7 @@ def panel11():
     for _ in range(10): b.append(f'<ellipse cx="{rr_.uniform(0, W):.0f}" cy="{rr_.uniform(700, 1300):.0f}" rx="{rr_.uniform(40, 120):.0f}" ry="{rr_.uniform(20, 70):.0f}" fill="#8A6A40" opacity="{rr_.uniform(.05, .12):.2f}" filter="url(#{doc.blur(12)})"/>')
     b.append(cable(doc, [(0, 700), (200, 780), (90, 900)], 7) + cable(doc, [(W, 660), (880, 740), (980, 860)], 7))
     b.append(O(doc, R(10, 790, 80, 860, 6, 1.4, 96), P(doc, '#E8ECEF', '#8E98A3'), 'fg', '', 96, .8) + O(doc, [(1000, 770), (1070, 770), (1060, 830), (1010, 830)], P(doc, '#F2E8D2', '#BFAE8E'), 'fg', '', 97, .8) + glow(doc, 1035, 850, 70, '#FFE8A8', .8))
+    b.append('<!--FG-->')
     # shutter frame + opening (warm interior glow)
     b.append(O(doc, R(90, 780, 990, 1640, 10, 2, 5), '#2A1B15', 'fg', f'<rect x="100" y="1340" width="880" height="290" fill="{RG(doc, (0, "#FFE7A6"), (.6, "#F7B25A"), (1, "#C26A2E"), c=(.5, .9), r=.8)}"/>' + ''.join(f'<rect x="{150 + k * 90}" y="{1500 - (k % 3) * 18}" width="60" height="{130 + (k % 3) * 18}" fill="{["#C9473F", "#FFFBF0", "#5A3622"][k % 3]}" opacity=".55"/>' for k in range(9)), 5, 1.1))
     # shutter slats (rolled up to y=1340)
@@ -102,6 +104,7 @@ def panel12():
     s, _ = wood_table(doc, (540, -100000), 0, H, [-300, 150, 460, 760, 1060, 1400], ['#CBA070', '#D9B386', '#C29463'], 0, 9, -400, 1500)
     b.append(s)
     b.append(f'<rect width="{W}" height="{H}" fill="{RG(doc, (0, "#FFEBC6", .35), (1, "#FFEBC6", 0), c=(.25, .15), r=.9)}"/>')
+    b.append('<!--FG-->')
     pad = Pl([(150, 300), (930, 270), (960, 1560), (180, 1590)], 50, 3, 3)
     b.append(shadow(doc, 560, 960, 460, 700, .4, 24))
     ledger = ''.join(f'<line x1="200" y1="{420 + i * 78}" x2="900" y2="{405 + i * 78}" stroke="#7BA4C8" stroke-width="2.4" opacity=".6"/>' for i in range(15))
@@ -135,6 +138,7 @@ def panel13():
         b.append(O(doc, R(tx_ - 50, 250, tx_ + 50, 360, 10, 1.4, 72 + k_), P(doc, mix(tc_, '#FFFFFF', .25), tc_, mix(tc_, '#1A0A08', .45), h=True), 'mid', f'<rect x="{tx_ - 50}" y="278" width="100" height="40" fill="{CREAM}"/>' + T(tx_, 306, 'TEH', 30, INKC, 900), 72 + k_, .8))
     b.append(bottle(doc, 950, 1150, 90, 210, '#E8A23A', 'SIRUP', '#8A5A32', 78) + O(doc, R(60, 1050, 200, 1150, 14, 1.6, 79), P(doc, '#F6F0E4', '#CDBB93', h=True), 'fg', T(130, 1110, 'GULA', 28, INKC, 900), 79, .8))
     b.append(O(doc, Pl([(40, 1170), (250, 1160), (260, 1230), (50, 1240)], 30, 1.2, 80), P(doc, '#E5BC8A', '#C99B66'), 'fg', '', 80, .9) + ''.join(O(doc, E(100 + k_ * 56, 1190, 24, 18, 1, 81 + k_), RG(doc, (0, '#FFF3A8'), (.8, '#F4D03A'), (1, '#C9A020'), c=(.4, .35), r=.9), 'mid', '', 81 + k_, .5) for k_ in range(3)))
+    b.append('<!--FG-->')
     # dispenser (large glass jar with tea, ice, lemon slices, tap + stand)
     x0, x1, yt, yb = 250, 830, 430, 1130
     b.append(shadow(doc, 560, 1148, 360, 30, .45, 14))

@@ -17,6 +17,7 @@ def panel1():
         b.append(G(shadow(doc, 14, 16, 40, 54, .4, 5) + O(doc, E(0, 0, 40, 54, 1, 30 + k), RG(doc, (0, '#FFF8EA'), (.6, '#F3DCB4'), (1, '#C9A06A'), c=(.34, .28), r=.9), 'fg', f'<ellipse cx="-12" cy="-22" rx="9" ry="16" fill="#fff" opacity=".8"/>', 30 + k, .8), ex, ey, rot))
     rr = random.Random(9)
     for _ in range(40): b.append(f'<path d="M{rr.uniform(120, 960):.0f},{rr.uniform(1380, 1900):.0f} q6,-8 14,-2" stroke="#E8C25A" stroke-width="4" stroke-linecap="round" fill="none" opacity=".7"/>')
+    b.append('<!--FG-->')
     # pack (top-down, pillow shape with crimped fins), rotated
     pk = []
     body = bez((-250, -300), (-268, -120), (-268, 120), (-250, 300), 20)[:-1] + bez((250, 300), (268, 120), (268, -120), (250, -300), 20)
@@ -71,6 +72,7 @@ def panel2():
     stripes = ''.join(f'<polygon points="{60 + i * 120 - (i * 3.75):.0f},790 {180 + i * 120 - (i * 3.75):.0f},790 {180 + i * 120 + 8 - (i * 3.75) + 3:.0f},900 {60 + i * 120 - 8:.0f},900" fill="{RED if i % 2 == 0 else CREAM}"/>' for i in range(8))
     b.append(O(doc, aw, '#fff', 'fg', stripes + f'<rect x="0" y="880" width="1080" height="22" fill="url(#{doc.lg([(0, "#000", 0), (1, "#2A1208", .45)])})"/>', 10, 1.0))
     b.append(''.join(f'<path d="M{60 + i * 120 - 8},900 q60,34 120,0" fill="{RED if i % 2 == 0 else CREAM}" stroke="{INKC}" stroke-width="4"/>' for i in range(8)))
+    b.append('<!--FG-->')
     # serving window with warm interior
     win = R(240, 960, 840, 1320, 10, 2, 9)
     inter = f'<rect x="240" y="960" width="600" height="360" fill="{RG(doc, (0, "#FFE7A6"), (.6, "#F7B25A"), (1, "#C26A2E"), c=(.5, .3), r=.9)}"/>'
@@ -142,6 +144,7 @@ def panel3():
     b.append(O(doc, wk + [(350, 1060)], P(doc, '#4A4F57', '#23262B', '#101215'), 'fg', f'<ellipse cx="540" cy="1060" rx="190" ry="34" fill="#15171A"/><path d="M420,1130 Q470,1190 540,1196" stroke="#8C95A0" stroke-width="10" fill="none" opacity=".55" stroke-linecap="round"/>', 11, 1.1))
     b.append(f'<ellipse cx="540" cy="1062" rx="176" ry="26" fill="{RG(doc, (0, "#F6C45E"), (1, "#C87A1E"))}"/>')
     b.append(smoke(doc, [(470, 1040, 170, 20), (620, 1040, 200, 22)], 5, .5, 22, 40, 4))
+    b.append('<!--FG-->')
     # counter
     b.append(O(doc, Pl([(-40, 1180), (1120, 1180), (1120, 1500), (-40, 1500)], 40, 1.2, 3), P(doc, '#D9A56C', '#B07A44'), 'fg', f'<rect x="-40" y="1180" width="1160" height="14" fill="#FFEBC6" opacity=".7"/>' + ''.join(f'<path d="M-40,{1215 + k * 38} L1120,{1215 + k * 38 + 6}" stroke="#8A5A32" stroke-width="2" opacity=".3"/>' for k in range(7)), 12, 1.1))
     bowls = []
