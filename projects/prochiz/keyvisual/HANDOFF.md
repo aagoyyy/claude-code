@@ -1,0 +1,50 @@
+# Handoff: video Prochiz "strategi gerilya rak roti tawar" (key visual gaya editorial)
+
+Status: **v5 selesai dan sudah dikirim ke user** (`Prochiz-keyvisual-v5.mp4`, 41,7 s, 1080x1920, 30 fps, audio = VO user). Siap dilanjutkan dengan revisi per scene.
+
+## Brief user
+- Naskah (7 kalimat) tentang Prochiz masuk lewat rak roti tawar, bukan rak keju. VO sudah direkam user: `assets/vo.mp3` (41,7 s).
+- Gaya = video referensi "Zuckerberg 13% vs 61%": latar krem bergrid titik SAMA di semua scene, cutout halftone hitam-putih, aksen merah/biru, judul Anton, elemen kecil berlapis. **Variasi ada di tata letak, bukan warna latar** (v3 dengan latar warna-warni ditolak).
+- **Tanpa caption bawah** (yang selalu muncul di referensi), tanpa CTA/kartu akhir di belakang. Video berakhir di scene "penetrasi pasar".
+- Semua elemen penting di **safe zone** 1080x1920: kiri 72, kanan 120, atas 270, bawah 380 px. Teks di dalam kotak harus proporsional (kotak dihitung dari tinggi huruf).
+- Tokoh tidak boleh kecil (>= ~850 px untuk figur utama), gambar tidak boleh "tembus" (lubang di cutout).
+- Brand: merah `#A62F2F`, krem `#FFFAE7`, hitam `#252627`. Logo asli dan kemasan Gold Slices / Premium Cheddar dipakai apa adanya (bayangan mengikuti bentuk, bukan kotak).
+- Scene 2 memakai TEKS "PROCHIZ" (bukan logo). Logo asli di scene 3, 13, 15; kemasan di scene 7, 10, 12.
+- Tanggal Masterclass "Kamis, 10 Desember 2026" (logo Gratyo) hanya relevan untuk video lama `Prochiz-gerilya-full.mp4`, bukan v5.
+
+## Struktur
+```
+keyvisual/
+  Prochiz-keyvisual-v5.mp4      hasil final
+  HANDOFF.md
+  src/    render.py  full.py  full2.py  board.py  board2.py  board3.py  anim5.py
+  fonts/  Anton.ttf  SpaceMono(.Bold).ttf   (OFL, dari @fontsource)
+  assets/ originals/ (13 foto AI dari user: SPG, customer, kerumunan, produk, lorong)
+          cutouts/   (cutout transparan hasil potong otomatis)
+          aisle/     (foto lorong keju/roti)
+          brand/     logo.png, gold_slices.png, premium_cheddar.png (+ file sumber)
+          vo.mp3
+  frames/ storyboard_v4.png, brand_01..15.png, brand_sheet.png
+```
+
+## Cara render ulang
+Path di `src/render.py` dan `src/full.py` masih menunjuk ke folder kerja lama (variabel `R`, `A`, `FONT`, `SRC`, path `images/1.webp` untuk logo Gratyo lama, dan `BR` di `board3.py`). **Sesuaikan dulu** ke lokasi repo ini: `R` = folder yang berisi `fonts/` dan `assets_zip/prochiz/` (= `assets/originals`), `A` = `assets/`.
+```
+pip install pillow numpy opencv-python-headless
+python3 -I src/board3.py                 # 15 frame statis + sheet (cek safe zone: "violations: 0")
+python3 -I src/anim5.py preview 0.5 2.6 ...   # sheet cuplikan animasi
+python3 -I src/anim5.py video out.mp4    # render penuh ~1m45s (4 core), audio dari assets/vo.mp3
+```
+Arsitektur: `board.py` = 15 tata letak (b01..b15, state akhir), `board2.py` = tata ulang scene tokoh-kecil (n03/n05/n07/n11/n12/n15), `board3.py` = versi brand (m02, m03, m07, m10, m12, m13, m15) + dict `ALL` (urutan final). `anim5.py` mem-patch fungsi gambar di board* sehingga tiap elemen masuk berurutan (judul per kata, kartu pop, tokoh naik, stempel menghantam + shake, titik berdenyut, garis tergambar), kamera zoom pelan, keluar = slide 0,14 s.
+
+## Timeline scene (detik, dari jeda audio VO)
+1: 0-1.96 | 2: 1.96-4.24 | 3: 4.24-7.15 | 4: 7.15-9.5 | 5: 9.5-12.3 | 6: 12.3-15.1 | 7: 15.1-17.4 | 8: 17.4-20.1 | 9: 20.1-23.18 | 10: 23.18-26.8 | 11: 26.8-31.78 | 12: 31.78-35.72 | 13: 35.72-38.33 | 14: 38.33-39.95 | 15: 39.95-41.72
+
+## Catatan / belum beres
+- **VO belum pernah ditranskrip** (host model Whisper diblokir proxy; tool ElevenLabs tidak bisa terima file lokal). Batas scene dihitung dari jeda sunyi audio + jumlah suku kata; 2 batas tanpa jeda jelas (~9.5 s dan ~39.95 s) masih perkiraan. Elemen dalam scene muncul merata, belum terkunci ke kata.
+- Grafik scene 4/5/15 itu ILUSTRASI (bukan data), diberi label.
+- SPG di scene 3/7/11 masih memegang nampan keju hasil AI. Opsi: generate ulang SPG memegang kemasan Prochiz asli (prompt P4/P5 sudah dibuat di chat).
+- Gold Slices hanya 512 px, agak lembut di scene 10.
+- Cutout otomatis (GrabCut + model latar) kadang kasar di sepatu/lantai; kerumunan sengaja dipotong sampai paha lalu fade. Pemotongan neural `@imgly/background-removal-node` sempat ditolak oleh pengaturan izin sesi, jadi belum dipakai.
+- Scene 15 hanya 1,8 s; opsi menahan frame terakhir 0,5 s.
+- Frame statis hasil v5 ada di `frames/brand_XX.png`.
