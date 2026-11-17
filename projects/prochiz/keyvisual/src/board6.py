@@ -69,13 +69,21 @@ def agus(n, h, frac=1.0):
 def name_label(L, cx, y):
     im = label("AGUSTINA  /  CO-FOUNDER PROCHIZ", 24); L.alpha_composite(im, (int(cx - im.width / 2), int(y)))
 
-def bar_card(w, rows, head, note="ILUSTRASI"):
-    h = 120 + 118 * len(rows); c = hairline_card(w, h, border=(40, 40, 40)); d = ImageDraw.Draw(c)
-    c.alpha_composite(label(head, 22), (22, 20)); y = 84
+def bar_card(w, rows, head=None, note=None):
+    top = 84 if head else 26; h = top + 118 * len(rows) + 10; c = hairline_card(w, h, border=(40, 40, 40)); d = ImageDraw.Draw(c)
+    if head: c.alpha_composite(label(head, 22), (22, 20))
+    y = top
     for nm, fr, col in rows:
         d.text((24, y), nm, font=an(26), fill=INKK + (255,)); d.rectangle((24, y + 40, w - 24, y + 84), outline=(40, 40, 40, 255), width=3, fill=(240, 236, 226, 255))
         d.rectangle((27, y + 43, 27 + int((w - 54) * fr), y + 81), fill=col + (255,)); y += 118
-    d.text((w - 24, h - 22), note, font=mono_font(16, False), fill=(110, 104, 90, 255), anchor="rb"); return c
+    if note: d.text((w - 24, h - 14), note, font=mono_font(16, False), fill=(110, 104, 90, 255), anchor="rb")
+    return c
+
+def dot_only(L, x, y, r=10):
+    d = ImageDraw.Draw(L); d.ellipse((x - r - 11, y - r - 11, x + r + 11, y + r + 11), outline=RED + (255,), width=3); d.ellipse((x - r, y - r, x + r, y + r), fill=RED + (255,), outline=(255, 255, 255, 255), width=3)
+
+def tag_blank():
+    im = hairline_card(96, 128, border=(40, 40, 40)); ImageDraw.Draw(im).rectangle((30, 36, 66, 72), fill=RED + (255,)); return im
 
 def ac(L, im, pos): L.alpha_composite(im, (int(pos[0]), int(pos[1])))
 def rule(L, p0, p1, col=INKK, w=6): ImageDraw.Draw(L).line((p0[0], p0[1], p1[0], p1[1]), fill=col + (255,), width=w)
@@ -84,35 +92,29 @@ def dotnode(L, x, y, col): ImageDraw.Draw(L).ellipse((x - 18, y - 18, x + 18, y 
 # ---------------------------------------------------------------- 15 scenes
 def s01(L):
     ttl(L, [[("KOMPETITOR", INKK)], [("MENGUASAI", INKK)], [("RAK", INKK), ("KEJU.", RED)]], 290, 124)
-    plumb(L, 230, 250, 1010, True)
     mh = mono_halftone(WALL.crop((294, 112, 1366, 912)).resize((860, 641), Image.LANCZOS), 5, 0.22, 1.08)
     d = ImageDraw.Draw(mh); sx, sy = int(536 * 860 / 1072), int(400 * 860 / 1072); d.rectangle((sx - 78, sy - 62, sx + 78, sy + 62), outline=RED + (255,), width=6)
     place(L, pcard(mh.resize((820, 611), Image.LANCZOS)), CX - 8, 1130, rot=-2)
-    micro(L, "SLOT KOSONG DI RAK KOMPETITOR", SL + 30, 745)
     ac(L, stamp("DIKUASAI KOMPETITOR"), (int(CX - 330), 1290))
 
 def s02(L):
     ttl(L, [[("PROCHIZ", RED)], [("MENYERANG DARI", INKK)], [("RAK ROTI TAWAR!", INKK)]], 290, 124)
     micro(L, "KENAPA RAK ROTI?", 90, 700, size=28)
     sp = agus(1, 1150, 0.72); ac(L, sp, (int(CX - sp.width / 2) + 20, 1480 - sp.height)); top = 1480 - sp.height
-    plumb(L, CX + 42, 260, top + 58, True, 9)
-    for x, y, r in ((120, 880, -5), (116, 1020, 4), (128, 1160, -3), (900, 840, 4), (904, 990, -4), (896, 1140, 3)): place(L, P.tag_card("ROTI"), x, y, rot=r)
+    dot_only(L, CX + 42, top - 6, 9)
+    for x, y, r in ((120, 880, -5), (116, 1020, 4), (128, 1160, -3), (900, 840, 4), (904, 990, -4), (896, 1140, 3)): place(L, tag_blank(), x, y, rot=r)
     name_label(L, CX + 20, 1420)
 
 def s03(L):
     ttl(L, [[("WAKTU MASUK KE", INKK)], [("SUPERMARKET", RED)]], 290, 124)
-    pw, ph = 860, 700; c = hairline_card(pw, ph, border=(40, 40, 40)); d = ImageDraw.Draw(c)
-    c.alpha_composite(label("DENAH TOKO  ·  TAMPAK ATAS", 22), (22, 20))
-    xs = [100, 270, 440, 610, 760]
-    for i, x in enumerate(xs): d.rectangle((x, 100, x + 56, 470), outline=(40, 40, 40, 255), width=3, fill=((255, 220, 214, 255) if i == 3 else (236, 232, 222, 255)))
-    c.alpha_composite(label("RAK KEJU", 20), (xs[1] - 28, 490)); c.alpha_composite(label("LORONG ROTI", 20, bg_=RED), (xs[3] - 52, 490))
-    c.alpha_composite(label("KASIR", 20), (pw - 150, ph - 70))
-    d.line((pw // 2, ph - 40, pw // 2, 590, xs[3] + 28, 560, xs[3] + 28, 300), fill=RED + (255,), width=5)
-    d.ellipse((xs[3] + 28 - 14, 300 - 14, xs[3] + 28 + 14, 300 + 14), fill=RED + (255,), outline=(255, 255, 255, 255), width=3)
-    c.alpha_composite(label("PINTU MASUK", 20), (pw // 2 - 70, ph - 38))
-    place(L, c, CX, 1130, rot=-1)
     micro(L, "PROCHIZ BERDIRI DI MANA?", SL + 20, 690, size=28)
-    plumb(L, SL + 40, 250, 780, False)
+    pw, ph = 860, 640; c = hairline_card(pw, ph, border=(40, 40, 40)); d = ImageDraw.Draw(c)
+    xs = [100, 270, 440, 610, 760]
+    for i, x in enumerate(xs): d.rectangle((x, 130, x + 56, 470), outline=(40, 40, 40, 255), width=3, fill=((255, 220, 214, 255) if i == 3 else (236, 232, 222, 255)))
+    c.alpha_composite(label("LORONG ROTI", 24, bg_=RED), (xs[3] + 28 - 70, 70))
+    cx3 = xs[3] + 28; d.line((cx3, ph - 30, cx3, 500), fill=RED + (255,), width=6)
+    d.ellipse((cx3 - 14, 486 - 14, cx3 + 14, 486 + 14), fill=RED + (255,), outline=(255, 255, 255, 255), width=3)
+    place(L, c, CX, 1130, rot=-1)
 
 def s04(L):
     ttl(L, [[("TIDAK BISA SEKADAR", INKK)], [("MENGANDALKAN", INKK), ("RAK KEJU", RED)]], 290, 100)
@@ -120,13 +122,12 @@ def s04(L):
     sx, sy = int(470 * 800 / 941), int(512 * 800 / 941); lg = wfit(LOGO_P, 170); box = Image.new("RGBA", (200, 150), PAPER_ + (255,)); box.alpha_composite(lg, (15, 14)); mh.alpha_composite(box, (sx - 100, sy - 75))
     ImageDraw.Draw(mh).rectangle((sx - 104, sy - 79, sx + 104, sy + 79), outline=RED + (255,), width=6)
     place(L, pcard(mh), CX, 1000, rot=1.2)
-    micro(L, "SATU DI ANTARA BANYAK", SL + 10, 1450); micro(L, "ILUSTRASI", SR - 150, 1450, bg=(110, 104, 90))
-    plumb(L, SR - 90, 250, 1000 - 400 + 70, False)
+    micro(L, "SATU DI ANTARA BANYAK", SL + 10, 1450)
 
 def s05(L):
     ttl(L, [[("BRAND LAWAN JAUH", INKK)], [("LEBIH DULU", INKK), ("DIKENAL", RED)]], 290, 108)
-    place(L, bar_card(760, (("BRAND LAWAN", 0.92, INKK), ("PROCHIZ", 0.26, RED)), "TINGKAT DIKENAL"), 490, 700, rot=1.5)
-    f = CUST1_X.resize((int(CUST1_X.width * 650 / CUST1_X.height), 650), Image.LANCZOS); ac(L, f, (SR - f.width - 40, 1480 - 650))
+    place(L, bar_card(760, (("BRAND LAWAN", 0.92, INKK), ("PROCHIZ", 0.26, RED)), "ILUSTRASI  ·  TINGKAT DIKENAL"), 490, 700, rot=1.5)
+    f = CUST1_X.resize((int(CUST1_X.width * 590 / CUST1_X.height), 590), Image.LANCZOS); ac(L, f, (SR - f.width - 40, 1480 - 590))
     q = label("mana yang Prochiz ya?", 30, fg=INKK, bg_=PAPER_); qq = Image.new("RGBA", (q.width + 8, q.height + 8), (40, 40, 40, 255)); qq.alpha_composite(q, (4, 4)); place(L, qq, 330, 1250, rot=3)
 
 def s06(L):
@@ -134,52 +135,46 @@ def s06(L):
     place(L, mono_card(WALL, 500, crop=(294, 112, 1366, 912)), 345, 880, rot=-5)
     ac(L, CROWD2, (int(470 - CROWD2.width / 2) + 40, 1480 - CROWD2.height + 4))
     ac(L, stamp("REBUT PERHATIAN", 50, -7), (130, 1180))
-    micro(L, "RAK KEJU  ·  KOMPETITOR", 90, 640)
 
 def s07(L):
-    micro(L, "PENDEKATAN BERBEDA", 90, 300, size=26, bg=RED)
     ttl(L, [[("BEDA.", RED)]], 340, 300, lead=1.0)
     sp = agus(2, 1100, 0.78); ac(L, sp, (SR - sp.width + 10, 1480 - sp.height))
-    a = hairline_card(380, 190, border=(40, 40, 40), fill=(238, 235, 226)); d = ImageDraw.Draw(a); a.alpha_composite(label("RAK KEJU", 20), (18, 16)); d.line((40, 70, 340, 170), fill=RED + (255,), width=8); d.line((40, 170, 340, 70), fill=RED + (255,), width=8)
+    a = hairline_card(380, 190, border=(40, 40, 40), fill=(238, 235, 226)); d = ImageDraw.Draw(a); d.text((24, 12), "RAK KEJU", font=an(34), fill=INKK + (255,)); d.line((40, 70, 340, 170), fill=RED + (255,), width=8); d.line((40, 170, 340, 70), fill=RED + (255,), width=8)
     place(L, a, 280, 940, rot=-3)
-    b = hairline_card(400, 220, border=RED); b.alpha_composite(label("LORONG ROTI TAWAR", 20, bg_=RED), (18, 16)); b.alpha_composite(wfit(GOLD_P, 220), (150, 60)); ImageDraw.Draw(b).text((22, 100), "ada\nProchiz", font=an(34), fill=INKK + (255,))
+    b = hairline_card(400, 220, border=RED); ImageDraw.Draw(b).text((24, 12), "LORONG ROTI", font=an(34), fill=RED + (255,)); b.alpha_composite(wfit(GOLD_P, 220), (150, 60)); ImageDraw.Draw(b).text((22, 100), "ada\nProchiz", font=an(34), fill=INKK + (255,))
     place(L, b, 300, 1220, rot=2); plumb(L, 280, 1030, 1110, False)
 
 def s08(L):
     ttl(L, [[("SPG DI LORONG", INKK)], [("ROTI", INKK), ("TAWAR", RED)]], 290, 108)
     place(L, mono_card(AISLE, 790, crop=(236, 0, 1436, 941)), 490, 960, rot=-2)
     sp = agus(1, 1050, 0.72); ac(L, sp, (SR - sp.width + 0, 1480 - sp.height))
-    hang(L, 828, 285, label("LORONG ROTI TAWAR", 20, bg_=INKK), rot=-3)
-    plumb(L, 300, 760, 1010, True, 12)
+    dot_only(L, 300, 1010, 12)
 
 def s09(L):
-    micro(L, "POV: KAMU LAGI CARI ROTI", 90, 300, size=28, bg=RED)
+    micro(L, "POV", 90, 300, size=34, bg=RED)
     ttl(L, [[("CUSTOMER", INKK)], [("MENCARI", INKK), ("ROTI", RED)]], 360, 122)
     pov = mono_card(POV, 600, crop=(400, 60, 1100, 941)); place(L, pov, 400, 1090, rot=-2)
     q = label("TERUS ENAKNYA DIAPAIN?", 34, fg=INKK, bg_=PAPER_); qq = Image.new("RGBA", (q.width + 8, q.height + 8), (40, 40, 40, 255)); qq.alpha_composite(q, (4, 4)); place(L, qq, 700, 1380, rot=3)
-    plumb(L, 640, 640, 1000, True, 12)
+    dot_only(L, 640, 1000, 12)
 
 def receipt():
     w, h = 330, 520; im = Image.new("RGBA", (w, h + 20), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     pts = [(0, 0), (w, 0)]; zz = 14
     pts += [(w - i * zz, h + (10 if i % 2 else 0)) for i in range(0, w // zz + 1)]; d.polygon(pts, fill=PAPER_ + (255,), outline=(40, 40, 40, 255))
-    f = mono_font(20); fb = mono_font(26); d.text((w // 2, 36), "NOTA BELANJA", font=fb, fill=INKK + (255,), anchor="mm"); d.text((w // 2, 70), "ILUSTRASI", font=mono_font(15, False), fill=(110, 104, 90, 255), anchor="mm")
-    d.line((20, 96, w - 20, 96), fill=(40, 40, 40, 255), width=2)
+    f = mono_font(20); fb = mono_font(26); d.text((w // 2, 44), "NOTA", font=fb, fill=INKK + (255,), anchor="mm"); d.line((20, 76, w - 20, 76), fill=(40, 40, 40, 255), width=2)
     for i, (n, hl) in enumerate((("ROTI TAWAR  x1", False), ("KEJU PROCHIZ  x1", True))):
         y = 140 + i * 72
         if hl: d.rectangle((14, y - 22, w - 14, y + 22), fill=RED + (255,))
         d.text((24, y), n, font=f, fill=((255, 255, 255) if hl else INKK) + (255,), anchor="lm")
-    d.line((20, 300, w - 20, 300), fill=(40, 40, 40, 255), width=2); d.text((24, 340), "DIBELI BERSAMA", font=f, fill=INKK + (255,), anchor="lm"); d.text((24, 400), "TERIMA KASIH", font=mono_font(18, False), fill=(110, 104, 90, 255), anchor="lm")
+    d.line((20, 300, w - 20, 300), fill=(40, 40, 40, 255), width=2); d.text((24, 340), "DIBELI BERSAMA", font=f, fill=INKK + (255,), anchor="lm"); pass
     return im
 
 def s10(L):
-    micro(L, "JAWABANNYA", 90, 300, size=26, bg=RED)
     ttl(L, [[("KEJU", RED)], [("PENDAMPING ROTI", INKK)]], 350, 116)
     gc = pcard(GOLDC.resize((560, 373), Image.LANCZOS)); place(L, gc, 380, 900, rot=-2)
     ac(L, wfit(Image.fromarray(np.asarray(P_ROTI)), 230), (110, 1080)) if False else None
     place(L, receipt(), 765, 1130, rot=4)
     ac(L, stamp("COCOK DIPASANGKAN", 46, -6), (96, 1220))
-    micro(L, "PROCHIZ GOLD CHEDDAR", 90, 1130)
 
 def s11(L):
     ttl(L, [[("KALAU KAMU OWNER:", INKK)], [("TUNGGU", INKK), ("ATAU", INKK), ("PINDAH?", RED)]], 290, 112)
@@ -189,8 +184,7 @@ def s11(L):
     left = panel(WALL, CUST3_X, 640, False); d = ImageDraw.Draw(left); d.line((90, 170, 330, 400), fill=RED + (255,), width=10); d.line((330, 170, 90, 400), fill=RED + (255,), width=10)
     place(L, left, SL + 12 + (pw + 24) / 2, 1010, rot=-1)
     place(L, panel(AISLE, agus(2, 780, 1.0), 700, True), SR - 12 - (pw + 24) / 2, 1010, rot=1)
-    micro(L, "MENUNGGU DI RAK KEJU", SL + 12, 1450); micro(L, "MENDATANGI DI LORONG ROTI", SR - 12 - 330, 1450, bg=RED)
-    micro(L, "VS", CX - 22, 1000, size=34)
+    micro(L, "MENUNGGU", SL + 12, 1450, size=28); micro(L, "MENDATANGI", SR - 12 - 190, 1450, size=28, bg=RED)
 
 def s12(L):
     ttl(L, [[("TEPAT SAAT", INKK)], [("KEBUTUHAN", RED), ("MUNCUL.", INKK)]], 290, 112)
@@ -199,32 +193,28 @@ def s12(L):
     items = ((800, "AMBIL ROTI", "roti"), (1090, "KEBUTUHAN MUNCUL", "ping"), (1380, "TAWARKAN KEJU", "pack"))
     for y, tag, ic in items:
         dotnode(L, 150, y, (RED if ic == "ping" else INKK))
-        c = hairline_card(480, 190, border=(40, 40, 40)); c.alpha_composite(label(tag, 22, bg_=(RED if ic == "ping" else INKK)), (18, 16))
-        if ic == "roti": c.alpha_composite(wfit(Image.fromarray(np.asarray(P_ROTI)), 120), (320, 40))
-        elif ic == "pack": c.alpha_composite(wfit(GOLD_P, 200), (250, 50))
-        else: ImageDraw.Draw(c).ellipse((350, 52, 430, 132), fill=RED + (255,))
-        ImageDraw.Draw(c).text((22, 110), ("customer\npilih roti", "butuh\npendamping", "SPG tawarkan\nProchiz")[items.index((y, tag, ic))], font=mono_font(22, False), fill=INKK + (255,))
-        place(L, c, 390, y, rot=(1, -1, 1)[items.index((y, tag, ic))])
-    plumb(L, 150, 1000, 1090, True, 12)
+        c = hairline_card(440, 170, border=(40, 40, 40)); c.alpha_composite(label(tag, 24, bg_=(RED if ic == "ping" else INKK)), (18, 16))
+        if ic == "roti": c.alpha_composite(wfit(Image.fromarray(np.asarray(P_ROTI)), 130), (290, 24))
+        elif ic == "pack": c.alpha_composite(wfit(GOLD_P, 190), (220, 36))
+        else: ImageDraw.Draw(c).ellipse((300, 40, 400, 140), fill=RED + (255,))
+        place(L, c, 420, y, rot=(1, -1, 1)[items.index((y, tag, ic))])
 
 def s13(L):
     ttl(L, [[("STRATEGI", INKK)]], 280, 140); rule(L, (SL + 18, 450), (SR, 450), INKK, 6); ttl(L, [[("GERILYA", RED)]], 460, 140)
     sp = agus(3, 800, 1.0); ac(L, sp, (int(CX - sp.width / 2) + 100, 1480 - sp.height + 10))
-    ac(L, wfit(LOGO_P, 300), (90, 860)); plumb(L, 240, 680, 860, False)
-    name_label(L, CX + 100, 1440)
+    ac(L, wfit(LOGO_P, 300), (90, 860))
 
 def s14(L):
     ttl(L, [[("MEREBUT", INKK)], [("PERHATIAN", RED)], [("CUSTOMER", INKK)]], 290, 118)
-    c = hairline_card(520, 440, border=(40, 40, 40)); d = ImageDraw.Draw(c); c.alpha_composite(label("MOMEN CUSTOMER", 22), (22, 18))
+    c = hairline_card(520, 370, border=(40, 40, 40)); d = ImageDraw.Draw(c)
     for i, (tx, col) in enumerate((("CARI ROTI", INKK), ("BUTUH PENDAMPING", (110, 106, 96)), ("TERTARIK KEJU", RED))):
-        d.rectangle((26, 80 + i * 110, 494, 160 + i * 110), fill=col + (255,)); d.text((260, 120 + i * 110), tx, font=an(34), fill=(255, 255, 255, 255), anchor="mm")
+        d.rectangle((26, 30 + i * 110, 494, 110 + i * 110), fill=col + (255,)); d.text((260, 70 + i * 110), tx, font=an(34), fill=(255, 255, 255, 255), anchor="mm")
     place(L, c, 330, 1050, rot=-2)
     f = CUST4_X; ac(L, f.resize((int(f.width * 800 / f.height), 800), Image.LANCZOS), (SR - 440, 1480 - 800))
-    plumb(L, 600, 700, 900, False)
 
 def s15(L):
     ttl(L, [[("MEMPERLUAS", INKK)], [("PENETRASI", RED)], [("PASAR.", INKK)]], 290, 118)
-    c = bar_card(480, (("PENETRASI PASAR", 0.82, RED),), "PROCHIZ  ·  TERUS NAIK"); c.alpha_composite(wfit(LOGO_P, 200), (140, 16 + 0)) if False else None
+    c = bar_card(480, (("PENETRASI PASAR", 0.82, RED),), None, "ILUSTRASI"); c.alpha_composite(wfit(LOGO_P, 200), (140, 16 + 0)) if False else None
     place(L, c, 700, 1020, rot=2); ac(L, wfit(LOGO_P, 190), (610, 800 - 20))
     sp = agus(1, 1050, 0.72); ac(L, sp, (60, 1480 - sp.height)); name_label(L, 290, 1440)
 
