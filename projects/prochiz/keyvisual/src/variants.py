@@ -73,8 +73,8 @@ def render_fn(fn, num, bgB, bgR):
     L = Image.new("RGBA", (W, H), (0, 0, 0, 0)); fn(L); im = bgfor(num, bgB, bgR).copy(); im.alpha_composite(L); return im.convert("RGB"), L
 
 if __name__ == "__main__":
-    bgB, bgR = BO.plus_sparse(), BO.red_sparse(); out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frames", "v8c"); os.makedirs(out, exist_ok=True); bad = 0
-    jobs = [(n, f"scene_{n:02d}", fn) for n, fn in B6.SC] + [(2, "scene_02_alt_A_rak_roti_card", s02a), (2, "scene_02_alt_B_rak_roti_lebar", s02b), (3, "scene_03_alt_A_pintu_masuk", s03a), (3, "scene_03_alt_B_lorong_foto", s03b)]
+    bgB, bgR = BO.plus_sparse(), BO.red_sparse(); out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frames", "v8d"); os.makedirs(out, exist_ok=True); bad = 0
+    jobs = [(n, f"scene_{n:02d}", fn) for n, fn in B6.SC]
     for num, name, fn in jobs:
         im, L = render_fn(fn, num, bgB, bgR); im.save(os.path.join(out, name + ".png"))
         bb = L.getchannel("A").point(lambda v: 255 if v > 125 else 0).filter(ImageFilter.MinFilter(9)).getbbox()
