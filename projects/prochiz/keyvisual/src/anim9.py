@@ -124,13 +124,51 @@ def _cam(img, z0, z1, u, dx=0.0):
 CAMS = [(1.0, 1.03, 0), (1.03, 1.0, 0), (1.0, 1.025, -6), (1.025, 1.0, 0), (1.0, 1.03, 6), (1.03, 1.0, 0), (1.0, 1.03, 0), (1.03, 1.0, 0),
         (1.0, 1.03, 0), (1.03, 1.0, 0), (1.0, 1.025, 0), (1.03, 1.0, 0), (1.0, 1.03, 0), (1.03, 1.0, 0), (1.0, 1.02, 0)]
 
-HW = 0.22                                        # half-width of the seamless push window around each cut (s)
+# transition of each cut (into scene j+2): (type, arg)
+TR = [("iris", (540, 1110)), ("push", "left"), ("zoom", (400, 1020)), ("iris", (540, 1060)), ("push", "down"), ("shrink", None), ("push", "left"),
+      ("zoom", (480, 900)), ("bar", None), ("push", "up"), ("iris", (540, 1055)), ("bar", None), ("push", "left"), ("shrink", None)]
+HW = 0.26                                        # half-width of the seamless push window around each cut (s)
 def scene_frame(k, tl):
     t0, t1 = _T[k]; dur = t1 - t0
     cv = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     for idx, e in enumerate(ELS[k]): draw_el(cv, e, tl, 99, idx)          # no fade-out: the push carries the scene off-screen
     z0, z1, dx = CAMS[k]; cv = _cam(cv, z0, z1, min(max(tl / dur, 0), 1), dx)
     out = (BG_RED if B7.SCENE_BG.get(k + 1) == "red" else BG).copy(); out.alpha_composite(cv); return out
+
+def _scale_about(img, s, cx, cy, rot=0.0):
+    c = math.cos(math.radians(rot)) / s; sn = math.sin(math.radians(rot)) / s
+    return img.transform(img.size, Image.AFFINE, (c, -sn, cx - c * cx + sn * cy, sn, c, cy - sn * cx - c * cy), Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+
+def transition(kind, arg, A_, B_, p):
+    out = Image.new("RGBA", (W, H))
+    if kind == "push":
+        if arg == "left":    o = int(round(p * W)); out.paste(A_, (-o, 0)); out.paste(B_, (W - o, 0))
+        elif arg == "right": o = int(round(p * W)); out.paste(A_, (o, 0)); out.paste(B_, (o - W, 0))
+        elif arg == "up":    o = int(round(p * H)); out.paste(A_, (0, -o)); out.paste(B_, (0, H - o))
+        else:                o = int(round(p * H)); out.paste(A_, (0, o)); out.paste(B_, (0, o - H))
+    elif kind == "iris":                     # circle opens from a point, thin red ring on its edge
+        cx, cy = arg; rmax = math.hypot(max(cx, W - cx), max(cy, H - cy)) + 20; r = rmax * p
+        out.paste(A_, (0, 0)); m = Image.new("L", (W, H), 0); ImageDraw.Draw(m).ellipse((cx - r, cy - r, cx + r, cy + r), fill=255)
+        out.paste(B_, (0, 0), m)
+        if 0.02 < p < 0.98: ImageDraw.Draw(out).ellipse((cx - r, cy - r, cx + r, cy + r), outline=(214, 52, 38, 255), width=10)
+    elif kind == "zoom":                     # camera pushes through A at a point, B settles in from slightly smaller
+        cx, cy = arg; e = p ** 1.6
+        b_ = _scale_about(B_, 0.88 + 0.12 * p, cx, cy); a_ = _scale_about(A_, 1 + 2.4 * e, cx, cy)
+        out = Image.new("RGBA", (W, H), (229, 224, 209, 255)); out.alpha_composite(b_)
+        k_ = 1 - ease_io((p - 0.5) / 0.32); a_.putalpha(a_.getchannel("A").point(lambda v: int(v * k_))); out.alpha_composite(a_)
+    elif kind == "bar":                      # a brand-red band sweeps across like a curtain: covers A, then uncovers B
+        out.paste(A_ if p < 0.5 else B_, (0, 0)); d = ImageDraw.Draw(out); sl = 260
+        if p < 0.5: x = (p / 0.5) * (W + sl); d.polygon([(-sl, 0), (x, 0), (x - sl, H), (-sl, H)], fill=(166, 47, 47, 255))
+        else: x = ((p - 0.5) / 0.5) * (W + sl); d.polygon([(x, 0), (W + sl, 0), (W + sl, H), (x - sl, H)], fill=(166, 47, 47, 255))
+    else:                                    # shrink: A becomes a tilted card that drops away, B underneath
+        out = B_.copy(); s_ = 1 - 0.62 * p; rot = -9 * p
+        a_ = _scale_about(A_, s_, W / 2, H / 2, rot); a_ = a_.transform(a_.size, Image.AFFINE, (1, 0, 0, 0, 1, -int(p * p * 900)), Image.BICUBIC, fillcolor=(0, 0, 0, 0))
+        sh = Image.new("RGBA", (W, H), (0, 0, 0, 0)); sh.putalpha(a_.getchannel("A").point(lambda v: int(v * 0.35)).filter(ImageFilter.GaussianBlur(18)))
+        out.alpha_composite(sh, (0, 14)); fr = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        if p > 0.03:                         # white card border around the shrinking frame
+            box = a_.getchannel("A").point(lambda v: 255 if v > 10 else 0).filter(ImageFilter.MaxFilter(17)); fr.paste((255, 255, 255, 255), (0, 0), box); out.alpha_composite(fr)
+        out.alpha_composite(a_)
+    return out
 
 def ease_io(x): x = min(max(x, 0.0), 1.0); return x * x * (3 - 2 * x)
 
@@ -139,9 +177,9 @@ def frame8(i):
     for j in range(len(_T) - 1):                                          # inside a push window between scene j and j+1?
         b = _T[j][1]
         if b - HW <= t < b + HW:
-            p = ease_io((t - (b - HW)) / (2 * HW)); off = int(round(p * W))
+            p = ease_io((t - (b - HW)) / (2 * HW)); kind, arg = TR[j]
             A_ = scene_frame(j, t - _T[j][0]); B_ = scene_frame(j + 1, t - _T[j + 1][0])
-            out = Image.new("RGBA", (W, H)); out.paste(A_, (-off, 0)); out.paste(B_, (W - off, 0))
+            out = transition(kind, arg, A_, B_, p)
             if 0.05 < p < 0.95:                                           # light directional blur at speed
                 out = out.filter(ImageFilter.BoxBlur(0)) if False else out
             return out.convert("RGB")
