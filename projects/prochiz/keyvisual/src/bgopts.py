@@ -15,6 +15,12 @@ def plus_sparse():
         for gy in range(108, H, 216): d.line((gx - 8, gy, gx + 8, gy), fill=(90, 84, 66, 70), width=2); d.line((gx, gy - 8, gx, gy + 8), fill=(90, 84, 66, 70), width=2)
     return im
 
+def red_sparse():
+    im = flat((166, 47, 47)); d = ImageDraw.Draw(im)
+    for gx in range(108, W, 216):
+        for gy in range(108, H, 216): d.line((gx - 8, gy, gx + 8, gy), fill=(255, 250, 231, 60), width=2); d.line((gx, gy - 8, gx, gy + 8), fill=(255, 250, 231, 60), width=2)
+    return im
+
 def grid_faint():
     im = flat(BEIGE); d = ImageDraw.Draw(im)
     for x in range(0, W, 72): d.line((x, 0, x, H), fill=(120, 112, 90, 14), width=1)

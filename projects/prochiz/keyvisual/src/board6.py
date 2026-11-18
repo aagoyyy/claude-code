@@ -11,6 +11,10 @@ from board5 import WALL, POV, GOLDC, AISLE, cover, wfit, LOGO_P, GOLD_P, CUST1_X
 from render import cut_halftone
 import board as B
 from board import P_ROTI
+from full import fade_bottom
+def _X2(name, src, h, hole=True): return cut_halftone(A + f"cutouts/{name}.png", h, cell=5, mix=0.06, color=True, fill_holes=hole, src=SRC + src)
+CUST1_X = _X2("cust1", "CUST-1 bingung.png", 860); CUST2_X = _X2("cust2", "CUST-2 pegang roti.png", 860); CUST3_X = _X2("cust3", "CUST-3 menunggu.png", 860); CUST4_X = _X2("cust4", "CUST-4 kagettertarik.png", 780)
+_cr = _X2("crowd", "C. Kerumunan (1 gambar, rasio 32).png", 900, hole=False); CROWD2 = fade_bottom(_cr.crop((0, 0, _cr.width, int(_cr.height * 0.70))), 140)
 
 PAPER_ = (250, 247, 240)
 def mono_font(sz, bold=True): return ImageFont.truetype(FONT + ("SpaceMono-Bold.ttf" if bold else "SpaceMono.ttf"), sz)
@@ -34,9 +38,9 @@ def place(L, im, cx, cy, rot=0.0, shadow=True):
 def pcard(img, border=(40, 40, 40), pad=12):
     c = hairline_card(img.width + 2 * pad, img.height + 2 * pad, border=border); c.alpha_composite(img.convert("RGBA"), (pad, pad)); return c
 
-def mono_card(img, w, cell=5, mix=0.24, crop=None):
+def mono_card(img, w, cell=5, mix=0.24, crop=None):          # name kept; photos are now full colour
     im = img.crop(crop) if crop else img; im = im.resize((w, int(im.height * w / im.width)), Image.LANCZOS)
-    return pcard(mono_halftone(im, cell, mix, 1.1))
+    return pcard(im)
 
 def stamp(text, size=54, rot=-7, alpha=0.8):
     st = label(text, size, fg=RED, bg_=PAPER_, track=3); n = Image.new("RGBA", (st.width + 24, st.height + 20), (0, 0, 0, 0))
@@ -57,7 +61,6 @@ def hero(key, src_name, h, frac=1.0, cell=4):
     if k not in _H:
         im = cut_halftone(A + f"cutouts/{key}.png", h, cell=cell, mix=0.10, color=True, fill_holes=True, src=SRC + src_name)
         if frac < 1: im = im.crop((0, 0, im.width, int(im.height * frac)))
-        im = selective_red(im)
         if frac < 1:
             a = np.asarray(im).copy(); hh = a.shape[0]; ramp = np.clip((hh - np.arange(hh)) / 60, 0, 1)[:, None]; a[..., 3] = (a[..., 3] * ramp).astype(np.uint8); im = Image.fromarray(a, "RGBA")
         _H[k] = im
@@ -92,7 +95,7 @@ def dotnode(L, x, y, col): ImageDraw.Draw(L).ellipse((x - 18, y - 18, x + 18, y 
 # ---------------------------------------------------------------- 15 scenes
 def s01(L):
     ttl(L, [[("KOMPETITOR", INKK)], [("MENGUASAI", INKK)], [("RAK", INKK), ("KEJU.", RED)]], 290, 124)
-    mh = mono_halftone(WALL.crop((294, 112, 1366, 912)).resize((860, 641), Image.LANCZOS), 5, 0.22, 1.08)
+    mh = WALL.crop((294, 112, 1366, 912)).resize((860, 641), Image.LANCZOS).convert("RGBA")
     d = ImageDraw.Draw(mh); sx, sy = int(536 * 860 / 1072), int(400 * 860 / 1072); d.rectangle((sx - 78, sy - 62, sx + 78, sy + 62), outline=RED + (255,), width=6)
     place(L, pcard(mh.resize((820, 611), Image.LANCZOS)), CX - 8, 1130, rot=-2)
     ac(L, stamp("DIKUASAI KOMPETITOR"), (int(CX - 330), 1290))
@@ -118,17 +121,23 @@ def s03(L):
 
 def s04(L):
     ttl(L, [[("TIDAK BISA SEKADAR", INKK)], [("MENGANDALKAN", INKK), ("RAK KEJU", RED)]], 290, 100)
-    crop = WALL.crop((360, 0, 1301, 941)).resize((800, 800), Image.LANCZOS); mh = mono_halftone(crop, 5, 0.22, 1.08).convert("RGBA")
+    crop = WALL.crop((360, 0, 1301, 941)).resize((800, 800), Image.LANCZOS); mh = crop.convert("RGBA")
     sx, sy = int(470 * 800 / 941), int(512 * 800 / 941); lg = wfit(LOGO_P, 170); box = Image.new("RGBA", (200, 150), PAPER_ + (255,)); box.alpha_composite(lg, (15, 14)); mh.alpha_composite(box, (sx - 100, sy - 75))
     ImageDraw.Draw(mh).rectangle((sx - 104, sy - 79, sx + 104, sy + 79), outline=RED + (255,), width=6)
     place(L, pcard(mh), CX, 1000, rot=1.2)
     micro(L, "SATU DI ANTARA BANYAK", SL + 10, 1450)
 
+CRM = (255, 250, 231); BRED = (166, 47, 47)
 def s05(L):
-    ttl(L, [[("BRAND LAWAN JAUH", INKK)], [("LEBIH DULU", INKK), ("DIKENAL", RED)]], 290, 108)
-    place(L, bar_card(760, (("BRAND LAWAN", 0.92, INKK), ("PROCHIZ", 0.26, RED)), "ILUSTRASI  ·  TINGKAT DIKENAL"), 490, 700, rot=1.5)
-    f = CUST1_X.resize((int(CUST1_X.width * 590 / CUST1_X.height), 590), Image.LANCZOS); ac(L, f, (SR - f.width - 40, 1480 - 590))
-    q = label("mana yang Prochiz ya?", 30, fg=INKK, bg_=PAPER_); qq = Image.new("RGBA", (q.width + 8, q.height + 8), (40, 40, 40, 255)); qq.alpha_composite(q, (4, 4)); place(L, qq, 330, 1250, rot=3)
+    lines = ["BRAND LAWAN", "JAUH LEBIH", "DULU", "DIKENAL"]; size = 200
+    while max(an(size).getlength(t) for t in lines) > 800 and size > 80: size -= 2
+    f = an(size); bb = f.getbbox("BRAND LAWAN"); top, bot = bb[1], bb[3]; gh = bot - top; step = gh * 1.30; total = step * (len(lines) - 1) + gh
+    y0 = 905 - total / 2                                           # cap-top of the first line
+    for i, t in enumerate(lines):
+        w_ = f.getlength(t); x = (W - w_) / 2; ytxt = y0 + i * step - top                        # draw origin so that cap-top lands on y0 + i*step
+        if i == len(lines) - 1:
+            ImageDraw.Draw(L).rectangle((x - 34, y0 + i * step - 22, x + w_ + 34, y0 + i * step + gh + 22), fill=CRM + (255,)); ttl(L, [[(t, BRED)]], ytxt, size, x=int(x))
+        else: ttl(L, [[(t, CRM)]], ytxt, size, x=int(x))
 
 def s06(L):
     ttl(L, [[("BEREBUT PERHATIAN", INKK)], [("DI RAK", INKK), ("KEJU", RED)]], 290, 112)
@@ -180,11 +189,11 @@ def s11(L):
     ttl(L, [[("KALAU KAMU OWNER:", INKK)], [("TUNGGU", INKK), ("ATAU", INKK), ("PINDAH?", RED)]], 290, 112)
     pw, ph = 420, 780
     def panel(img, fig, fh, red):
-        base = mono_halftone(cover(img, pw, ph, 0.5, 0.5), 5, 0.2, 1.05); ii = base.copy(); f2 = fig.resize((int(fig.width * fh / fig.height), fh), Image.LANCZOS); ii.alpha_composite(f2, ((pw - f2.width) // 2, ph - fh)); return pcard(ii, border=(RED if red else (40, 40, 40)))
+        base = cover(img, pw, ph, 0.5, 0.5).convert("RGBA"); ii = base.copy(); f2 = fig.resize((int(fig.width * fh / fig.height), fh), Image.LANCZOS); ii.alpha_composite(f2, ((pw - f2.width) // 2, ph - fh)); return pcard(ii, border=(RED if red else (40, 40, 40)))
     left = panel(WALL, CUST3_X, 640, False); d = ImageDraw.Draw(left); d.line((90, 170, 330, 400), fill=RED + (255,), width=10); d.line((330, 170, 90, 400), fill=RED + (255,), width=10)
     place(L, left, SL + 12 + (pw + 24) / 2, 1010, rot=-1)
     place(L, panel(AISLE, agus(2, 780, 1.0), 700, True), SR - 12 - (pw + 24) / 2, 1010, rot=1)
-    micro(L, "MENUNGGU", SL + 12, 1450, size=28); micro(L, "MENDATANGI", SR - 12 - 190, 1450, size=28, bg=RED)
+    wr = label("MENDATANGI", 28).width; micro(L, "MENUNGGU", SL + 12, 545, size=28); micro(L, "MENDATANGI", SR - 12 - wr, 545, size=28, bg=RED)
 
 def s12(L):
     ttl(L, [[("TEPAT SAAT", INKK)], [("KEBUTUHAN", RED), ("MUNCUL.", INKK)]], 290, 112)
@@ -218,6 +227,7 @@ def s15(L):
     place(L, c, 700, 1020, rot=2); ac(L, wfit(LOGO_P, 190), (610, 800 - 20))
     sp = agus(1, 1050, 0.72); ac(L, sp, (60, 1480 - sp.height)); name_label(L, 290, 1440)
 
+SCENE_BG = {5: "red"}
 SC = [(1, s01), (2, s02), (3, s03), (4, s04), (5, s05), (6, s06), (7, s07), (8, s08), (9, s09), (10, s10), (11, s11), (12, s12), (13, s13), (14, s14), (15, s15)]
 def render(fn):
     base = bg(); L = Image.new("RGBA", (W, H), (0, 0, 0, 0)); fn(L); out = base.copy(); out.alpha_composite(L); return out.convert("RGB"), L
