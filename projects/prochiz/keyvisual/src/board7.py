@@ -118,7 +118,7 @@ def t03(L):          # entrance: tall taped photo left, SPG walking out of it on
     y = T(L, [[("WAKTU MASUK KE", INKK)], [("SUPERMARKET", RED)]], 300, 100)
     w, s = title_w("SUPERMARKET", 100); under(L, 90, int(y) - 4, w, 4)
     P(L, photo(Image.open(A + "new/entrance.png").convert("RGB"), 560, tapes=("tr", "bl")), 398, 1060, rot=-2)
-    sp = spg("walk", 860); AC(L, sp, (SR - sp.width - 6, 1480 - sp.height))
+    sp = spg("long_walk", 860); AC(L, sp, (SR - sp.width - 6, 1480 - sp.height))
     AC(L, tag("MASUK", 40, WHITE, RED, -4), (150, 1390))
 
 def t04(L):          # one tall wall, Prochiz logo glowing in the slot, ribbon tag
@@ -160,12 +160,12 @@ def t07(L):          # giant word + burst, two taped cards with a brush arrow, S
 def t08(L):          # wide taped aisle photo across the top half, SPG waving in front, red pin
     T(L, [[("SPG DI LORONG", INKK)], [("ROTI", INKK), ("TAWAR", RED)]], 300, 100)
     P(L, photo(AISLE, 820, crop=(200, 0, 1472, 941), tapes=("tl", "tr")), CX - 10, 900, rot=-1.5)
-    sp = spg("wave", 900, 0.80); AC(L, sp, (SR - sp.width - 10, 1480 - sp.height))
+    sp = spg("long_wave", 900, 0.80); AC(L, sp, (SR - sp.width - 10, 1480 - sp.height))
     B6.dot_only(L, 300, 900, 13)
 
 def t09(L):          # POV: photo fills the middle, question bubble, POV tag
     AC(L, tag("POV", 46, WHITE, RED, -4), (90, 290))
-    T(L, [[("KAMU LAGI", INKK)], [("CARI", INKK), ("ROTI", RED)]], 380, 112)
+    T(L, [[("ANDA LAGI", INKK)], [("CARI", INKK), ("ROTI", RED)]], 380, 112)
     P(L, photo(POV, 720, crop=(380, 0, 1300, 941)), CX - 20, 1110, rot=2)
     AC(L, bubble("TERUS ENAKNYA DIAPAIN?", 34), (300, 1300))
 
@@ -178,14 +178,14 @@ def t10(L):          # answer: product photo + cheese sandwich photo, stamp
     AC(L, stamp("COCOK DIPASANGKAN", 44, -6), (110, 1360))
 
 def t11(L):          # two taped panels, two-tone tags above, VS badge
-    T(L, [[("KALAU KAMU OWNER:", INKK)], [("TUNGGU ATAU", INKK), ("PINDAH?", RED)]], 300, 84)
+    T(L, [[("KALAU ANDA OWNER:", INKK)], [("TUNGGU ATAU", INKK), ("PINDAH?", RED)]], 300, 84)
     pw, ph = 400, 720
     def panel(img, fig, fh, cross=False):
         base = cover(img, pw, ph, 0.5, 0.5).convert("RGBA"); f2 = fig.resize((int(fig.width * fh / fig.height), fh), Image.LANCZOS); base.alpha_composite(f2, ((pw - f2.width) // 2, ph - fh))
         if cross: d = ImageDraw.Draw(base); d.line((80, 150, 320, 380), fill=RED + (255,), width=12); d.line((320, 150, 80, 380), fill=RED + (255,), width=12)
         return base
     P(L, photo(panel(WALL, CUST3_X, 600, True), pw, tapes=("tl",)), SL + 20 + pw / 2, 1050, rot=-2)
-    P(L, photo(panel(AISLE, spg("offer", 700), 640), pw, tapes=("tr",)), SR - 20 - pw / 2, 1050, rot=2)
+    P(L, photo(panel(AISLE, spg("long_offer", 700), 640), pw, tapes=("tr",)), SR - 20 - pw / 2, 1050, rot=2)
     AC(L, tag("MENUNGGU", 30, WHITE, INKK, -3), (SL + 30, 600)); t = tag("MENDATANGI", 30, WHITE, RED, 3); AC(L, t, (SR - 30 - t.width, 600))
     v = Image.new("RGBA", (110, 110), (0, 0, 0, 0)); ImageDraw.Draw(v).ellipse((0, 0, 109, 109), fill=INKK + (255,)); ImageDraw.Draw(v).text((55, 55), "VS", font=af(40), fill=WHITE + (255,), anchor="mm"); AC(L, v, (CX - 55, 1000))
 
@@ -213,9 +213,8 @@ def t14(L):          # scenes 14 + 15 merged: the guerrilla move in one picture 
     T(L, [[("MEREBUT", INKK), ("PERHATIAN,", INKK)], [("MEMPERLUAS", INKK)], [("PENETRASI", RED), ("PASAR.", RED)]], 300, 92)
     pw, ph = 820, 660
     base = cover(AISLE, pw, ph, 0.45, 0.5).convert("RGBA")
-    cu = CUST2_X.resize((int(CUST2_X.width * 560 / CUST2_X.height), 560), Image.LANCZOS); base.alpha_composite(cu, (40, ph - 560))
-    so = spg("offer", 600); base.alpha_composite(so, (pw - so.width - 30, ph - 600))
-    b = burst(46, col=WHITE, angles=(-150, -110, -70), width=7); base.alpha_composite(b, (pw - so.width - 30 + int(so.width * 0.06), ph - 600 + 10))
+    so = spg("long_offer", 600); sx_ = pw - so.width - 60; base.alpha_composite(so, (sx_, ph - 600))
+    b = burst(46, col=WHITE, angles=(-150, -110, -70), width=7); base.alpha_composite(b, (sx_ - 10, ph - 600 + 40))
     P(L, photo(base, pw, tapes=("tl", "br")), CX, 1010, rot=-1.5)
     AC(L, tag("STRATEGI GERILYA PROCHIZ", 30, WHITE, RED, -3), (SL + 10, 650))
     c = Image.new("RGBA", (330, 150), WHITE + (255,)); d = ImageDraw.Draw(c); d.text((18, 14), "PENETRASI PASAR", font=af(22), fill=INKK + (255,))
