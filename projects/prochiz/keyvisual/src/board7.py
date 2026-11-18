@@ -178,7 +178,7 @@ def t10(L):          # answer: product photo + cheese sandwich photo, stamp
     AC(L, stamp("COCOK DIPASANGKAN", 44, -6), (110, 1360))
 
 def t11(L):          # two taped panels, two-tone tags above, VS badge
-    T(L, [[("KALAU ANDA OWNER:", INKK)], [("TUNGGU ATAU", INKK), ("PINDAH?", RED)]], 300, 84)
+    T(L, [[("KALAU ANDA", INKK)], [("BUSINESS OWNER:", INKK)], [("TUNGGU ATAU", INKK), ("PINDAH?", RED)]], 290, 84)
     pw, ph = 400, 720
     def panel(img, fig, fh, cross=False):
         base = cover(img, pw, ph, 0.5, 0.5).convert("RGBA"); f2 = fig.resize((int(fig.width * fh / fig.height), fh), Image.LANCZOS); base.alpha_composite(f2, ((pw - f2.width) // 2, ph - fh))
