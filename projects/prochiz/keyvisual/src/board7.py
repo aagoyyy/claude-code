@@ -230,7 +230,7 @@ SCENE_BG = {5: "red"}
 
 if __name__ == "__main__":
     import bgopts as BO
-    bgB, bgR = BO.plus_sparse(), BO.red_sparse(); out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frames", "v9"); os.makedirs(out, exist_ok=True); bad = 0
+    bgB, bgR = BO.flat(BO.BEIGE), BO.flat((166, 47, 47)); out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frames", "v9"); os.makedirs(out, exist_ok=True); bad = 0
     import board as BB
     for n, fn in SC:
         L = Image.new("RGBA", (W, H), (0, 0, 0, 0)); fn(L); im = (bgR if SCENE_BG.get(n) == "red" else bgB).copy(); im.alpha_composite(L); im.convert("RGB").save(os.path.join(out, f"scene_{n:02d}.png"))

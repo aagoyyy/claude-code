@@ -82,8 +82,8 @@ def build():
 
 ELS = build()
 import bgopts as _BO
-BG = _BO.plus_sparse()      # option B: flat beige + sparse plus marks
-BG_RED = _BO.red_sparse()   # scene 5
+BG = _BO.flat(_BO.BEIGE)       # plain beige (no pattern), same colour as before
+BG_RED = _BO.flat((166, 47, 47))  # plain brand red for scene 5
 
 # ------------------------------------------------------------------ animation
 def ease(x): x = min(max(x, 0.0), 1.0); return 1 - (1 - x) ** 3
