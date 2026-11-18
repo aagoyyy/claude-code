@@ -80,7 +80,8 @@ def build():
     return scenes
 
 ELS = build()
-BG = bg()
+import bgopts as _BO
+BG = _BO.plus_sparse()      # option B: flat beige + sparse plus marks (calmer than the dense grid)
 
 # ------------------------------------------------------------------ animation
 def ease(x): x = min(max(x, 0.0), 1.0); return 1 - (1 - x) ** 3
