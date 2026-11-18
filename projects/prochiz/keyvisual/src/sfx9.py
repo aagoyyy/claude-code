@@ -29,7 +29,7 @@ def ping(amp):                              # pin / dot
 def swish(amp):                             # scene clear
     n = int(0.20 * SR_); e = np.sin(np.linspace(0, np.pi, n)) ** 2; return amp * bandnoise(n, 1200, 6500) * e
 
-GAIN = {"title": (tick, 0.050), "micro": (tick, 0.045), "card": (paper, 0.085), "fig": (whoosh, 0.10), "stamp": (thud, 0.17), "line": (zip_, 0.030), "dot": (ping, 0.045)}
+GAIN = {"name": (paper, 0.085), "title": (tick, 0.050), "micro": (tick, 0.045), "card": (paper, 0.085), "fig": (whoosh, 0.10), "stamp": (thud, 0.17), "line": (zip_, 0.030), "dot": (ping, 0.045)}
 
 def build():
     buf = np.zeros(int((TOTAL + 0.6) * SR_)); ev = []
