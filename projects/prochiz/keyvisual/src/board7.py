@@ -208,24 +208,21 @@ def t13(L):          # summary: logo, big two-line title with underline + burst,
     sp = agus(3, 700); AC(L, sp, (SR - sp.width - 4, 1480 - sp.height))
     AC(L, two_tone(), (SL + 10, 1250))
 
-def t14(L):          # taped list card + customer pointing with burst
-    T(L, [[("MEREBUT", INKK)], [("PERHATIAN", RED)], [("CUSTOMER", INKK)]], 300, 104)
-    c = Image.new("RGBA", (480, 340), WHITE + (255,)); d = ImageDraw.Draw(c)
-    for i, (tx, col) in enumerate((("CARI ROTI", INKK), ("BUTUH PENDAMPING", (110, 106, 96)), ("TERTARIK KEJU", RED))):
-        d.rectangle((20, 20 + i * 104, 460, 104 + i * 104), fill=col + (255,)); d.text((240, 62 + i * 104), tx, font=af(30), fill=WHITE + (255,), anchor="mm")
-    P(L, photo(c, 480, border=0, tapes=("tl", "br")), 320, 1060, rot=-2)
-    f = CUST4_X; f = f.resize((int(f.width * 800 / f.height), 800), Image.LANCZOS); AC(L, f, (SR - 440, 1480 - 800)); AC(L, burst(60), (SR - 120, 680))
+def t14(L):          # scenes 14 + 15 merged: the guerrilla move in one picture (SPG intercepts a bread shopper with a cheese sample)
+    T(L, [[("MEREBUT", INKK), ("PERHATIAN,", INKK)], [("MEMPERLUAS", INKK)], [("PENETRASI", RED), ("PASAR.", RED)]], 300, 92)
+    pw, ph = 820, 660
+    base = cover(AISLE, pw, ph, 0.45, 0.5).convert("RGBA")
+    cu = CUST2_X.resize((int(CUST2_X.width * 560 / CUST2_X.height), 560), Image.LANCZOS); base.alpha_composite(cu, (40, ph - 560))
+    so = spg("offer", 600); base.alpha_composite(so, (pw - so.width - 30, ph - 600))
+    b = burst(46, col=WHITE, angles=(-150, -110, -70), width=7); base.alpha_composite(b, (pw - so.width - 30 + int(so.width * 0.06), ph - 600 + 10))
+    P(L, photo(base, pw, tapes=("tl", "br")), CX, 1010, rot=-1.5)
+    AC(L, tag("STRATEGI GERILYA PROCHIZ", 30, WHITE, RED, -3), (SL + 10, 650))
+    c = Image.new("RGBA", (330, 150), WHITE + (255,)); d = ImageDraw.Draw(c); d.text((18, 14), "PENETRASI PASAR", font=af(22), fill=INKK + (255,))
+    d.rectangle((18, 56, 312, 96), outline=INKK + (255,), width=3, fill=(240, 236, 226, 255)); d.rectangle((21, 59, 21 + int(288 * 0.82), 93), fill=RED + (255,))
+    d.polygon([(286, 110), (306, 140), (266, 140)], fill=RED + (255,)); d.text((18, 112), "ILUSTRASI", font=af(14), fill=(120, 116, 104, 255))
+    P(L, photo(c, 330, border=0, tapes=("bl",)), 768, 1400, rot=3)
 
-def t15(L):          # closing: co-founder waving, taped result card with logo, two-tone tag
-    T(L, [[("MEMPERLUAS", INKK)], [("PENETRASI", RED)], [("PASAR.", INKK)]], 300, 112)
-    sp = agus(1, 980, 0.72); AC(L, sp, (74, 1480 - sp.height))
-    c = Image.new("RGBA", (400, 360), WHITE + (255,)); c.alpha_composite(wfit(LOGO_P, 240), (80, 20)); d = ImageDraw.Draw(c)
-    d.text((24, 190), "PENETRASI PASAR", font=af(26), fill=INKK + (255,)); d.rectangle((24, 236, 376, 290), outline=INKK + (255,), width=4, fill=(240, 236, 226, 255)); d.rectangle((28, 240, 28 + int(344 * 0.82), 286), fill=RED + (255,))
-    d.text((376, 330), "ILUSTRASI", font=af(16), fill=(120, 116, 104, 255), anchor="rm")
-    P(L, photo(c, 400, border=0, tapes=("tr",)), 740, 1020, rot=3)
-    AC(L, two_tone(), (SL + 10, 1318))
-
-SC = [(1, t01), (2, t02), (3, t03), (4, t04), (5, t05), (6, t06), (7, t07), (8, t08), (9, t09), (10, t10), (11, t11), (12, t12), (13, t13), (14, t14), (15, t15)]
+SC = [(1, t01), (2, t02), (3, t03), (4, t04), (5, t05), (6, t06), (7, t07), (8, t08), (9, t09), (10, t10), (11, t11), (12, t12), (13, t13), (14, t14)]
 SCENE_BG = {5: "red"}
 
 if __name__ == "__main__":
@@ -240,7 +237,8 @@ if __name__ == "__main__":
     PW, PH = 432, 768; gap = 20; cols = 5
     sheet = Image.new("RGB", (cols * (PW + gap) + gap, 3 * (PH + 96) + gap), (28, 28, 32)); d = ImageDraw.Draw(sheet)
     hf = ImageFont.truetype("/usr/share/fonts/opentype/inter/Inter-Bold.otf", 22); nf = ImageFont.truetype("/usr/share/fonts/opentype/inter/Inter-Medium.otf", 17)
-    for i, (tm, vo, _) in enumerate(BB.SCN):
+    SCN_ = list(BB.SCN[:13]) + [(BB.SCN[13][0], BB.SCN[13][1] + " " + BB.SCN[14][1], None)]
+    for i, (tm, vo, _) in enumerate(SCN_):
         n = i + 1; im = Image.open(os.path.join(out, f"scene_{n:02d}.png")).resize((PW, PH), Image.LANCZOS)
         x = gap + (i % cols) * (PW + gap); y = gap + (i // cols) * (PH + 96)
         d.text((x, y + 2), f"{n:02d}", font=hf, fill=(255, 210, 90)); d.text((x + 46, y + 2), f"{tm.replace(':', '.')}s", font=hf, fill=(200, 200, 200)); sheet.paste(im, (x, y + 34))

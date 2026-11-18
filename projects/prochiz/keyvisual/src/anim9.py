@@ -12,8 +12,8 @@ import proto_ref_vibe as PV
 
 FPS = 30; TOTAL = 41.72
 _T = [(0.00, 1.96), (1.96, 4.24), (4.24, 7.15), (7.15, 9.50), (9.50, 12.30), (12.30, 15.10), (15.10, 17.40), (17.40, 20.10),
-      (20.10, 23.18), (23.18, 26.80), (26.80, 31.78), (31.78, 35.72), (35.72, 38.33), (38.33, 39.95), (39.95, 41.72)]
-VO = [v for _, v, _ in B.SCN]
+      (20.10, 23.18), (23.18, 26.80), (26.80, 31.78), (31.78, 35.72), (35.72, 38.33), (38.33, 41.72)]     # scenes 14+15 merged
+VO = [v for _, v, _ in B.SCN][:13] + [B.SCN[13][1] + " " + B.SCN[14][1]]
 
 # ------------------------------------------------------------------ element recorder
 REC = {"prev": None, "els": [], "on": False}
@@ -126,7 +126,7 @@ CAMS = [(1.0, 1.03, 0), (1.03, 1.0, 0), (1.0, 1.025, -6), (1.025, 1.0, 0), (1.0,
 
 # transition of each cut (into scene j+2): (type, arg)
 TR = [("iris", (540, 1110)), ("push", "left"), ("zoom", (400, 1020)), ("iris", (540, 1060)), ("push", "down"), ("shrink", None), ("push", "left"),
-      ("zoom", (480, 900)), ("bar", None), ("push", "up"), ("iris", (540, 1055)), ("bar", None), ("push", "left"), ("shrink", None)]
+      ("zoom", (480, 900)), ("bar", None), ("push", "up"), ("iris", (540, 1055)), ("bar", None), ("shrink", None)]
 HW = 0.26                                        # half-width of the seamless push window around each cut (s)
 def scene_frame(k, tl):
     t0, t1 = _T[k]; dur = t1 - t0
