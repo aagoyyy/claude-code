@@ -169,12 +169,13 @@ def t09(L):          # POV: photo fills the middle, question bubble, POV tag
     P(L, photo(POV, 720, crop=(380, 0, 1300, 941)), CX - 20, 1110, rot=2)
     AC(L, bubble("TERUS ENAKNYA DIAPAIN?", 34), (300, 1300))
 
-def t10(L):          # answer: big product photo taped, receipt, stamp
+def t10(L):          # answer: product photo + cheese sandwich photo, stamp
     AC(L, tag("JAWABANNYA:", 34, WHITE, INKK, -3), (90, 300))
     y = T(L, [[("KEJU", RED)], [("PENDAMPING ROTI", INKK)]], 370, 104)
     P(L, photo(GOLDC, 640, crop=(80, 120, 1456, 1000)), 420, 930, rot=-2.5)
-    P(L, receipt(), 772, 1210, rot=5)
-    AC(L, stamp("COCOK DIPASANGKAN", 46, -6), (100, 1270))
+    P(L, photo(Image.open(A + "new/roti_isi_keju.png").convert("RGB"), 440, crop=(120, 60, 1448, 1060), tapes=("tr", "bl")), 670, 1250, rot=4)
+    AC(L, tag("+", 70, WHITE, RED, 0), (430, 1090))
+    AC(L, stamp("COCOK DIPASANGKAN", 44, -6), (110, 1360))
 
 def t11(L):          # two taped panels, two-tone tags above, VS badge
     T(L, [[("KALAU KAMU OWNER:", INKK)], [("TUNGGU ATAU", INKK), ("PINDAH?", RED)]], 300, 84)
