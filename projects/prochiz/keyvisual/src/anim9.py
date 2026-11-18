@@ -61,6 +61,11 @@ def schedule(i, els, dur):
     t_title = -0.55 if i == 0 else -0.24          # titles pre-roll so they are already arriving during the push transition
     for k, e in enumerate(titles): e["t"] = t_title + k * 0.085
     last_title = t_title + len(titles) * 0.085
+    # scenes that introduce the co-founder: her photo and name card come in right after the title, so viewers can read the bio longer
+    if any(e["kind"] == "name" for e in rest):
+        early = [e for e in rest if e["kind"] in ("fig", "name")]; rest = [e for e in rest if e["kind"] not in ("fig", "name")]
+        for q, e in enumerate(sorted(early, key=lambda e: e["kind"] != "fig")): e["t"] = last_title + 0.05 + q * 0.22
+        last_title = last_title + 0.05 + len(early) * 0.22
     m = len(rest)
     for j, e in enumerate(rest):
         wi = min(len(ws) - 1, int((j + 0.5) * len(ws) / max(m, 1))); e["t"] = max(wt[wi], last_title + 0.15 + 0.07 * j * 0)
@@ -95,13 +100,13 @@ def draw_el(cv, e, tl, dur, idx):
     t = tl - e["t"]
     if t < 0: return
     kind = e["kind"]; im = e["img"]; x, y = e["x"], e["y"]
-    p = ease(t / {"title": 0.38, "micro": 0.30, "card": 0.50, "fig": 0.60, "line": 0.55, "dot": 0.25, "stamp": 0.24}.get(kind, 0.4))
+    p = ease(t / {"name": 0.40, "title": 0.38, "micro": 0.30, "card": 0.50, "fig": 0.60, "line": 0.55, "dot": 0.25, "stamp": 0.24}.get(kind, 0.4))
     ex = 0.0
     if tl > dur - 0.16: ex = ((tl - (dur - 0.16)) / 0.16) ** 2          # soft clear before the next scene (only if not the last scene)
     if kind == "title": dy = (1 - p) * 38
     elif kind == "micro": dy = 0; x = x - (1 - p) * 18
     elif kind == "fig": dy = (1 - p) * 120
-    elif kind == "card": dy = (1 - p) * 26
+    elif kind in ("card", "name"): dy = (1 - p) * 26
     else: dy = 0
     alpha = p * (1 - ex)
     if kind == "line":                                        # draw the line progressively (top->bottom / left->right)

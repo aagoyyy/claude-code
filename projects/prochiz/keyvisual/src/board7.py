@@ -61,14 +61,19 @@ def glow_at(im, cx, cy, r, rays=True):
     if rays:
         b = burst(int(r * 0.55), col=WHITE, angles=(-125, -90, -55), width=7); im.alpha_composite(b, (int(cx - b.width / 2), int(cy - r * 0.95 - b.height * 0.6)))
 
-def two_tone(name="AGUSTINA", role="CO-FOUNDER PROCHIZ"):
-    f1, f2 = af(54), af(30)
-    w1 = int(f1.getlength(name)) + 50; w2 = int(f2.getlength(role)) + 46
-    a = Image.new("RGBA", (w1, 86), WHITE + (255,)); ImageDraw.Draw(a).text((25, 8), name, font=f1, fill=INKK + (255,))
-    b = Image.new("RGBA", (w2, 58), RED + (255,)); ImageDraw.Draw(b).text((23, 6), role, font=f2, fill=WHITE + (255,))
-    a = a.rotate(2.5, resample=Image.BICUBIC, expand=True); b = b.rotate(1.5, resample=Image.BICUBIC, expand=True)
-    c = Image.new("RGBA", (max(a.width, b.width + 40), a.height + b.height - 10), (0, 0, 0, 0)); c.alpha_composite(a, (0, 0)); c.alpha_composite(b, (40, a.height - 12))
-    return c
+def two_tone(name="AGUSTINI MUARA", role="CO-FOUNDER PROCHIZ",
+             bio=("Built a Local Brand into", "Indonesia's No. 1 Cheese Brand", "with Trillions Valuation"), w=520):
+    """Three-tier name card: name (white), role (red ribbon), bio (dark strip). Marked kind='name' so the animation brings it in early."""
+    f1, f2, f3 = af(46), af(26), af(21)
+    while f1.getlength(name) > w - 50: f1 = af(f1.size - 2)
+    a = Image.new("RGBA", (w, 78), WHITE + (255,)); ImageDraw.Draw(a).text((24, 8), name, font=f1, fill=INKK + (255,))
+    b = Image.new("RGBA", (int(f2.getlength(role)) + 44, 52), RED + (255,)); ImageDraw.Draw(b).text((22, 6), role, font=f2, fill=WHITE + (255,))
+    lh = 30; c3 = Image.new("RGBA", (w - 30, 26 + lh * len(bio)), INKK + (255,)); d3 = ImageDraw.Draw(c3)
+    for i, ln in enumerate(bio): d3.text((22, 12 + i * lh), ln, font=f3, fill=WHITE + (255,))
+    a = a.rotate(1.5, resample=Image.BICUBIC, expand=True); b = b.rotate(1.0, resample=Image.BICUBIC, expand=True); c3 = c3.rotate(0.6, resample=Image.BICUBIC, expand=True)
+    out = Image.new("RGBA", (max(a.width, b.width + 30, c3.width + 30), a.height + b.height + c3.height - 22), (0, 0, 0, 0))
+    out.alpha_composite(a, (0, 0)); out.alpha_composite(b, (30, a.height - 10)); out.alpha_composite(c3, (30, a.height + b.height - 22))
+    out.kind = "name"; return out
 
 def tag(text, size=34, fg=WHITE, bg=INKK, rot=-3):
     f = af(size); im = Image.new("RGBA", (int(f.getlength(text)) + 40, size + 30), bg + (255,)); ImageDraw.Draw(im).text((20, 8), text, font=f, fill=fg + (255,))
@@ -110,9 +115,9 @@ def t02(L):          # the user's reference: logo, title, burst, underline, tape
     bw = Image.open(A + "new/bread_wall.png").convert("RGBA")
     pk = GOLD_P.copy(); pk = pk.resize((230, int(230 * pk.height / pk.width)), Image.LANCZOS)
     glow_at(bw, 836, 640, 170); bw.alpha_composite(pk, (836 - 115, 712 - pk.height))
-    P(L, photo(bw, 440, crop=(456, 140, 1216, 941)), 318, 1170, rot=-3)
-    sp = agus(3, 640); AC(L, sp, (SR - sp.width - 4, 1480 - sp.height))
-    tt = two_tone(); AC(L, tt, (SR - tt.width, 1330))
+    P(L, photo(bw, 350, crop=(456, 140, 1216, 941)), 290, 1018, rot=-3)
+    sp = agus(3, 660); AC(L, sp, (SR - sp.width - 4, 1480 - sp.height))
+    tt = two_tone(); AC(L, tt, (SL + 10, 1478 - tt.height))
 
 def t03(L):          # entrance: tall taped photo left, SPG walking out of it on the right, brush arrow "MASUK"
     y = T(L, [[("WAKTU MASUK KE", INKK)], [("SUPERMARKET", RED)]], 300, 100)
@@ -207,7 +212,7 @@ def t13(L):          # summary: logo, big two-line title with underline + burst,
     y = T(L, [[("STRATEGI", INKK)], [("GERILYA", RED)]], 440, 150)
     w, s = title_w("GERILYA", 150); under(L, 90, int(y) - 4, w, 6); ws, _ = title_w("STRATEGI", 150); AC(L, burst(70), (int(90 + min(ws, 700) + 12), 400)) if ws < 760 else None
     sp = agus(3, 700); AC(L, sp, (SR - sp.width - 4, 1480 - sp.height))
-    AC(L, two_tone(), (SL + 10, 1250))
+    tt = two_tone(); AC(L, tt, (SL + 10, 1478 - tt.height))
 
 def t14(L):          # scenes 14 + 15 merged: the guerrilla move in one picture (SPG intercepts a bread shopper with a cheese sample)
     T(L, [[("MEREBUT", INKK), ("PERHATIAN,", INKK)], [("MEMPERLUAS", INKK)], [("PENETRASI", RED), ("PASAR.", RED)]], 300, 92)
