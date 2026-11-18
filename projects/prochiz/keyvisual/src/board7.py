@@ -149,13 +149,13 @@ def t06(L):          # crowd is the hero; small taped wall photo pinned top-left
 def t07(L):          # giant word + burst, two taped cards with a brush arrow, SPG half-body
     AC(L, tag("PENDEKATAN", 34, WHITE, INKK, -3), (90, 300))
     T(L, [[("BEDA.", RED)]], 360, 260, lead=1.0); AC(L, burst(90), (720, 330))
-    sp = spg("tray_half", 760, fade=110); AC(L, sp, (SR - sp.width + 10, 1480 - sp.height))
+    sp = spg("long_tray_half", 760, fade=110); AC(L, sp, (SR - sp.width + 10, 1480 - sp.height))
     a = hairline_card(360, 180, border=(40, 40, 40), fill=(238, 235, 226)); da = ImageDraw.Draw(a); da.text((22, 14), "RAK KEJU", font=af(34), fill=INKK + (255,))
     da.line((40, 80, 320, 160), fill=RED + (255,), width=9); da.line((40, 160, 320, 80), fill=RED + (255,), width=9)
     P(L, photo(a, 360, border=0, tapes=("br",)), 270, 960, rot=-4)
     b = hairline_card(380, 220, border=RED); db = ImageDraw.Draw(b); db.text((22, 14), "LORONG ROTI", font=af(34), fill=RED + (255,)); pk = wfit(GOLD_P, 200); glow_at(b, 270, 140, 90, rays=False); b.alpha_composite(pk, (170, 74)); db.text((22, 90), "ada\nProchiz", font=af(32), fill=INKK + (255,))
-    P(L, photo(b, 380, border=0, tapes=("tr",)), 290, 1250, rot=3)
-    AC(L, brush(110, 20, seed=5).rotate(-70, expand=True), (230, 1050))
+    P(L, photo(b, 380, border=0, tapes=("br",)), 290, 1250, rot=3)
+    AC(L, brush(46, 16, seed=5).rotate(-80, expand=True), (250, 1068))
 
 def t08(L):          # wide taped aisle photo across the top half, SPG waving in front, red pin
     T(L, [[("SPG DI LORONG", INKK)], [("ROTI", INKK), ("TAWAR", RED)]], 300, 100)
