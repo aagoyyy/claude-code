@@ -1,0 +1,348 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <title>Adrian Carton de Wiart — infographik luka (SVG motion)</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3126"/><stop offset=".55" stop-color="#2a231b"/><stop offset="1" stop-color="#17130f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".42" r=".6">
+      <stop offset="0" stop-color="#e2b26a" stop-opacity=".38"/><stop offset="1" stop-color="#e2b26a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" cx=".5" cy=".5" r=".75">
+      <stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".65"/>
+    </radialGradient>
+    <linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3d9a4" stop-opacity=".22"/><stop offset="1" stop-color="#f3d9a4" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="khaki" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b9b27d"/><stop offset=".55" stop-color="#a39c66"/><stop offset="1" stop-color="#7d774a"/>
+    </linearGradient>
+    <linearGradient id="khakiLeg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a8a272"/><stop offset="1" stop-color="#77714a"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e7b992"/><stop offset="1" stop-color="#c58f68"/>
+    </linearGradient>
+    <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a4a2a"/><stop offset="1" stop-color="#4b2b18"/>
+    </linearGradient>
+    <linearGradient id="boot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a5532"/><stop offset="1" stop-color="#55301a"/>
+    </linearGradient>
+    <linearGradient id="gauze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f0e4"/><stop offset="1" stop-color="#cfc9b8"/>
+    </linearGradient>
+    <radialGradient id="wound" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#d8281c" stop-opacity=".85"/><stop offset="1" stop-color="#d8281c" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="puttee" width="40" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+      <rect width="40" height="22" fill="#8e8858"/>
+      <rect y="0" width="40" height="5" fill="#5f5a38"/>
+      <rect y="5" width="40" height="3" fill="#a9a373"/>
+    </pattern>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0"/>
+    </filter>
+    <clipPath id="torsoClip"><path d="M345 730 Q345 690 405 682 L595 682 Q655 690 657 730 L682 1045 L322 1045 Z"/></clipPath>
+  </defs>
+
+  <style>
+    :root { --ease: cubic-bezier(.2,.8,.2,1); }
+    text { font-family: Georgia, 'Times New Roman', serif; }
+    .sans { font-family: 'Helvetica Neue', Arial, sans-serif; }
+    /* one-shot reveals (delay via --d) */
+    .rise  { opacity:0; transform:translateY(40px); animation: rise 1s var(--ease) var(--d,0s) forwards; }
+    .fade  { opacity:0; animation: fade .9s ease var(--d,0s) forwards; }
+    .draw  { stroke-dasharray:1; stroke-dashoffset:1; animation: draw .8s ease-out var(--d,0s) forwards; }
+    .pop   { opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.2); animation: pop .6s cubic-bezier(.3,1.6,.4,1) var(--d,0s) forwards; }
+    .lab-l { opacity:0; transform:translateX(-26px); animation: slide .8s var(--ease) var(--d,0s) forwards; }
+    .lab-r { opacity:0; transform:translateX(26px);  animation: slide .8s var(--ease) var(--d,0s) forwards; }
+    @keyframes rise  { to { opacity:1; transform:none } }
+    @keyframes fade  { to { opacity:1 } }
+    @keyframes draw  { to { stroke-dashoffset:0 } }
+    @keyframes pop   { to { opacity:1; transform:scale(1) } }
+    @keyframes slide { to { opacity:1; transform:none } }
+    /* loops */
+    .breathe { transform-box:fill-box; transform-origin:50% 100%; animation: breathe 4.5s ease-in-out 2.5s infinite; }
+    @keyframes breathe { 0%,100%{ transform:scale(1,1) } 50%{ transform:scale(1.008,1.012) } }
+    .pulse  { transform-box:fill-box; transform-origin:center; animation: pulse 2.2s ease-out var(--d,0s) infinite; }
+    @keyframes pulse { 0%{ transform:scale(.6); opacity:.9 } 100%{ transform:scale(2.6); opacity:0 } }
+    .throb  { transform-box:fill-box; transform-origin:center; animation: throb 1.6s ease-in-out var(--d,0s) infinite; }
+    @keyframes throb { 0%,100%{ transform:scale(1); opacity:.7 } 50%{ transform:scale(1.35); opacity:1 } }
+    .sway   { transform-box:fill-box; transform-origin:50% 0%; animation: sway 9s ease-in-out infinite alternate; }
+    @keyframes sway { from{ transform:skewX(-3deg) } to{ transform:skewX(3deg) } }
+    .drift  { animation: drift 14s ease-in-out infinite alternate; }
+    @keyframes drift { from{ transform:translateX(-20px) } to{ transform:translateX(20px) } }
+    .push   { transform-box:view-box; transform-origin:50% 50%; animation: push 14s ease-out forwards; }
+    @keyframes push { from{ transform:scale(1) } to{ transform:scale(1.035) } }
+    .lbl-h  { font-family:'Helvetica Neue', Arial, sans-serif; font-weight:800; font-size:36px; letter-spacing:3px; fill:#f1e4c4; }
+    .lbl-s  { font-family:'Helvetica Neue', Arial, sans-serif; font-weight:400; font-size:26px; fill:#b9ab8c; }
+    .callout{ stroke:#e0b86a; stroke-width:2.5; fill:none; stroke-linecap:round; }
+    .ring   { fill:none; stroke:#e0b86a; stroke-width:3; }
+    @media (prefers-reduced-motion: reduce){ *{ animation-duration:.01s !important; animation-delay:0s !important; animation-iteration-count:1 !important } }
+  </style>
+
+  <g id="camera" class="push">
+
+  <!-- ============ BACKGROUND ============ -->
+  <g id="background">
+    <rect width="1080" height="1920" fill="url(#bg)"/>
+    <ellipse cx="500" cy="760" rx="520" ry="640" fill="url(#glow)"/>
+    <g id="shafts" class="drift" opacity=".9">
+      <g class="sway"><polygon points="60,130 300,130 520,1100 150,1100" fill="url(#shaft)"/></g>
+      <g class="sway" style="animation-delay:-3s"><polygon points="330,130 470,130 700,1100 520,1100" fill="url(#shaft)" opacity=".6"/></g>
+    </g>
+    <!-- back wall panel -->
+    <rect x="-20" y="330" width="1120" height="1280" fill="#000" opacity=".12"/>
+    <ellipse cx="190" cy="610" rx="260" ry="60" fill="#d9c9a0" opacity=".12" filter="url(#soft)"/>
+    <!-- floor -->
+    <path d="M0 1690 H1080 V1920 H0 Z" fill="#14100c"/>
+    <path d="M0 1690 H1080" stroke="#6b5a40" stroke-width="2" opacity=".6"/>
+    <path d="M540 1690 L260 1920 M540 1690 L820 1920 M540 1690 L540 1920" stroke="#4a3d2b" stroke-width="1.5" opacity=".35"/>
+  </g>
+
+  <!-- ============ TITLE ============ -->
+  <g id="title">
+    <text class="rise" style="--d:.2s" x="540" y="215" text-anchor="middle" font-size="76" font-weight="700" letter-spacing="3" fill="#e9d9b2" textLength="960" lengthAdjust="spacing">ADRIAN CARTON DE WIART</text>
+    <text class="rise" style="--d:.55s" x="540" y="278" text-anchor="middle" font-size="31" font-style="italic" fill="#b5a687">1880 sampai 1963, prajurit yang sulit dibunuh</text>
+  </g>
+
+  <!-- ============ CHARACTER ============ -->
+  <g id="character" class="rise" style="--d:.8s">
+    <!-- ground shadow -->
+    <ellipse id="shadow" cx="500" cy="1700" rx="300" ry="34" fill="#000" opacity=".55" filter="url(#blur6)"/>
+
+    <g id="body" class="breathe">
+      <!-- legs -->
+      <g id="legL">
+        <path d="M355 1030 L520 1030 L492 1470 L486 1610 L412 1610 L410 1470 Z" fill="url(#khakiLeg)" stroke="#3c391f" stroke-width="3"/>
+        <path d="M388 1180 Q430 1200 480 1176" stroke="#5f5a38" stroke-width="3" fill="none" opacity=".6"/>
+        <!-- puttee -->
+        <path d="M413 1455 L490 1455 L486 1608 L412 1608 Z" fill="url(#puttee)" stroke="#3c391f" stroke-width="3"/>
+        <!-- thigh bandage -->
+        <g id="bandageThigh">
+          <rect x="376" y="1245" width="142" height="86" rx="4" fill="url(#gauze)" stroke="#7d7767" stroke-width="2"/>
+          <path d="M376 1264 H518 M376 1284 H518 M376 1304 H518" stroke="#aaa392" stroke-width="2"/>
+        </g>
+        <!-- boot -->
+        <path d="M404 1604 L494 1604 L498 1690 L376 1690 Q372 1650 404 1604 Z" fill="url(#boot)" stroke="#2a170c" stroke-width="3"/>
+        <ellipse cx="440" cy="1675" rx="30" ry="6" fill="#d4a070" opacity=".5"/>
+        <g id="bandageAnkle">
+          <rect x="408" y="1590" width="86" height="34" rx="3" fill="url(#gauze)" stroke="#7d7767" stroke-width="2"/>
+          <path d="M408 1602 H494 M408 1613 H494" stroke="#aaa392" stroke-width="2"/>
+        </g>
+      </g>
+      <g id="legR">
+        <path d="M502 1030 L672 1030 L648 1440 L632 1580 L566 1580 L560 1440 Z" fill="url(#khakiLeg)" stroke="#3c391f" stroke-width="3"/>
+        <path d="M560 1420 L646 1420 L632 1580 L566 1580 Z" fill="url(#puttee)" stroke="#3c391f" stroke-width="3"/>
+        <path d="M552 1566 L650 1566 L690 1640 L690 1664 L548 1664 Q540 1600 552 1566 Z" fill="url(#boot)" stroke="#2a170c" stroke-width="3" transform="translate(0,-12)"/>
+        <ellipse cx="618" cy="1635" rx="34" ry="7" fill="#d4a070" opacity=".5"/>
+      </g>
+
+      <!-- torso -->
+      <g id="torso">
+        <path d="M345 730 Q345 690 405 682 L595 682 Q655 690 657 730 L682 1045 L322 1045 Z" fill="url(#khaki)" stroke="#3c391f" stroke-width="3"/>
+        <!-- shading right side -->
+        <path d="M560 682 L595 682 Q655 690 657 730 L682 1045 L600 1045 Z" fill="#4d4a2a" opacity=".28"/>
+        <!-- collar & tie -->
+        <path d="M455 682 L500 745 L545 682 Z" fill="#cfc58f" stroke="#3c391f" stroke-width="2"/>
+        <path d="M492 730 L508 730 L514 840 L500 858 L486 840 Z" fill="#1f3d2c"/>
+        <path d="M455 682 L440 720 L500 760 Z M545 682 L560 720 L500 760 Z" fill="#c2b87e" stroke="#3c391f" stroke-width="2"/>
+        <!-- epaulette -->
+        <rect x="360" y="700" width="62" height="30" rx="4" fill="#8f8a58" stroke="#3c391f" stroke-width="2" transform="rotate(-14 391 715)"/>
+        <circle cx="378" cy="718" r="4" fill="#e5c25a"/><circle cx="396" cy="714" r="4" fill="#e5c25a"/>
+        <!-- pockets -->
+        <rect x="372" y="800" width="104" height="82" rx="6" fill="#b2ab74" stroke="#3c391f" stroke-width="2.5"/>
+        <rect x="372" y="800" width="104" height="26" rx="6" fill="#a39c66" stroke="#3c391f" stroke-width="2.5"/>
+        <circle cx="424" cy="828" r="5" fill="#e5c25a"/>
+        <rect x="560" y="808" width="104" height="82" rx="6" fill="#a39c66" stroke="#3c391f" stroke-width="2.5"/>
+        <rect x="560" y="808" width="104" height="26" rx="6" fill="#968f5c" stroke="#3c391f" stroke-width="2.5"/>
+        <circle cx="612" cy="836" r="5" fill="#e5c25a"/>
+        <!-- medal ribbons -->
+        <g id="ribbons"><rect x="578" y="772" width="14" height="26" fill="#8c1f2a"/><rect x="592" y="772" width="14" height="26" fill="#2a4a9a"/><rect x="606" y="772" width="14" height="26" fill="#2a4a9a"/><rect x="620" y="772" width="14" height="26" fill="#e3c13a"/></g>
+        <!-- lower pockets -->
+        <rect x="362" y="965" width="104" height="48" rx="4" fill="#a9a26c" stroke="#3c391f" stroke-width="2.5"/>
+        <rect x="548" y="965" width="104" height="48" rx="4" fill="#a39c66" stroke="#3c391f" stroke-width="2.5"/>
+        <!-- fold lines -->
+        <path d="M382 930 Q420 944 470 928 M540 930 Q580 944 628 926" stroke="#5f5a38" stroke-width="3" fill="none" opacity=".45"/>
+      </g>
+
+      <!-- arm left (viewer's left), fist -->
+      <g id="armL">
+        <path d="M345 730 Q312 760 306 860 L296 1040 L360 1050 L366 880 Q372 800 372 745 Z" fill="url(#khaki)" stroke="#3c391f" stroke-width="3"/>
+        <path d="M296 1040 Q288 1100 306 1138 Q336 1150 358 1130 Q372 1090 360 1050 Z" fill="url(#skin)" stroke="#6b3f24" stroke-width="3"/>
+        <path d="M312 1066 V1110 M326 1062 V1114 M340 1064 V1112" stroke="#9c6b46" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <!-- arm right: sleeve ends in bandaged stump -->
+      <g id="armR">
+        <path d="M657 730 Q694 770 700 860 L712 1030 L650 1042 L644 880 Q638 800 640 745 Z" fill="url(#khaki)" stroke="#3c391f" stroke-width="3"/>
+        <g id="bandageHand">
+          <path d="M648 1030 L716 1018 L736 1100 Q690 1128 660 1112 Z" fill="url(#gauze)" stroke="#7d7767" stroke-width="2.5"/>
+          <path d="M656 1050 L726 1040 M660 1070 L730 1060 M664 1090 L733 1080" stroke="#aaa392" stroke-width="2"/>
+        </g>
+      </g>
+
+      <!-- Sam Browne belt -->
+      <g id="belt">
+        <path d="M588 684 L636 706 L468 1028 L420 1012 Z" fill="url(#leather)" stroke="#2a170c" stroke-width="3"/>
+        <path d="M594 696 L474 1018" stroke="#d1a574" stroke-width="2" stroke-dasharray="9 7" opacity=".8" transform="translate(12,2)"/>
+        <rect x="322" y="1005" width="360" height="42" fill="url(#leather)" stroke="#2a170c" stroke-width="3"/>
+        <rect x="455" y="997" width="64" height="58" rx="4" fill="#c9a24c" stroke="#5e4614" stroke-width="3"/>
+        <rect x="470" y="1010" width="34" height="32" fill="#7d6020"/>
+      </g>
+
+      <!-- head -->
+      <g id="head">
+        <rect x="470" y="640" width="60" height="60" fill="#c58f68"/>
+        <!-- ears -->
+        <ellipse cx="428" cy="570" rx="13" ry="24" fill="#d9a67e" stroke="#6b3f24" stroke-width="2.5"/>
+        <ellipse cx="572" cy="570" rx="13" ry="24" fill="#cf9a72" stroke="#6b3f24" stroke-width="2.5"/>
+        <!-- face -->
+        <path d="M430 560 Q430 490 500 484 Q570 490 570 560 Q570 640 500 668 Q430 640 430 560 Z" fill="url(#skin)" stroke="#6b3f24" stroke-width="3"/>
+        <!-- hair -->
+        <path d="M426 548 Q420 470 470 446 Q520 430 560 458 Q584 486 574 548 Q566 500 540 488 Q500 470 462 490 Q436 508 426 548 Z" fill="#d6d6d2" stroke="#7a7a76" stroke-width="2.5"/>
+        <path d="M452 480 Q500 454 552 478" stroke="#fff" stroke-width="3" fill="none" opacity=".5"/>
+        <!-- brows & eye -->
+        <path d="M458 548 Q474 540 488 548" stroke="#8a8a86" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="474" cy="565" rx="11" ry="7" fill="#fff"/><circle cx="474" cy="565" r="5.5" fill="#4a7fb0"/><circle cx="474" cy="565" r="2.5" fill="#101820"/>
+        <!-- nose -->
+        <path d="M502 566 Q494 592 500 604 Q512 606 516 598" stroke="#9c6544" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- mustache -->
+        <path d="M455 626 Q470 604 500 612 Q530 604 548 626 Q538 640 520 632 Q500 640 480 632 Q464 640 455 626 Z" fill="#9a9a96" stroke="#5f5f5c" stroke-width="2.5"/>
+        <path d="M486 664 Q500 668 514 664" stroke="#9c6544" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+        <!-- eye patch + strap -->
+        <g id="eyepatch">
+          <path d="M424 512 L584 548" stroke="#101010" stroke-width="7" stroke-linecap="round"/>
+          <ellipse cx="528" cy="564" rx="28" ry="24" fill="#141414" stroke="#000" stroke-width="2"/>
+          <ellipse cx="520" cy="556" rx="9" ry="6" fill="#fff" opacity=".12"/>
+        </g>
+        <!-- scars -->
+        <path d="M566 560 Q574 580 568 600" stroke="#d0705a" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+        <path d="M482 476 Q492 490 486 504" stroke="#d0705a" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============ WOUND HOTSPOTS (loop) ============ -->
+  <g id="hotspots">
+    <!-- kepala -->
+    <g id="hs-kepala" transform="translate(484 486)">
+      <circle class="pop" style="--d:2.2s" r="52" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:2.2s" r="14"/>
+      <circle class="pop" style="--d:2.2s" r="14" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:2.2s" r="5" fill="#e0b86a"/>
+    </g>
+    <!-- mata kiri -->
+    <g id="hs-mata" transform="translate(528 564)">
+      <circle class="pop" style="--d:2.45s" r="14" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="ring pulse" style="--d:2.45s" r="14"/>
+      <circle class="pop" style="--d:2.45s" r="5" fill="#e0b86a"/>
+    </g>
+    <!-- telinga -->
+    <g id="hs-telinga" transform="translate(574 570)">
+      <circle class="pop" style="--d:2.7s" r="46" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:2.7s" r="12"/>
+      <circle class="pop" style="--d:2.7s" r="12" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:2.7s" r="4.5" fill="#e0b86a"/>
+    </g>
+    <!-- wajah -->
+    <g id="hs-wajah" transform="translate(556 618)">
+      <circle class="pop" style="--d:2.95s" r="46" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:2.95s" r="12"/>
+      <circle class="pop" style="--d:2.95s" r="12" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:2.95s" r="4.5" fill="#e0b86a"/>
+    </g>
+    <!-- perut -->
+    <g id="hs-perut" transform="translate(482 906)">
+      <circle class="pop" style="--d:3.2s" r="70" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:3.2s" r="15"/>
+      <circle class="pop" style="--d:3.2s" r="15" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:3.2s" r="5.5" fill="#e0b86a"/>
+    </g>
+    <!-- panggul -->
+    <g id="hs-panggul" transform="translate(352 1052)">
+      <circle class="pop" style="--d:3.45s" r="60" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:3.45s" r="15"/>
+      <circle class="pop" style="--d:3.45s" r="15" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:3.45s" r="5.5" fill="#e0b86a"/>
+    </g>
+    <!-- tangan kiri -->
+    <g id="hs-tangan" transform="translate(694 1076)">
+      <circle class="pop" style="--d:3.7s" r="56" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:3.7s" r="14"/>
+      <circle class="pop" style="--d:3.7s" r="14" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:3.7s" r="5" fill="#e0b86a"/>
+    </g>
+    <!-- kaki -->
+    <g id="hs-kaki" transform="translate(448 1288)">
+      <circle class="pop" style="--d:3.95s" r="62" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:3.95s" r="15"/>
+      <circle class="pop" style="--d:3.95s" r="15" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:3.95s" r="5.5" fill="#e0b86a"/>
+    </g>
+    <!-- pergelangan kaki -->
+    <g id="hs-gelang" transform="translate(452 1607)">
+      <circle class="pop" style="--d:4.2s" r="52" fill="url(#wound)"/>
+      <circle class="ring pulse" style="--d:4.2s" r="14"/>
+      <circle class="pop" style="--d:4.2s" r="14" fill="#2a1a12" stroke="#e0b86a" stroke-width="3"/>
+      <circle class="pop" style="--d:4.2s" r="5" fill="#e0b86a"/>
+    </g>
+  </g>
+
+  <!-- ============ CALLOUTS (garis + label) ============ -->
+  <g id="callouts">
+    <!-- RIGHT SIDE -->
+    <g id="co-kepala">
+      <path class="callout draw" pathLength="1" style="--d:2.4s" d="M484 486L768 372"/>
+      <g class="lab-r" style="--d:2.6s"><text class="lbl-h" x="780" y="386">KEPALA</text><text class="lbl-s" x="780" y="424">tertembak</text></g>
+    </g>
+    <g id="co-mata">
+      <path class="callout draw" pathLength="1" style="--d:2.65s" d="M528 564L768 476"/>
+      <g class="lab-r" style="--d:2.85s"><text class="lbl-h" x="780" y="494">MATA KIRI</text><text class="lbl-s" x="780" y="532">Somaliland, 1914</text></g>
+    </g>
+    <g id="co-telinga">
+      <path class="callout draw" pathLength="1" style="--d:2.9s" d="M574 570L768 590"/>
+      <g class="lab-r" style="--d:3.1s"><text class="lbl-h" x="780" y="606">TELINGA</text><text class="lbl-s" x="780" y="644">tertembak</text></g>
+    </g>
+    <g id="co-wajah">
+      <path class="callout draw" pathLength="1" style="--d:3.15s" d="M556 618L768 700"/>
+      <g class="lab-r" style="--d:3.35s"><text class="lbl-h" x="780" y="716">WAJAH</text><text class="lbl-s" x="780" y="754">tertembak</text></g>
+    </g>
+    <g id="co-tangan">
+      <path class="callout draw" pathLength="1" style="--d:3.85s" d="M694 1076L768 1150"/>
+      <g class="lab-r" style="--d:4.05s"><text class="lbl-h" x="780" y="1168">TANGAN KIRI</text><text class="lbl-s" x="780" y="1206">putus, Ypres 1915</text></g>
+    </g>
+
+    <!-- LEFT SIDE -->
+    <g id="co-perut">
+      <path class="callout draw" pathLength="1" style="--d:3.35s" d="M482 906 L300 856"/>
+      <g class="lab-l" style="--d:3.55s"><text class="lbl-h" x="290" y="870" text-anchor="end">PERUT</text><text class="lbl-s" x="290" y="908" text-anchor="end">Perang Boer</text></g>
+    </g>
+    <g id="co-panggul">
+      <path class="callout draw" pathLength="1" style="--d:3.6s" d="M352 1052 L300 1016"/>
+      <g class="lab-l" style="--d:3.8s"><text class="lbl-h" x="290" y="1030" text-anchor="end">PANGGUL</text><text class="lbl-s" x="290" y="1068" text-anchor="end">tertembak</text></g>
+    </g>
+    <g id="co-kaki">
+      <path class="callout draw" pathLength="1" style="--d:4.1s" d="M448 1288 L300 1270"/>
+      <g class="lab-l" style="--d:4.3s"><text class="lbl-h" x="290" y="1284" text-anchor="end">KAKI</text><text class="lbl-s" x="290" y="1322" text-anchor="end">tertembak</text></g>
+    </g>
+    <g id="co-gelang">
+      <path class="callout draw" pathLength="1" style="--d:4.35s" d="M452 1607 L300 1580"/>
+      <g class="lab-l" style="--d:4.55s"><text class="lbl-h" x="290" y="1560" text-anchor="end">GELANGAN</text><text class="lbl-h" x="290" y="1606" text-anchor="end">KAKI</text><text class="lbl-s" x="290" y="1644" text-anchor="end">tertembak</text></g>
+    </g>
+  </g>
+
+  <!-- ============ FOOTER ============ -->
+  <g id="footer">
+    <text class="rise" style="--d:5s" x="540" y="1800" text-anchor="middle" font-size="52" font-style="italic" fill="#eadcb8">“Frankly, I had enjoyed the war.”</text>
+    <text class="rise sans" style="--d:5.3s" x="540" y="1858" text-anchor="middle" font-size="25" fill="#9d8f74" font-family="Helvetica Neue, Arial, sans-serif">ilustrasi vektor 2.5D dari luka-luka yang tercatat dalam memoarnya</text>
+  </g>
+
+  </g><!-- /camera -->
+
+  <!-- vignette + grain (static overlay) -->
+  <rect width="1080" height="1920" fill="url(#vig)" pointer-events="none"/>
+  <rect width="1080" height="1920" filter="url(#grain)" opacity=".18" pointer-events="none"/>
+</svg>
