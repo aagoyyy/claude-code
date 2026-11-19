@@ -1,0 +1,132 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "Archivo Black"; src: url("../fonts/ArchivoBlack.ttf"); }
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+  svg { display: block; }
+</style></head>
+<body>
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <g id="L_bg"></g><g id="L_mid"></g><g id="L_char"></g><g id="L_fg"></g><g id="L_ui"></g>
+</svg>
+<script src="../rig/rig.js"></script>
+<script src="../characters/human.js"></script>
+<script src="../sets/office.js"></script>
+<script src="../props/calculator.js"></script>
+<script src="../infographics/cards.js"></script>
+<script>
+// ---------------------------------------------------------------- test scene 01 (8 s, 60 fps, 9:16)
+// beats: idle + look at calculator -> taps, digits roll -> lands on 95% -> anticipation -> surprise pop (overshoot)
+//        -> camera push-in to face -> title card enters.
+const R = RIG, W = 1080, H = 1920, DUR = 8.0;
+const $ = id => document.getElementById(id);
+const layers = { bg: $("L_bg"), mid: $("L_mid"), char: $("L_char"), fg: $("L_fg"), ui: $("L_ui") };
+const office = SETS.buildOffice(layers);
+
+const charRoot = R.el("g", { transform: "translate(540 1565) scale(1.55)" }, layers.char);
+const boss = HUMAN.buildHuman(charRoot, HUMAN.BOSS);
+// calculator held in the screen-left hand, drawn behind the fingers
+const holderL = boss.arms[0].holder;
+const calcG = R.el("g", {}); holderL.insertBefore(calcG, holderL.firstChild);
+const calc = PROPS.buildCalculator(calcG);
+// emphasis burst near the head (in head space so it follows the head)
+const bursts = [[-118, -520, -55], [118, -520, 55]].map(([x, y, r]) => INFO.burst(R.el("g", { transform: `translate(${x} ${y}) rotate(${r}) scale(0.8)` }, boss.head), "#ffb21f"));
+// title card + source label (screen space)
+const card = INFO.titleCard(R.el("g", {}, layers.ui), { big: "95%?!", small: "ANGKA YANG BIKIN KAGET", w: 820, h: 330 });
+const src = INFO.sourceLabel(R.el("g", {}, layers.ui), "Ilustrasi: angka contoh, bukan data");
+
+// ---------------- body pose track ----------------
+const LOOK = { torso: 0, tx: 0, ty: 0, neck: -1, head: -3, headDY: 3, uaL: 12, faL: -142, waL: 20, uaR: -16, faR: 146, waR: -22, hipL: 0, hipR: 0, kneeL: 0, kneeR: 0 };
+const body = R.track([
+  { t: 0.0, v: LOOK },
+  { t: 3.25, v: LOOK },
+  { t: 3.55, v: { ty: 8, torso: -1.5, neck: 2, head: -6, headDY: 7, faL: -138, faR: 150 }, e: "inOut" },              // anticipation: sink + tuck
+  { t: 3.85, v: { ty: -12, torso: 1.5, neck: -2, head: 4, headDY: -6, faL: -148, waL: 14, uaR: -30, faR: 124, waR: -36 }, e: "outBack" }, // pop
+  { t: 4.6, v: { ty: -4, torso: 0.6, neck: -1, head: 2, headDY: -2, faL: -140, waL: 18, uaR: -24, faR: 128, waR: -30 }, e: "inOut" },
+  { t: 8.0, v: { ty: -2, torso: 0.3, neck: 0, head: 1, headDY: -1, faL: -138, uaR: -22, faR: 130, waR: -28 }, e: "inOut" },
+]);
+// ---------------- face track ----------------
+const face = R.track([
+  { t: 0.0, v: { open: 0.82, squint: 0.1, lookX: -0.55, lookY: 0.85, pitch: 0.55, yaw: -0.15, bY: 0, bIn: -1, bOut: 0, bArch: 0, mk: 0 } },
+  { t: 3.25, v: { open: 0.8, squint: 0.15, lookX: -0.55, lookY: 0.9, bIn: -2 } },
+  { t: 3.55, v: { open: 0.45, squint: 0.55, lookX: -0.3, lookY: 0.6, pitch: 0.7, bY: -3, bIn: -6, bOut: 1, mk: 1 }, e: "inOut" },
+  { t: 3.85, v: { open: 1.42, squint: 0, lookX: 0, lookY: -0.15, pitch: -0.25, yaw: 0, bY: 16, bIn: 6, bOut: 2, bArch: 6, mk: 2 }, e: "outBack" },
+  { t: 4.6, v: { open: 1.22, lookX: 0.05, lookY: 0, pitch: -0.1, bY: 12, bIn: 5, bArch: 5, mk: 3 }, e: "inOut" },
+  { t: 6.4, v: { open: 1.2, lookX: 0.1, bY: 11, mk: 3 } },
+  { t: 6.8, v: { open: 1.1, bY: 9, bIn: 7, mk: 4 }, e: "inOut" },
+  { t: 8.0, v: { open: 1.1, lookX: 0.05, mk: 4 } },
+]);
+// mouth key -> viseme blend (0 rest, 1 pressed, 2 surprise, 3 O, 4 'wow' U->O)
+function mouthFor(mk, t) {
+  if (mk <= 1) return R.mixViseme("rest", "MBP", mk);
+  if (mk <= 2) return R.mixViseme("MBP", "surprise", mk - 1);
+  if (mk <= 3) return R.mixViseme("surprise", "O", mk - 2);
+  const k = mk - 3, w = 0.5 + 0.5 * Math.sin(t * 5.5);         // "wow": U <-> O
+  return R.mixViseme("O", R.mixViseme("U", "O", w), k);
+}
+// ---------------- camera track (world space; layers get parallax) ----------------
+const cam = R.track([
+  { t: 0.0, v: { cx: 540, cy: 1010, z: 1.2 } },
+  { t: 0.9, v: { cx: 535, cy: 1020, z: 1.22 } },
+  { t: 3.1, v: { cx: 460, cy: 1235, z: 1.55 }, e: "inOut" },     // zoom to the detail: calculator
+  { t: 3.55, v: { cx: 462, cy: 1228, z: 1.56 } },
+  { t: 3.75, v: { cx: 470, cy: 1200, z: 1.62 }, e: "outBack" }, // tiny bump on the surprise
+  { t: 4.15, v: { cx: 480, cy: 1170, z: 1.6 }, e: "inOut" },
+  { t: 5.7, v: { cx: 540, cy: 905, z: 2.35 }, e: "inOut" },      // push-in to the face
+  { t: 8.0, v: { cx: 540, cy: 915, z: 2.48 }, e: "linear" },
+]);
+const PAR = { bg: 0.55, mid: 0.82, char: 1.0, fg: 1.06 };
+function applyCam(c) {
+  for (const k in PAR) {
+    const p = PAR[k], z = 1 + (c.z - 1) * p, cx = 540 + (c.cx - 540) * p, cy = 960 + (c.cy - 960) * p;
+    layers[k].setAttribute("transform", `translate(540 960) scale(${z}) translate(${-cx} ${-cy})`);
+  }
+}
+// taps on the calculator (additive forearm pulses)
+const TAPS = [1.25, 1.62, 2.0, 2.38, 2.76];
+function tapAt(t) { let a = 0; for (const s of TAPS) { const u = (t - s) / 0.16; if (u >= 0 && u <= 1) a += Math.sin(u * Math.PI); } return a; }
+function pressedKey(t) { for (let i = 0; i < TAPS.length; i++) { const u = (t - TAPS[i]) / 0.16; if (u >= 0.3 && u <= 0.8) return [5, 9, 6, 14, 19][i]; } return -1; }
+function display(t) {
+  if (t < 1.25) return "0";
+  if (t >= 3.15) return "95%";
+  const u = R.clamp((t - 1.25) / (3.15 - 1.25)), base = Math.floor(95 * R.ease.out(u)), jit = u < 0.85 ? Math.floor(Math.abs(Math.sin(t * 91.7)) * 30) : 0;
+  return String(Math.min(94, base + jit));
+}
+
+function render(t) {
+  const b = body(t), f = face(t), c = cam(t);
+  // secondary motion: breathing, tie + wrist follow-through, blinks
+  const breath = 0.012 * Math.sin(2 * Math.PI * t / 3.2);
+  const tap = tapAt(t);
+  const tie = 1.2 * Math.sin(2 * Math.PI * t / 3.2 + 1) + R.kick(t, 3.62, -11, 1.8, 3.6) + R.kick(t, 3.38, 4, 1.6, 6);
+  const waLk = R.kick(t, 3.66, 10, 2.4, 6), waRk = R.kick(t, 3.7, -14, 2.2, 5);
+  const blink = t > 3.4 && t < 4.4 ? 0 : R.blink(t, [0.85, 2.52, 5.05, 7.25]);
+  const handR = t < 3.62 ? R.HANDPOSE.point : R.mixHand("point", "open", R.ease.out(R.clamp((t - 3.62) / 0.25)));
+  boss.set({
+    torso: b.torso, tx: b.tx, ty: b.ty, breath, neck: b.neck, head: b.head, headDY: b.headDY, tie,
+    uaL: b.uaL, faL: b.faL, waL: b.waL + waLk, handL: R.HANDPOSE.grip,
+    uaR: b.uaR, faR: b.faR - tap * 7, waR: b.waR + tap * 9 + waRk, handR,
+    face: {
+      open: f.open, squint: f.squint, close: blink, lookX: f.lookX, lookY: f.lookY, pitch: f.pitch, yaw: f.yaw,
+      brow: { y: f.bY, inner: f.bIn, outer: f.bOut, arch: f.bArch }, mouth: mouthFor(f.mk, t),
+    },
+  });
+  // keep the calculator upright-ish regardless of the arm chain (counter-rotate), small tilt toward the face
+  const chain = b.uaL + b.faL + b.waL + waLk + b.torso;
+  calcG.setAttribute("transform", `translate(0 46) rotate(${-chain - 8}) scale(0.7) translate(52 -78)`);
+  calc.set(display(t), pressedKey(t));
+  // burst on surprise
+  const bk = t < 3.7 ? 0 : t < 4.0 ? R.ease.outBack((t - 3.7) / 0.3) : Math.max(0, 1 - (t - 4.0) / 0.5);
+  bursts.forEach(b => b.set(bk));
+  office.update(t);
+  applyCam(c);
+  // title card: enters 5.85 with overshoot, slight settle tilt
+  const tc = R.clamp((t - 5.85) / 0.45), s = t < 5.85 ? 0 : 0.55 + 0.45 * R.ease.outBack(tc, 2.2), rot = -6 + 3 * R.ease.out(tc);
+  card.setAttribute("transform", `translate(540 1255) rotate(${rot}) scale(${s})`); card.setAttribute("opacity", t < 5.85 ? 0 : R.clamp(tc * 3));
+  const sl = R.clamp((t - 6.3) / 0.3);
+  src.setAttribute("transform", `translate(${96 - 30 * (1 - R.ease.out(sl))} 1462)`); src.setAttribute("opacity", sl);
+}
+window.render = render; window.DUR = DUR;
+render(0);
+</script>
+</body></html>
