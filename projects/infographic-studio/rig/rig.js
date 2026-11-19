@@ -180,14 +180,14 @@
     for (let i = 0; i < 4; i++) {
       const j1 = R.joint(H.g, bases[i][0], bases[i][1]);
       const L1 = lens[i] * 0.55, L2 = lens[i] * 0.5;
-      R.el("rect", { x: bases[i][0] - 5.6, y: bases[i][1] - 4, width: 11.2, height: L1 + 6, rx: 5.6, fill: skin }, j1);
+      R.el("rect", { x: bases[i][0] - 5.2, y: bases[i][1] - 4, width: 10.4, height: L1 + 6, rx: 5.2, fill: skin }, j1);
       const j2 = R.joint(j1, bases[i][0], bases[i][1] + L1);
-      R.el("rect", { x: bases[i][0] - 5.2, y: bases[i][1] + L1 - 4, width: 10.4, height: L2 + 4, rx: 5.2, fill: skin }, j2);
+      R.el("rect", { x: bases[i][0] - 4.9, y: bases[i][1] + L1 - 4, width: 9.8, height: L2 + 4, rx: 4.9, fill: skin }, j2);
       R.el("path", { d: `M ${bases[i][0] - 3} ${bases[i][1] + L1 + L2 - 3} q 3 3 6 0`, stroke: sh, "stroke-width": 2, fill: "none" }, j2);
       H.fingers.push([j1, j2]);
     }
     // palm
-    R.el("path", { d: "M -24 2 C -26 20 -27 40 -22 52 L 22 52 C 26 40 25 18 22 2 Z", fill: skin }, H.g);
+    R.el("path", { d: "M -22 2 C -25 18 -25 38 -20 50 C -10 57 10 57 20 50 C 25 38 24 18 21 2 Z", fill: skin }, H.g);
     R.el("path", { d: "M 22 2 C 25 18 26 40 22 52 L 14 52 C 18 36 18 18 15 2 Z", fill: sh }, H.g);           // flat shade on the outer edge
     R.el("path", { d: "M -10 22 q 8 6 18 2", stroke: line, "stroke-width": 1.8, fill: "none", opacity: 0.6 }, H.g);
     // thumb
