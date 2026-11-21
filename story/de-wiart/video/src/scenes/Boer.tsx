@@ -5,6 +5,9 @@ import {Cam, clamp, easeOut, easeOutBack, ease, H, W} from '../world/util';
 import {Character, place} from '../rig/Character';
 import {attach, kf, Pose} from '../rig/pose';
 import {Post} from '../fx/Post';
+import {Figure, FigureDefs} from '../rig/Figure';
+import {aimPose, idlePose} from '../rig/Side';
+import {boer, tommy} from './BoerA';
 
 export const FPS = 24;
 export const BOER_FRAMES = 144;
@@ -32,7 +35,7 @@ export const boerPose = (f: number): Pose => {
   };
 };
 
-export const Boer: React.FC = () => {
+export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
   const f = useCurrentFrame();
   const pose = boerPose(f);
 
@@ -62,17 +65,14 @@ export const Boer: React.FC = () => {
   const muzzle = f >= 56 && f < 62 ? 1 - (f - 56) / 6 : 0;
   const smoke = clamp((f - 57) / 70);
 
-  const capIn = easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 104) / 14);
-  const fade = clamp(f / 14) * (1 - clamp((f - (BOER_FRAMES - 10)) / 10));
+  const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 104) / 14);
+  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (BOER_FRAMES - 10)) / 10));
 
   return (
     <AbsoluteFill style={{background: '#000'}}>
       <Layer cam={cam} depth={0.02}><Sky f={f} /></Layer>
       <Layer cam={cam} depth={0.06}>
         <Mountains />
-        {/* far muzzle flash + smoke trailing off on the ridge */}
-        {muzzle > 0 && <circle cx={1760} cy={668} r={22 * muzzle + 6} fill="#fff1c4" opacity={muzzle} />}
-        {smoke > 0 && <ellipse cx={1760 + smoke * 40} cy={664 - smoke * 36} rx={14 + smoke * 60} ry={9 + smoke * 28} fill="#d9c7b0" opacity={0.5 * (1 - smoke)} />}
       </Layer>
       <Layer cam={cam} depth={0.12} blend="screen" opacity={0.9}><Rays f={f} /></Layer>
       <Layer cam={cam} depth={0.12} blur={0.8}><Hills seed={21} base={668} amp={34} haze={0.62} /></Layer>
@@ -91,10 +91,21 @@ export const Boer: React.FC = () => {
         <Acacia x={1560} y={812} s={0.95} seed={31} haze={0.3} />
         <Acacia x={300} y={806} s={0.62} seed={32} haze={0.36} />
       </Layer>
+      <Layer cam={cam} depth={0.54}>
+        <FigureDefs />
+        <Figure uid="mk" x={1130} y={812} s={0.22} o={boer('left')} p={aimPose(f / 6)} light="warm" lo />
+        {muzzle > 0 && <circle cx={1062} cy={600} r={16 * muzzle + 4} fill="#fff1c4" opacity={muzzle} />}
+        {smoke > 0 && <ellipse cx={1062 - smoke * 40} cy={598 - smoke * 36} rx={10 + smoke * 50} ry={8 + smoke * 24} fill="#d9c7b0" opacity={0.5 * (1 - smoke)} />}
+      </Layer>
       <Layer cam={cam} depth={0.78}><Plains seed={7} y0={850} y1={960} count={900} haze0={0.18} haze1={0.1} fade={1} /></Layer>
       <Layer cam={cam} depth={0.8}><Grass f={f} seed={41} count={160} yMin={860} yMax={955} hMin={30} hMax={70} cDark="#6a5a2a" cLite="#d9b868" sway={0.8} /></Layer>
       <Layer cam={cam} depth={1.0}><Plains seed={8} y0={930} y1={1080} count={900} haze0={0.08} haze1={0.0} fade={1} /></Layer>
 
+      <Layer cam={cam} depth={0.82}>
+        <FigureDefs />
+        {[250, 430].map((x, i) => <Figure key={'cl' + i} uid={`bl${i}`} x={x} y={872} s={0.4} o={tommy('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" />)}
+        {[1560, 1740].map((x, i) => <Figure key={'cr' + i} uid={`br${i}`} x={x} y={872} s={0.4} o={tommy('left', i ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" />)}
+      </Layer>
       {/* character plane */}
       <Character
         pose={pose}

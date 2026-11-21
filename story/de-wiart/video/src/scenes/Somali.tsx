@@ -103,7 +103,7 @@ export const Somali: React.FC = () => {
         variant={variant}
         cam={cam}
         depth={1}
-        key={0.9}
+        lit={0.9}
         under={dustT > 0 ? (
           <>
             {[0, 1, 2, 3, 4, 5].map((i) => {

@@ -10,6 +10,12 @@ export const Layer: React.FC<{cam: Cam; depth: number; blur?: number; blend?: st
   </svg>
 );
 
+/** endless horizontal scroll for repeating layers: children must tile with period P */
+export const Scroll: React.FC<{off: number; P?: number; children: React.ReactNode}> = ({off, P = 2920, children}) => {
+  const o = ((off % P) + P) % P;
+  return <><g transform={`translate(${-o} 0)`}>{children}</g><g transform={`translate(${-o + P} 0)`}>{children}</g></>;
+};
+
 /* ---------- sky ---------- */
 export const Sky: React.FC<{f: number}> = ({f}) => {
   const clouds = useMemo(() => {
@@ -136,12 +142,12 @@ export const Plains: React.FC<{seed: number; y0: number; y1: number; count: numb
       <defs>
         <linearGradient id={`pl${seed}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={far} /><stop offset="1" stopColor={near} /></linearGradient>
         <linearGradient id={`pm${seed}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#000" /><stop offset={fade ? 0.18 : 0} stopColor="#fff" /></linearGradient>
-        <mask id={`pmk${seed}`} maskUnits="userSpaceOnUse" x={-700} y={y0} width={W + 1400} height={y1 - y0 + 420}><rect x={-700} y={y0} width={W + 1400} height={y1 - y0 + 420} fill={`url(#pm${seed})`} /></mask>
+        <mask id={`pmk${seed}`} maskUnits="userSpaceOnUse" x={-4000} y={y0} width={12000} height={y1 - y0 + 420}><rect x={-4000} y={y0} width={12000} height={y1 - y0 + 420} fill={`url(#pm${seed})`} /></mask>
         <linearGradient id={`pls${seed}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#ffd890" stopOpacity=".38" /><stop offset=".55" stopColor="#ffd890" stopOpacity=".0" /><stop offset="1" stopColor="#2a1820" stopOpacity=".22" /></linearGradient>
       </defs>
       <g mask={`url(#pmk${seed})`}>
-      <rect x={-600} y={y0} width={W + 1200} height={y1 - y0 + 400} fill={`url(#pl${seed})`} />
-      <rect x={-600} y={y0} width={W + 1200} height={y1 - y0 + 400} fill={`url(#pls${seed})`} />
+      <rect x={-4000} y={y0} width={12000} height={y1 - y0 + 400} fill={`url(#pl${seed})`} />
+      <rect x={-4000} y={y0} width={12000} height={y1 - y0 + 400} fill={`url(#pls${seed})`} />
       {strokes.map((s, i) => <path key={i} d={`M${s.x} ${s.y} q${s.l * 0.15} ${-s.l * 0.6} ${s.l * 0.3} ${-s.l}`} stroke={s.c} strokeWidth={s.w} opacity={s.o} fill="none" strokeLinecap="round" />)}
       {sunPatch && [0, 1, 2, 3, 4].map((i) => <polygon key={i} points={`${160 + i * 330},${y0} ${260 + i * 330},${y0} ${60 + i * 360},${y1 + 200} ${-140 + i * 360},${y1 + 200}`} fill="#ffe0a0" opacity=".07" />)}
       </g>

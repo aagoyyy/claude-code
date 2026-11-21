@@ -124,7 +124,7 @@ export const Ypres: React.FC = () => {
         variant={variant}
         cam={cam}
         depth={1}
-        key={0.3 + 0.9 * G}
+        lit={0.3 + 0.9 * G}
         light={{rim: '#cfeedd', key: '#d8ffe8', bounce: '#6a6a50', haze: '#2a3d58', skew: -0.45, shadow: 0.25 + 0.4 * G, halo: '#9fd8c0'}}
       />
 

@@ -14,14 +14,14 @@ type Props = {
   cam: Cam;
   depth?: number;
   /** key light strength 0..1 */
-  key?: number;
+  lit?: number;
   /** lighting palette (defaults = low warm sun) + cast-shadow skew/opacity */
   light?: {rim?: string; key?: string; bounce?: string; haze?: string; skew?: number; shadow?: number; halo?: string};
   children?: React.ReactNode; // drawn in the same parallax plane, above the character (hotspots...)
   under?: React.ReactNode;    // drawn below the character (dust, grass)
 };
 
-export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, key = 1, light = {}, children, under}) => {
+export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, lit: key = 1, light = {}, children, under}) => {
   const L = {rim: '#ffd9a0', key: '#ffe3b5', bounce: '#d9964c', haze: '#ffcf98', skew: -0.9, shadow: 0.5, halo: '#ffc27a', ...light};
   const T = transforms(pose);
   return (
