@@ -5,6 +5,7 @@ import {AnimalArt} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
 import {liveFront as _lf, HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
 import {heroYoung} from '../scenes/BoerA';
+import {Actor, A} from './act';
 
 /* ----------------------------- archetypes ----------------------------- */
 export const gent = (f: 'left' | 'right', c = '#2a2a34', hat: SideOpts['head'] = 'top'): SideOpts => ({pal: civ(c, mix(c, '#000000', 0.3), '#6a5a4a'), head: hat, hat: '#14100c', outfit: 'frock', mustache: true, face: f});
@@ -54,13 +55,13 @@ const S1_1: React.FC = () => {
       <Par d={1}>
         {[300, 880, 1480].map((x, i) => lamp(x, 1000, 300, i))}
         {/* lamplighter with his pole, far */}
-        <g><line x1={1500} y1={900} x2={1530} y2={660} stroke="#2a1a10" strokeWidth={4} /><Fig id="ll" x={1490} y={906} s={sc(906, 700)} o={worker('right', '#3a3028')} p={P(walkPose(0.4, 0.5), {uaN: -120, faN: -30, handN: 'relaxed'})} lit={0.7} lo /></g>
-        {/* the talking couple */}
-        <Fig id="g1" x={640} y={1020} s={0.5} o={gent('right')} p={P(idlePose(0.4), arms.explain, face.talk(3), face.smile, {head: 3})} />
-        <Fig id="l1" x={870} y={1030} s={0.5} o={lady('left')} p={P(idlePose(1.2), arms.offer, face.smile, {head: -3})} />
-        {/* a boy hurrying past, glancing back */}
-        <Fig id="b11" x={1210} y={1040} s={0.42} o={boy('right', '#5a3a2a')} p={P(runPose(1.3), {head: -14, smile: 0.6})} lit={0.7} />
-        <Fig id="b12" x={1430} y={1000} s={0.34} o={worker('left')} p={P(walkPose(2.4, 0.7), arms.behind)} lit={0.7} lo />
+        <g><line x1={1500} y1={900} x2={1530} y2={660} stroke="#2a1a10" strokeWidth={4} /><Actor id="ll" x={1490} y={906} s={sc(906, 700)} o={worker('right', '#3a3028')} path={[[0, 1490, 906], [2.2, 1490, 906], [4.8, 1330, 906]]} acts={[{t0: 0.2, t1: 2.2, fn: (u) => ({uaN: -150 + 10 * Math.sin(u * 9), faN: -20, handN: 'relaxed'})}]} lit={0.7} lo /></g>
+        {/* the talking couple: they take turns, he gestures, she nods and answers */}
+        <Actor id="g1" x={640} y={1020} s={0.5} o={gent('right')} acts={[{t0: 0, t1: 2.4, fn: A.talk(1.2)}, {t0: 2.4, t1: 3.4, fn: A.smile()}, {t0: 3.4, t1: 5, fn: A.point()}]} />
+        <Actor id="l1" x={870} y={1030} s={0.5} o={lady('left')} acts={[{t0: 0, t1: 2.4, fn: A.smile()}, {t0: 2.4, t1: 5, fn: A.talk(0.9)}]} seed={1.2} />
+        {/* a boy racing across the street, glancing back at the couple */}
+        <Actor id="b11" x={1210} y={1040} s={0.42} o={boy('right', '#5a3a2a')} path={[[0, 1990, 1040], [5, -140, 1040]]} lit={0.7} />
+        <Actor id="b12" x={1430} y={1000} s={0.34} o={worker('left')} path={[[0, 300, 1000], [5, 1250, 1000]]} lit={0.7} lo />
       </Par>
       <Par d={1.9} blur={9}><polygon points="1920,1080 1920,880 1740,940 1660,1080" fill="#0c080e" /><rect x={1780} y={820} width={60} height={160} fill="#0c080e" /><rect x={1760} y={800} width={100} height={30} fill="#0c080e" /></Par>
       <Par d={1}><Motes n={50} seed={1} y0={300} y1={900} o={0.4} /></Par>
