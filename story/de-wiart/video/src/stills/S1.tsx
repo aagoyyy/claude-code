@@ -7,18 +7,18 @@ import {arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog
 import {heroYoung} from '../scenes/BoerA';
 
 /* ----------------------------- archetypes ----------------------------- */
-const gent = (f: 'left' | 'right', c = '#2a2a34', hat: SideOpts['head'] = 'top'): SideOpts => ({pal: civ(c, mix(c, '#000000', 0.3), '#6a5a4a'), head: hat, hat: '#14100c', outfit: 'frock', mustache: true, face: f});
-const worker = (f: 'left' | 'right', c = '#5a4a3a'): SideOpts => ({pal: civ(c, '#3a3028', '#3a2a1c'), head: 'flatcap', hat: '#4a3a2a', outfit: 'blazer', face: f});
-const lady = (f: 'left' | 'right', c = '#7a2a3a'): SideOpts => ({pal: civ(c, c, '#4a2a1a'), head: 'scarf', hat: mix(c, '#ffffff', 0.12), outfit: 'dress', hairStyle: 'bun', build: 0.92, face: f});
-const effendi = (f: 'left' | 'right', c = '#e8dcc0'): SideOpts => ({pal: civ(c, c, '#2a1c14', '#c8925e'), head: 'fez', hat: '#a82a1a', outfit: 'thobe', mustache: true, face: f});
-const fellah = (f: 'left' | 'right', c = '#8a6a4a'): SideOpts => ({pal: civ(c, c, '#1a120c', '#b8844e'), head: 'turban', hat: '#e8e0d0', outfit: 'thobe', beard: true, face: f});
-const scholar = (f: 'left' | 'right', hair: string, extra: Partial<SideOpts> = {}): SideOpts => ({pal: civ('#15121a', '#15121a', hair), head: 'none', outfit: 'gown', face: f, ...extra});
-const boy = (f: 'left' | 'right', c = '#2a3a5a', hair = '#4a3020'): SideOpts => ({pal: civ(c, c, hair), head: 'flatcap', hat: c, outfit: 'blazer', build: 0.8, stretch: 0.56, face: f});
-const young = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'frock', pal: {...heroYoung(f).pal, top: '#3a4a3a', bottom: '#2a2a2a'}});
-const athlete = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'blazer', pal: {...heroYoung(f).pal, top: '#8a1a2a', bottom: '#e8e0d0', puttee: '#e8e0d0'}});
-const P = (...a: any[]) => Object.assign({}, ...a);
+export const gent = (f: 'left' | 'right', c = '#2a2a34', hat: SideOpts['head'] = 'top'): SideOpts => ({pal: civ(c, mix(c, '#000000', 0.3), '#6a5a4a'), head: hat, hat: '#14100c', outfit: 'frock', mustache: true, face: f});
+export const worker = (f: 'left' | 'right', c = '#5a4a3a'): SideOpts => ({pal: civ(c, '#3a3028', '#3a2a1c'), head: 'flatcap', hat: '#4a3a2a', outfit: 'blazer', face: f});
+export const lady = (f: 'left' | 'right', c = '#7a2a3a'): SideOpts => ({pal: civ(c, c, '#4a2a1a'), head: 'scarf', hat: mix(c, '#ffffff', 0.12), outfit: 'dress', hairStyle: 'bun', build: 0.92, face: f});
+export const effendi = (f: 'left' | 'right', c = '#e8dcc0'): SideOpts => ({pal: civ(c, c, '#2a1c14', '#c8925e'), head: 'fez', hat: '#a82a1a', outfit: 'thobe', mustache: true, face: f});
+export const fellah = (f: 'left' | 'right', c = '#8a6a4a'): SideOpts => ({pal: civ(c, c, '#1a120c', '#b8844e'), head: 'turban', hat: '#e8e0d0', outfit: 'thobe', beard: true, face: f});
+export const scholar = (f: 'left' | 'right', hair: string, extra: Partial<SideOpts> = {}): SideOpts => ({pal: civ('#15121a', '#15121a', hair), head: 'none', outfit: 'gown', face: f, ...extra});
+export const boy = (f: 'left' | 'right', c = '#2a3a5a', hair = '#4a3020'): SideOpts => ({pal: civ(c, c, hair), head: 'flatcap', hat: c, outfit: 'blazer', build: 0.8, stretch: 0.56, face: f});
+export const young = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'frock', pal: {...heroYoung(f).pal, top: '#3a4a3a', bottom: '#2a2a2a'}});
+export const athlete = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'blazer', pal: {...heroYoung(f).pal, top: '#8a1a2a', bottom: '#e8e0d0', puttee: '#e8e0d0'}});
+export const P = (...a: any[]) => Object.assign({}, ...a);
 
-const lamp = (x: number, y: number, h: number, k: number) => (
+export const lamp = (x: number, y: number, h: number, k: number) => (
   <g key={k}>
     <rect x={x - 5} y={y - h} width={10} height={h} fill="#15101a" /><rect x={x - 13} y={y - 14} width={26} height={14} fill="#15101a" />
     <rect x={x - 16} y={y - h - 30} width={32} height={34} rx={4} fill="#ffe0a0" /><polygon points={`${x - 22},${y - h - 30} ${x},${y - h - 52} ${x + 22},${y - h - 30}`} fill="#15101a" />
@@ -69,7 +69,7 @@ const S1_1: React.FC = () => {
 };
 
 /* ===== 1.2  a Brussels street: a carriage waits, a gentleman is arguing with the driver ===== */
-const wheel = (cx: number, r: number) => (
+export const wheel = (cx: number, r: number) => (
   <g><circle cx={cx} cy={-20} r={r} fill="none" stroke="#1a1012" strokeWidth={13} /><circle cx={cx} cy={-20} r={r - 10} fill="none" stroke="#5a3a1c" strokeWidth={5} /><circle cx={cx} cy={-20} r={9} fill="#1a1012" />{[0, 30, 60, 90, 120, 150].map((a) => <line key={a} x1={cx} y1={-20} x2={cx + r * Math.cos((a * Math.PI) / 180)} y2={-20 + r * Math.sin((a * Math.PI) / 180)} stroke="#1a1012" strokeWidth={4} />)}</g>
 );
 const S1_2: React.FC = () => (
@@ -157,7 +157,7 @@ const S1_3: React.FC = () => {
 };
 
 /* ===== Cairo kit ===== */
-const palm = (x: number, y: number, h: number, k = 1) => {
+export const palm = (x: number, y: number, h: number, k = 1) => {
   const leaves = [-80, -58, -36, -14, 10, 32, 54, 76];
   return (
     <g key={x} transform={`translate(${x} ${y}) scale(${k})`}>
@@ -170,7 +170,7 @@ const palm = (x: number, y: number, h: number, k = 1) => {
     </g>
   );
 };
-const pyramid = (x: number, y: number, w: number, h: number, c: string) => (
+export const pyramid = (x: number, y: number, w: number, h: number, c: string) => (
   <g>
     <polygon points={`${x - w / 2},${y} ${x},${y - h} ${x + w / 2},${y}`} fill={c} />
     <polygon points={`${x - w / 2},${y} ${x},${y - h} ${x + w / 2},${y}`} fill="url(#blockP)" opacity=".6" />
@@ -178,7 +178,7 @@ const pyramid = (x: number, y: number, w: number, h: number, c: string) => (
     <polygon points={`${x},${y - h} ${x + w / 2},${y} ${x + w * 0.02},${y}`} fill="#3a1a0a" opacity=".4" />
   </g>
 );
-const kairoSky = (id: string) => (
+export const kairoSky = (id: string) => (
   <>
     <SkyRect id={id} stops={[[0, '#4f9ac8'], [0.5, '#bfe0d8'], [1, '#ffe4b0']]} h={720} />
     <Clouds n={5} seed={5} y0={60} y1={300} c="#fff" o={0.4} />
