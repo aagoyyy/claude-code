@@ -17,6 +17,7 @@ export type SideOpts = {
   build?: number;                 // width multiplier of the torso/limbs
   hat?: string;                   // headgear colour
   scars?: boolean;
+  bayonet?: boolean;
   fine?: boolean;                 // full-detail (cloth grain, AO blurs); false for far/background figures
 };
 
@@ -200,6 +201,59 @@ const HeadGear: React.FC<{kind: Head; c: string}> = ({kind, c}) => {
   }
 };
 
+
+/** Lee-Enfield style bolt-action rifle. Axis along +y (butt at -300, muzzle at +490); sights on +x, magazine on -x. */
+const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean}> = ({metal, bayonet, fine = true}) => {
+  const steel = '#3b3f47', steelL = '#7d848f';
+  return (
+    <g>
+      <defs>
+        <linearGradient id="rfWood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#b57a45" /><stop offset=".5" stopColor="#8a5428" /><stop offset="1" stopColor="#4e2c14" /></linearGradient>
+        <linearGradient id="rfSteel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#8a919c" /><stop offset=".5" stopColor="#4a4f58" /><stop offset="1" stopColor="#23262c" /></linearGradient>
+      </defs>
+      {/* sling */}
+      <path d="M-14 -240 Q-70 -60 -16 190" stroke="#3a2414" strokeWidth="9" fill="none" strokeLinecap="round" />
+      <path d="M-14 -240 Q-66 -60 -14 190" stroke="#8a5a32" strokeWidth="2" fill="none" opacity=".6" strokeDasharray="8 6" />
+      {/* butt stock: curved profile, butt plate, grain */}
+      <path d="M-20 -304 L22 -304 L25 -262 Q27 -190 14 -150 L8 -120 L-10 -120 Q-20 -200 -22 -250 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d="M-20 -304 L22 -304 L24 -290 L-21 -290 Z" fill={steel} stroke={OUT} strokeWidth="2" />
+      <path d="M-14 -280 Q-12 -200 -8 -130 M2 -282 Q6 -200 8 -140" stroke="#5a3418" strokeWidth="1.6" fill="none" opacity=".6" />
+      <path d="M-18 -300 Q-20 -220 -10 -126" stroke="#e0b078" strokeWidth="3" fill="none" opacity=".4" />
+      {/* wrist + receiver + bolt */}
+      <path d="M-12 -126 L12 -126 L14 -10 L-12 -10 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.4" />
+      <rect x={-11} y={-108} width={22} height={86} fill="url(#rfSteel)" stroke={OUT} strokeWidth="2.4" />
+      <rect x={-8} y={-96} width={14} height={30} fill="#1a1c21" opacity=".5" />
+      <path d="M10 -84 L40 -92" stroke={steel} strokeWidth="6" strokeLinecap="round" /><circle cx={44} cy={-93} r={9} fill={steel} stroke={OUT} strokeWidth="2" /><circle cx={41} cy={-96} r={3} fill={steelL} opacity=".8" />
+      {/* magazine box + trigger guard (underside = -x) */}
+      <path d="M-11 -90 L-30 -90 L-30 -26 L-11 -26 Z" fill="url(#rfSteel)" stroke={OUT} strokeWidth="2.2" />
+      <path d="M-14 -4 Q-46 -2 -42 -44 Q-42 -60 -14 -60" fill="none" stroke={steel} strokeWidth="4" strokeLinecap="round" />
+      <path d="M-18 -32 L-26 -18" stroke={steel} strokeWidth="3.5" strokeLinecap="round" />
+      {/* rear sight ladder */}
+      <path d="M11 20 L26 14 L26 52 L11 46 Z" fill={steel} stroke={OUT} strokeWidth="2" />
+      <path d="M26 20 V48 M18 24 V46" stroke={steelL} strokeWidth="1.4" opacity=".8" />
+      {/* fore-end with brass band, wooden handguard over the barrel */}
+      <path d="M-11 -10 L12 -10 L13 270 L-12 270 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.4" />
+      <path d="M-4 -4 L-4 262 M4 -4 L4 262" stroke="#5a3418" strokeWidth="1.4" opacity=".5" />
+      <path d="M-9 0 L-10 262" stroke="#e0b078" strokeWidth="3" opacity=".4" />
+      <rect x={-12} y={118} width={26} height={9} fill="#c9a24c" stroke="#5e4614" strokeWidth="1.4" />
+      <path d="M12 270 L14 340 L-4 340 L-12 270 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.2" />
+      {/* barrel, nose cap, front-sight blade, muzzle crown */}
+      <rect x={-5} y={338} width={11} height={152} fill="url(#rfSteel)" stroke={OUT} strokeWidth="2" />
+      <rect x={-8} y={330} width={17} height={14} rx={2} fill={steel} stroke={OUT} strokeWidth="2" />
+      <path d="M6 462 L22 458 L22 482 L6 486 Z" fill={steel} stroke={OUT} strokeWidth="1.6" />
+      <circle cx={0} cy={490} r={6.5} fill="#15171a" stroke={OUT} strokeWidth="1.5" /><circle cx={0} cy={490} r={2.4} fill="#000" />
+      <path d="M-2 340 V486" stroke="#d7dde6" strokeWidth="2" opacity=".55" />
+      {bayonet && (
+        <g>
+          <rect x={-9} y={474} width={18} height={20} fill={steel} stroke={OUT} strokeWidth="2" />
+          <path d="M-6 494 L6 494 L2 650 L-2 662 Z" fill="#c5ccd6" stroke={OUT} strokeWidth="2" />
+          <path d="M-3 496 L-1 652" stroke="#fff" strokeWidth="2" opacity=".7" /><path d="M2 500 L1 640" stroke="#7a8290" strokeWidth="2" />
+        </g>
+      )}
+    </g>
+  );
+};
+
 export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const {pal} = o;
   const flip = o.face === 'left';
@@ -260,15 +314,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
             </g>
           )}
           {near && (o.gear === 'rifle' || o.gear === 'rifle+pack') && (
-            <g transform="translate(0 220) rotate(-3)">
-              <rect x={-8} y={-300} width={16} height={560} rx={5} fill="#5a3a22" stroke={OUT} strokeWidth="2.5" />
-              <path d="M-10 -300 L10 -300 L12 -200 L-12 -190 Z" fill="#3a2414" stroke={OUT} strokeWidth="2" />
-              <rect x={-5} y={90} width={10} height={380} fill={metal} stroke={OUT} strokeWidth="1.5" />
-              <rect x={-4} y={-190} width={8} height={290} fill="#6a4426" />
-              <path d="M-4 -300 V460" stroke="#d9a977" strokeWidth="2" opacity=".5" />
-              <rect x={-10} y={-70} width={20} height={12} fill={metal} /><rect x={-10} y={30} width={20} height={9} fill={metal} />
-              <path d="M0 470 l0 -12 M-4 466 h8" stroke="#222" strokeWidth="3" />
-            </g>
+            <g transform="translate(0 204) rotate(-3)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} /></g>
           )}
           {near && o.gear === 'spear' && (
             <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /><path d="M-1 -515 L-1 -425" stroke="#fff" strokeWidth="2" opacity=".6" /></g>
@@ -490,7 +536,6 @@ export const muzzleOf = (p: SidePose): [number, number] => {
   const sx = -6, sy = -300;                                   // shoulder rel. hip
   const rx = sx * Math.cos(t) - sy * Math.sin(t), ry = sx * Math.sin(t) + sy * Math.cos(t);
   const a1 = rad(p.uaN || 0), a2 = rad((p.uaN || 0) + (p.faN || 0)) - rad(3);
-  const hx = rx + 175 * -Math.sin(a1 + t) + 410 * -Math.sin(a2 + t), hy = ry + 175 * Math.cos(a1 + t) + 410 * Math.cos(a2 + t);
-  const mx = hx + 470 * -Math.sin(a2 + t), my = hy + 470 * Math.cos(a2 + t);
+  const mx = rx + 175 * -Math.sin(a1 + t) + 694 * -Math.sin(a2 + t), my = ry + 175 * Math.cos(a1 + t) + 694 * Math.cos(a2 + t);
   return [mx, -666 + my + (p.dy || 0)];
 };

@@ -23,8 +23,8 @@ export const BoerShot1: React.FC = () => (
     ]}}
     back={{
       specs: [
-        {id: 'a1', o: tommy('right'), x: 640, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
-        {id: 'a2', o: tommy('right', '#c89870'), x: 440, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
+        {id: 'a1', o: {...tommy('right'), bayonet: true}, x: 640, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
+        {id: 'a2', o: {...tommy('right', '#c89870'), bayonet: true}, x: 440, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
         {id: 'a3', o: tommy('right'), x: 250, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, stopAt: 74, dieAt: 74, lo: true},
         {id: 'a4', o: tommy('right'), x: 790, y: 892, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true},
       ],
