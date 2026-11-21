@@ -16,10 +16,15 @@ export type SideOpts = {
   mustache?: boolean; beard?: boolean;
   build?: number;                 // width multiplier of the torso/limbs
   hat?: string;                   // headgear colour
+  scars?: boolean;
+  fine?: boolean;                 // full-detail (cloth grain, AO blurs); false for far/background figures
 };
 
 const sh = (c: string, t: number) => mix(c, '#000000', t);
 const hl = (c: string, t: number) => mix(c, '#ffffff', t);
+
+let UID = 0;
+const nid = () => `sx${++UID}`;
 
 export const SideDefs: React.FC = () => (
   <defs>
@@ -30,76 +35,144 @@ export const SideDefs: React.FC = () => (
       <stop offset="0" stopColor="#000" stopOpacity=".28" /><stop offset=".25" stopColor="#000" stopOpacity="0" /><stop offset=".8" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".3" />
     </linearGradient>
     <filter id="sBlur3"><feGaussianBlur stdDeviation="3" /></filter>
+    <filter id="sBlur6" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7" /></filter>
+    <pattern id="weaveS" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 .5 H5 M.5 0 V5" stroke="#000" strokeWidth=".6" opacity=".16" /></pattern>
+    <filter id="clothS" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1 .8" numOctaves="2" seed="3" /><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.1 -.35" /></filter>
+    <pattern id="putteeS" width="44" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)">
+      <rect width="44" height="24" fill="#948e5c" /><rect width="44" height="6" fill="#5a5534" /><rect y="6" width="44" height="3" fill="#b4ae7c" /><rect y="15" width="44" height="1.5" fill="#6e6942" opacity=".6" />
+    </pattern>
+    <linearGradient id="goldS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f3d57a" /><stop offset=".5" stopColor="#c9a24c" /><stop offset="1" stopColor="#8a6a22" /></linearGradient>
+    <linearGradient id="leatherS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#8d5732" /><stop offset=".5" stopColor="#6f4122" /><stop offset="1" stopColor="#4b2b18" /></linearGradient>
+    <linearGradient id="gauzeS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#fbf8ee" /><stop offset=".6" stopColor="#ebe5d3" /><stop offset="1" stopColor="#b9b3a0" /></linearGradient>
+    <radialGradient id="shineS" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#fff" stopOpacity=".55" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></radialGradient>
   </defs>
 );
 
 const OUT = '#2a2418';
 
-/** limb segment hanging down from its pivot, with round caps */
-const Seg: React.FC<{len: number; w0: number; w1: number; c: string; out?: string; children?: React.ReactNode}> = ({len, w0, w1, c, out = OUT, children}) => {
+/** cloth texture + grain, clipped to the host shape (same material treatment as the front rig) */
+const Tex: React.FC<{clip: string; x: number; y: number; w: number; h: number; fine?: boolean; grain?: number}> = ({clip, x, y, w, h, fine = true, grain = 0.22}) => (
+  <g clipPath={`url(#${clip})`}>
+    <rect x={x} y={y} width={w} height={h} fill="url(#weaveS)" />
+    {fine && <rect x={x} y={y} width={w} height={h} filter="url(#clothS)" opacity={grain} />}
+  </g>
+);
+
+/** limb segment hanging down from its pivot, with round caps, shading, cloth grain and clipped detail children */
+const Seg: React.FC<{len: number; w0: number; w1: number; c: string; out?: string; fine?: boolean; tex?: boolean; seam?: boolean; children?: React.ReactNode; over?: React.ReactNode}> = ({len, w0, w1, c, out = OUT, fine = true, tex = true, seam = true, children, over}) => {
+  const id = nid();
   const d = `M${-w0 / 2} 0 L${w0 / 2} 0 L${w1 / 2} ${len} L${-w1 / 2} ${len} Z`;
+  const wm = Math.max(w0, w1);
   return (
     <g>
+      <defs><clipPath id={id}><path d={d} /><circle cx={0} cy={0} r={w0 / 2} /><circle cx={0} cy={len} r={w1 / 2} /></clipPath></defs>
       <path d={d} fill={c} stroke={out} strokeWidth="3" strokeLinejoin="round" />
       <circle cx={0} cy={len} r={w1 / 2} fill={c} /><circle cx={0} cy={0} r={w0 / 2} fill={c} />
-      <path d={d} fill="url(#sideShade)" /><circle cx={0} cy={len} r={w1 / 2} fill="url(#sideShade)" /><circle cx={0} cy={0} r={w0 / 2} fill="url(#sideShade)" />
+      <g clipPath={`url(#${id})`}>
+        {tex && <rect x={-wm} y={-wm / 2} width={wm * 2} height={len + wm} fill="url(#weaveS)" />}
+        <rect x={-wm} y={-wm / 2} width={wm * 2} height={len + wm} fill="url(#sideShade)" />
+        <rect x={-wm} y={-wm / 2} width={wm * 2} height={len + wm} fill="url(#sideShadeV)" opacity=".6" />
+        {fine && tex && <rect x={-wm} y={-wm / 2} width={wm * 2} height={len + wm} filter="url(#clothS)" opacity=".22" />}
+        {fine && <path d={`M${w0 * 0.34} ${len * 0.06} L${w1 * 0.34} ${len * 0.96}`} stroke="#000" strokeWidth={Math.max(8, w1 * 0.2)} opacity=".26" filter="url(#sBlur3)" />}
+        {children}
+      </g>
+      {seam && <path d={`M${-w0 * 0.32} ${len * 0.04} L${-w1 * 0.32} ${len * 0.96}`} fill="none" stroke={sh(c, 0.5)} strokeWidth="1.8" strokeDasharray="5 4" opacity=".7" />}
       <path d={`M${-w0 * 0.3} ${len * 0.05} L${-w1 * 0.3} ${len * 0.95}`} stroke="#fff" strokeWidth="3" opacity=".16" strokeLinecap="round" />
-      {children}
+      {over}
     </g>
   );
 };
 
+const Button: React.FC<{x: number; y: number; r?: number}> = ({x, y, r = 5.5}) => (
+  <g><circle cx={x} cy={y} r={r} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.2" /><circle cx={x - r * 0.3} cy={y - r * 0.3} r={r * 0.32} fill="#fff6c8" /></g>
+);
+
 const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number}> = ({o, near, blink}) => {
   const {pal} = o;
-  const skinD = sh(pal.skin, 0.28), skinL = hl(pal.skin, 0.2);
+  const fine = o.fine !== false;
+  const skinD = sh(pal.skin, 0.3), skinL = hl(pal.skin, 0.22), skinM = sh(pal.skin, 0.12);
   const hatC = o.hat || '#9a9462';
+  const cid = nid();
   const faceP = 'M-70 -20 C-80 -90 -40 -100 10 -98 C50 -96 66 -66 66 -44 L69 -30 L66 -10 Q92 14 77 26 L63 31 L61 46 L63 56 Q61 76 48 82 L20 86 Q-20 92 -44 66 L-62 30 Q-78 10 -70 -20 Z';
   const hairP = 'M-72 -14 C-86 -92 -40 -108 12 -104 C46 -102 62 -80 66 -58 Q40 -80 14 -78 Q-20 -74 -34 -54 Q-44 -30 -40 -4 Q-52 10 -58 36 Q-80 20 -72 -14 Z';
+  const hairless = o.head === 'turban';
+  const old = !o.young && o.hero;
   return (
     <g>
-      {/* neck */}
-      <path d="M-34 56 L38 56 L36 124 L-44 124 Z" fill={sh(pal.skin, 0.12)} stroke={OUT} strokeWidth="3" />
-      <path d="M-34 70 Q2 100 38 70 V100 Q2 130 -34 100 Z" fill="#000" opacity=".22" filter="url(#sBlur3)" />
-      {/* ear (near side) */}
+      <defs><clipPath id={cid}><path d={faceP} /></clipPath></defs>
+      {/* neck: shaded, wrinkled, shadowed under the jaw */}
+      <path d="M-34 56 L38 56 L36 124 L-44 124 Z" fill={skinM} stroke={OUT} strokeWidth="3" />
+      <path d="M-34 56 L38 56 L36 124 L-44 124 Z" fill="url(#sideShade)" />
+      <path d="M-30 78 Q2 92 34 78 M-32 98 Q2 112 34 98" stroke={skinD} strokeWidth="2" fill="none" opacity=".5" />
+      <path d="M-34 60 Q2 98 38 62 V92 Q2 128 -34 94 Z" fill="#000" opacity=".28" filter="url(#sBlur3)" />
+      {/* ear: helix + antihelix */}
       <ellipse cx={-14} cy={8} rx={15} ry={24} fill={skinL} stroke={OUT} strokeWidth="2.5" />
-      <path d="M-18 -4 Q-6 8 -16 22" stroke={skinD} strokeWidth="2.5" fill="none" />
+      <path d="M-20 -6 Q-4 -2 -8 14 Q-10 22 -18 22" stroke={skinD} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <ellipse cx={-14} cy={10} rx={6} ry={9} fill={skinD} opacity=".35" />
+      {/* face */}
       <path d={faceP} fill={pal.skin} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
-      <path d={faceP} fill="url(#sideShade)" />
-      <ellipse cx={34} cy={34} rx={20} ry={13} fill="#d0705a" opacity=".22" />
-      {/* hair / sideburn */}
-      {!(o.head === 'turban') && <path d={hairP} fill={pal.hair} stroke={sh(pal.hair, 0.45)} strokeWidth="2.5" />}
-      {!(o.head === 'turban') && <path d="M-62 -60 Q-20 -92 24 -88" stroke="#fff" strokeWidth="4" opacity=".28" fill="none" strokeLinecap="round" />}
-      {/* brow, eye, nose line, wrinkles */}
+      <g clipPath={`url(#${cid})`}>
+        <rect x={-100} y={-110} width={200} height={210} fill="url(#sideShade)" />
+        <rect x={-100} y={-110} width={200} height={210} fill="url(#sideShadeV)" opacity=".6" />
+        {fine && <path d="M-40 66 Q10 100 60 60" stroke="#000" strokeWidth="22" fill="none" opacity=".2" filter="url(#sBlur6)" />}
+        {fine && <path d="M-50 -66 Q10 -88 62 -60" stroke="#000" strokeWidth="14" fill="none" opacity=".22" filter="url(#sBlur6)" />}
+        <ellipse cx={34} cy={36} rx={22} ry={14} fill="#d0705a" opacity=".3" filter="url(#sBlur3)" />
+        <ellipse cx={-6} cy={30} rx={18} ry={12} fill="#c0604c" opacity=".14" filter="url(#sBlur3)" />
+        {/* forehead wrinkles, crow's feet, eye bag, folds */}
+        <path d="M-6 -72 Q22 -80 54 -72 M0 -62 Q26 -68 54 -60" stroke={skinD} strokeWidth="2.2" fill="none" strokeLinecap="round" opacity={old ? 0.55 : 0.25} />
+        <path d="M18 -34 l-12 -6 M18 -27 l-13 2 M20 -20 l-10 8" stroke={skinD} strokeWidth="2" strokeLinecap="round" opacity={old ? 0.6 : 0.3} />
+        <path d="M30 -18 Q44 -10 58 -18" stroke={skinD} strokeWidth="2.2" fill="none" opacity={old ? 0.6 : 0.3} />
+        <path d="M36 12 Q22 28 26 52" stroke={skinD} strokeWidth="2.6" fill="none" strokeLinecap="round" opacity={old ? 0.55 : 0.3} />
+        <path d="M-52 40 Q-30 56 -10 56" stroke={skinD} strokeWidth="2" fill="none" opacity=".35" />
+      </g>
+      {/* nose: bridge highlight, nostril, wing shade */}
+      <path d="M66 -10 Q92 14 77 26" stroke="#9c6544" strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".6" />
+      <path d="M62 -8 Q70 8 70 16" stroke="#fff" strokeWidth="3" fill="none" opacity=".28" strokeLinecap="round" />
+      <path d="M64 24 Q70 28 76 26" stroke="#6b3f24" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <ellipse cx={72} cy={24} rx={3.4} ry={2.6} fill="#4a2a18" opacity=".7" />
+      {/* hair / sideburn / strands */}
+      {!hairless && <path d={hairP} fill={pal.hair} stroke={sh(pal.hair, 0.45)} strokeWidth="2.5" />}
+      {!hairless && <path d={hairP} fill="url(#sideShade)" />}
+      {!hairless && <path d="M-62 -60 Q-20 -92 24 -88 M-66 -30 Q-50 -64 -20 -78 M-48 -4 Q-60 10 -56 30 M-30 -84 Q10 -98 44 -84" stroke={sh(pal.hair, 0.35)} strokeWidth="2" fill="none" opacity=".7" strokeLinecap="round" />}
+      {!hairless && <path d="M-58 -64 Q-18 -96 26 -92" stroke="#fff" strokeWidth="4" opacity=".4" fill="none" strokeLinecap="round" />}
+      {!hairless && <path d="M-44 -4 Q-38 20 -30 36 Q-46 26 -50 4 Z" fill={sh(pal.hair, 0.12)} stroke={sh(pal.hair, 0.5)} strokeWidth="1.5" />}
+      {/* brow (hairs), eyelid, lashes, eye */}
       <path d="M26 -52 Q42 -62 58 -50" stroke={sh(pal.hair, 0.15)} strokeWidth="6" fill="none" strokeLinecap="round" />
+      <path d="M30 -54 l4 -6 M38 -58 l3 -6 M46 -58 l3 -5" stroke={sh(pal.hair, 0.3)} strokeWidth="1.8" strokeLinecap="round" />
       {!(o.hero && o.patch && near) && (
         <g transform={`translate(42 -32) scale(1 ${blink}) translate(-42 32)`}>
           <ellipse cx={42} cy={-32} rx={13} ry={8} fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5" />
-          <circle cx={46} cy={-32} r={6} fill="#4a86b8" /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.5} fill="#fff" />
+          <circle cx={46} cy={-32} r={6} fill="#4a86b8" /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.6} fill="#fff" />
+          <path d="M30 -34 Q42 -44 56 -34" stroke="#4a2a18" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+          <path d="M54 -36 l7 -3 M55 -32 l8 0" stroke="#4a2a18" strokeWidth="1.8" strokeLinecap="round" />
         </g>
       )}
-      <path d="M30 -38 Q42 -46 56 -36" stroke="#4a2a18" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-      <path d="M44 -26 Q50 -4 62 8" stroke={skinD} strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".5" />
-      <path d="M62 42 Q70 52 60 62" stroke={skinD} strokeWidth="2.4" fill="none" opacity=".45" />
-      <path d="M24 -64 Q44 -72 60 -62" stroke={skinD} strokeWidth="2" fill="none" opacity=".4" />
-      {/* mouth + mustache */}
-      <path d="M60 58 Q50 62 40 58" stroke="#a85c46" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <path d="M26 -22 Q42 -14 58 -24" stroke={skinD} strokeWidth="2" fill="none" opacity=".5" />
+      {/* mouth, lips, chin */}
+      <path d="M62 56 Q50 61 38 56" stroke="#a85c46" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      <path d="M60 64 Q52 70 42 66" stroke="#b9705a" strokeWidth="3" fill="none" strokeLinecap="round" opacity=".7" />
+      <path d="M50 78 Q56 76 58 70" stroke={skinD} strokeWidth="2" fill="none" opacity=".5" />
       {(o.mustache ?? o.hero) && (
         <g>
           <path d="M64 34 Q80 36 84 50 Q76 58 62 52 Q40 52 30 46 Q40 36 64 34 Z" fill={sh(pal.hair, 0.1)} stroke={sh(pal.hair, 0.55)} strokeWidth="2.2" />
-          <path d="M44 42 q10 6 24 2 M42 50 q12 4 26 0" stroke={sh(pal.hair, 0.45)} strokeWidth="1.8" fill="none" />
+          <path d="M44 42 q10 6 24 2 M42 50 q12 4 26 0 M54 38 q8 4 18 0 M70 46 q6 4 10 8" stroke={sh(pal.hair, 0.45)} strokeWidth="1.8" fill="none" strokeLinecap="round" />
+          <path d="M40 40 Q58 34 76 40" stroke="#fff" strokeWidth="3" fill="none" opacity=".35" strokeLinecap="round" />
         </g>
       )}
-      {o.beard && <path d="M20 66 Q50 100 62 56 Q50 70 20 66 Z M40 52 Q62 88 66 52 Z" fill={sh(pal.hair, 0.1)} stroke={sh(pal.hair, 0.5)} strokeWidth="2" />}
-      {/* eyepatch strap (always) + patch when the patched eye faces the camera */}
+      {o.beard && <g><path d="M20 66 Q50 100 62 56 Q50 70 20 66 Z M40 52 Q62 88 66 52 Z" fill={sh(pal.hair, 0.1)} stroke={sh(pal.hair, 0.5)} strokeWidth="2" /><path d="M30 70 q8 12 18 8 M44 62 q8 10 16 4" stroke={sh(pal.hair, 0.4)} strokeWidth="1.6" fill="none" /></g>}
+      {o.scars && <g stroke="#c8604a" strokeWidth="3.4" fill="none" strokeLinecap="round" opacity=".75"><path d="M46 -64 Q56 -50 52 -38" /><path d="M54 12 Q62 26 58 42" /></g>}
+      {/* eyepatch + strap (with stitching and sheen) */}
       {o.hero && o.patch && (
         <g>
           <path d="M64 -54 Q8 -72 -68 -46" stroke="#111" strokeWidth="8" fill="none" strokeLinecap="round" />
+          <path d="M62 -56 Q8 -75 -66 -49" stroke="#4a4a4a" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity=".7" />
+          {near && <ellipse cx={44} cy={-28} rx={27} ry={23} fill="#000" opacity=".35" />}
           {near && <ellipse cx={42} cy={-30} rx={27} ry={23} fill="#151515" stroke="#000" strokeWidth="2" />}
-          {near && <ellipse cx={34} cy={-38} rx={11} ry={6} fill="#fff" opacity=".15" />}
+          {near && <ellipse cx={42} cy={-30} rx={22} ry={18} fill="none" stroke="#3a3a3a" strokeWidth="1.5" strokeDasharray="3 3" />}
+          {near && <ellipse cx={34} cy={-38} rx={11} ry={6} fill="#fff" opacity=".16" />}
           {near && <path d="M16 -36 Q-20 -48 -62 -42" stroke="#111" strokeWidth="7" fill="none" strokeLinecap="round" />}
         </g>
       )}
-      {/* headgear */}
       <HeadGear kind={o.head || 'none'} c={hatC} />
     </g>
   );
@@ -131,32 +204,59 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const {pal} = o;
   const flip = o.face === 'left';
   const B = o.build ?? 1;
+  const fine = o.fine !== false;
   const top = pal.top, bot = pal.bottom;
   const metal = pal.metal || '#6b6a62';
-  const nearIsLeftArm = flip;                    // facing left shows the person's LEFT side
+  const nearIsLeftArm = flip;
   const stumpNear = o.hero && o.stump && nearIsLeftArm, stumpFar = o.hero && o.stump && !nearIsLeftArm;
   const rot = (a?: number) => `rotate(${(a || 0).toFixed(2)})`;
+  const stitchC = sh(top, 0.5);
+  const tid = nid();
+  const torsoP = 'M-34 -352 L44 -352 Q100 -336 120 -270 Q134 -190 130 -110 Q126 -50 104 -4 L-92 -4 Q-112 -60 -114 -130 Q-118 -230 -104 -296 Q-90 -340 -34 -352 Z';
 
   const Arm: React.FC<{near: boolean; ua?: number; fa?: number; stump?: boolean}> = ({near, ua, fa, stump}) => {
     const c = near ? top : sh(top, 0.22);
+    const sc = sh(c, 0.5);
     return (
       <g transform={`translate(0 -666) ${rot(p.torso)} translate(-6 -300) ${rot(ua)}`}>
-        <Seg len={175} w0={64 * B} w1={56 * B} c={c} />
+        <Seg len={175} w0={64 * B} w1={56 * B} c={c} fine={fine}>
+          {/* sleeve cap shadow + elbow creases + sleeve folds */}
+          <ellipse cx={0} cy={-6} rx={44} ry={26} fill="#000" opacity=".28" filter="url(#sBlur6)" />
+          <path d="M-26 128 Q0 144 26 128 M-24 146 Q0 160 24 146 M-26 108 Q0 118 26 106" stroke={sc} strokeWidth="2.8" fill="none" opacity=".5" strokeLinecap="round" />
+          <path d="M-22 40 Q0 52 22 40 M-22 70 Q0 80 22 70" stroke={sc} strokeWidth="2.4" fill="none" opacity=".35" />
+        </Seg>
         <g transform={`translate(0 175) ${rot(fa)}`}>
-          <Seg len={190} w0={54 * B} w1={44 * B} c={c}>
-            <rect x={-26} y={150} width={52} height={22} rx={4} fill={sh(c, 0.18)} stroke={OUT} strokeWidth="2.5" />
+          <Seg len={190} w0={54 * B} w1={44 * B} c={c} fine={fine} over={
+            <g>
+              {/* cuff: band + stitching + button */}
+              <rect x={-27 * B} y={150} width={54 * B} height={24} rx={4} fill={sh(c, 0.18)} stroke={OUT} strokeWidth="2.5" />
+              <rect x={-27 * B} y={150} width={54 * B} height={24} rx={4} fill="url(#sideShade)" />
+              <path d={`M${-23 * B} 156 H${23 * B} M${-23 * B} 168 H${23 * B}`} stroke={sc} strokeWidth="1.5" strokeDasharray="4 3" opacity=".75" />
+              <Button x={-12 * B} y={162} r={4} />
+            </g>
+          }>
+            <path d="M-24 34 Q0 50 24 34 M-22 60 Q0 72 22 58 M-20 96 Q0 108 20 96" stroke={sc} strokeWidth="2.6" fill="none" opacity=".45" strokeLinecap="round" />
+            <path d="M-18 8 Q-6 90 -14 150" stroke="#fff" strokeWidth="5" fill="none" opacity=".12" filter="url(#sBlur3)" />
           </Seg>
           {stump ? (
             <g transform="translate(0 196)">
-              <path d="M-26 -16 L26 -16 Q38 30 20 62 Q0 74 -20 62 Q-38 30 -26 -16 Z" fill="#efeadb" stroke="#7d7767" strokeWidth="2.5" />
-              <path d="M-30 4 Q0 12 30 4 M-32 22 Q0 30 32 22 M-30 40 Q0 48 30 40" stroke="#aaa392" strokeWidth="2" fill="none" />
-              <ellipse cx={4} cy={40} rx={14} ry={16} fill="#c4281c" opacity=".55" filter="url(#sBlur3)" />
+              <path d="M-26 -16 L26 -16 Q38 30 20 62 Q0 74 -20 62 Q-38 30 -26 -16 Z" fill="url(#gauzeS)" stroke="#7d7767" strokeWidth="2.5" />
+              <path d="M-30 -2 Q0 8 30 -2 M-31 14 Q0 24 31 14 M-31 30 Q0 40 31 30 M-28 46 Q0 56 28 46" stroke="#aaa392" strokeWidth="2" fill="none" />
+              <path d="M-26 -16 L26 -16 Q38 30 20 62 Q0 74 -20 62 Q-38 30 -26 -16 Z" fill="url(#sideShade)" opacity=".6" />
+              <path d="M-26 -16 L26 -16 Q38 30 20 62 Q0 74 -20 62 Q-38 30 -26 -16 Z" fill="url(#sideShadeV)" opacity=".5" />
+              <ellipse cx={4} cy={40} rx={16} ry={18} fill="#c4281c" opacity=".55" filter="url(#sBlur3)" />
+              <path d="M-14 66 l6 22 l12 -16 z" fill="#ebe5d3" stroke="#7d7767" strokeWidth="1.5" />
             </g>
           ) : (
             <g transform="translate(0 200)">
-              <ellipse cx={0} cy={26} rx={30} ry={38} fill={pal.skin} stroke="#6b3f24" strokeWidth="3" />
-              <ellipse cx={0} cy={26} rx={30} ry={38} fill="url(#sideShade)" />
-              <path d="M-14 8 H22 M-16 26 H24 M-14 44 H20" stroke="#9c6b46" strokeWidth="3" strokeLinecap="round" />
+              {/* fist: palm, four curled fingers with knuckles, thumb, wrist crease */}
+              <path d="M-22 -4 Q-34 20 -30 46 Q-12 66 18 60 Q36 40 30 6 Q22 -8 -22 -4 Z" fill={pal.skin} stroke="#6b3f24" strokeWidth="3" />
+              <path d="M-22 -4 Q-34 20 -30 46 Q-12 66 18 60 Q36 40 30 6 Q22 -8 -22 -4 Z" fill="url(#sideShade)" />
+              {[8, 24, 40].map((y) => <path key={y} d={`M-27 ${y} Q2 ${y + 8} 32 ${y}`} stroke="#9c6b46" strokeWidth="3" fill="none" strokeLinecap="round" />)}
+              {[-14, 2, 18].map((x) => <circle key={x} cx={x} cy={4} r={5.5} fill={hl(pal.skin, 0.2)} opacity=".6" />)}
+              <ellipse cx={22} cy={26} rx={11} ry={20} fill={hl(pal.skin, 0.06)} stroke="#6b3f24" strokeWidth="2.5" transform="rotate(10 22 26)" />
+              <path d="M-18 -2 Q2 4 22 -2" stroke={sh(pal.skin, 0.4)} strokeWidth="2.4" fill="none" opacity=".6" />
+              <path d="M-16 56 Q0 62 14 56" stroke="#fff" strokeWidth="3" fill="none" opacity=".22" />
             </g>
           )}
           {near && (o.gear === 'rifle' || o.gear === 'rifle+pack') && (
@@ -165,10 +265,11 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
               <rect x={-5} y={80} width={10} height={150} fill={metal} />
               <rect x={-5} y={-250} width={10} height={90} fill="#3a2414" />
               <path d="M-4 -250 V220" stroke="#d9a977" strokeWidth="2" opacity=".5" />
+              <rect x={-9} y={-130} width={18} height={10} fill={metal} /><rect x={-9} y={-60} width={18} height={8} fill={metal} />
             </g>
           )}
           {near && o.gear === 'spear' && (
-            <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /></g>
+            <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /><path d="M-1 -515 L-1 -425" stroke="#fff" strokeWidth="2" opacity=".6" /></g>
           )}
         </g>
       </g>
@@ -178,25 +279,77 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const Leg: React.FC<{near: boolean; th?: number; shn?: number; ft?: number}> = ({near, th, shn, ft}) => {
     const c = near ? bot : sh(bot, 0.24), bc = near ? pal.boots : sh(pal.boots, 0.25);
     const pt = pal.puttee;
+    const cc = sh(c, 0.5);
     return (
       <g transform={`translate(0 -666) ${rot(th)}`}>
-        <Seg len={300} w0={134 * B} w1={96 * B} c={c} />
+        <Seg len={300} w0={134 * B} w1={96 * B} c={c} fine={fine} over={
+          o.hero && o.bandages && near ? (
+            <g>
+              <rect x={-52} y={150} width={104} height={86} rx={6} fill="url(#gauzeS)" stroke="#7d7767" strokeWidth="2" />
+              <path d="M-52 168 Q0 176 52 168 M-52 186 Q0 194 52 186 M-52 204 Q0 212 52 204 M-52 222 Q0 230 52 222" stroke="#aaa392" strokeWidth="2" fill="none" />
+              <rect x={-52} y={150} width={104} height={86} rx={6} fill="url(#sideShade)" opacity=".5" />
+              <ellipse cx={4} cy={196} rx={26} ry={22} fill="#c4281c" opacity=".5" filter="url(#sBlur3)" />
+            </g>
+          ) : undefined
+        }>
+          {/* hip/thigh creases, knee creases, front crease line, highlight + inner shadow */}
+          <path d="M-56 36 Q0 58 56 34 M-54 64 Q0 82 52 62 M-48 92 Q0 106 46 90" stroke={cc} strokeWidth="3" fill="none" opacity=".42" strokeLinecap="round" />
+          <path d="M-40 252 Q0 272 42 250 M-38 272 Q0 286 40 270" stroke={cc} strokeWidth="3" fill="none" opacity=".45" strokeLinecap="round" />
+          <path d="M-30 20 Q-22 150 -26 290" stroke="#fff" strokeWidth="9" fill="none" opacity=".16" filter="url(#sBlur3)" />
+          <path d="M34 10 Q30 150 24 290" stroke={cc} strokeWidth="14" fill="none" opacity=".2" filter="url(#sBlur6)" />
+        </Seg>
         <g transform={`translate(0 300) ${rot(shn)}`}>
-          <Seg len={260} w0={94 * B} w1={66 * B} c={pt ? (near ? pt : sh(pt, 0.22)) : c}>
-            {pt && [60, 100, 140, 180, 220].map((y) => <path key={y} d={`M-40 ${y} L40 ${y - 14}`} stroke={sh(pt, 0.4)} strokeWidth="5" opacity=".7" />)}
+          <Seg len={260} w0={94 * B} w1={66 * B} c={pt ? (near ? pt : sh(pt, 0.22)) : c} fine={fine} tex={!pt} seam={!pt}>
+            {pt ? (
+              <g>
+                <rect x={-60} y={30} width={120} height={230} fill="url(#putteeS)" />
+                <rect x={-60} y={30} width={120} height={230} fill="url(#sideShade)" />
+                <rect x={-60} y={30} width={120} height={230} fill="url(#sideShadeV)" opacity=".5" />
+                <rect x={-60} y={30} width={120} height={12} fill="#3a3720" />
+                <rect x={-60} y={246} width={120} height={10} fill="#3a3720" />
+                <path d="M30 80 q6 60 -6 140" stroke="#e8e0c0" strokeWidth="3" fill="none" opacity=".45" />
+                <path d="M-40 40 Q0 52 40 40" stroke="#000" strokeWidth="10" fill="none" opacity=".28" filter="url(#sBlur3)" />
+              </g>
+            ) : (
+              <g>
+                <path d="M-34 20 Q0 36 34 20 M-30 60 Q0 72 30 58" stroke={cc} strokeWidth="2.6" fill="none" opacity=".4" />
+                <path d="M26 10 Q22 120 18 250" stroke={cc} strokeWidth="12" fill="none" opacity=".2" filter="url(#sBlur6)" />
+              </g>
+            )}
           </Seg>
           <g transform={`translate(0 260) ${rot(ft)}`}>
+            {/* boot: leather gradient, heel block, toe-cap seam, welt stitching, laces + eyelets, wrinkles, sole */}
             <path d="M-46 -20 L38 -20 L44 38 Q150 40 178 70 L180 106 L-62 106 L-62 20 Z" fill={bc} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
             <path d="M-46 -20 L38 -20 L44 38 Q150 40 178 70 L180 106 L-62 106 L-62 20 Z" fill="url(#sideShade)" />
-            <rect x={-62} y={98} width={244} height={10} rx={4} fill="#17100a" />
-            <path d="M52 44 Q110 54 150 76" stroke={hl(bc, 0.3)} strokeWidth="3" fill="none" opacity=".6" />
+            <path d="M-46 -20 L38 -20 L44 38 Q150 40 178 70 L180 106 L-62 106 L-62 20 Z" fill="url(#sideShadeV)" opacity=".7" />
+            <path d="M-62 56 L-62 106 L-12 106 L-12 66 Q-34 62 -62 56 Z" fill="#000" opacity=".22" />
+            <path d="M92 52 Q118 66 124 106" stroke={sh(bc, 0.55)} strokeWidth="3" fill="none" opacity=".75" />
+            <path d="M44 38 Q112 40 152 66" stroke={hl(bc, 0.3)} strokeWidth="3" fill="none" opacity=".55" />
+            <path d="M-56 98 H176" stroke={hl(bc, 0.35)} strokeWidth="2" strokeDasharray="6 5" opacity=".55" />
+            {[0, 1, 2, 3].map((i) => (
+              <g key={i}>
+                <circle cx={14 + i * 14} cy={-6 + i * 11} r={3.2} fill="#14100a" />
+                <path d={`M${6 + i * 14} ${-8 + i * 11} l22 6`} stroke="#e5c89a" strokeWidth="2.6" strokeLinecap="round" opacity=".85" />
+              </g>
+            ))}
+            <path d="M-40 8 Q-4 22 36 14 M-44 30 Q-6 40 40 36" stroke={sh(bc, 0.5)} strokeWidth="2.6" fill="none" opacity=".5" />
+            <rect x={-62} y={98} width={244} height={12} rx={4} fill="#17100a" />
+            <path d="M-58 100 H176" stroke="#5a4a3a" strokeWidth="1.5" opacity=".7" />
+            <rect x={-62} y={92} width={46} height={14} fill="#241810" />
+            <ellipse cx={92} cy={62} rx={34} ry={10} fill="url(#shineS)" opacity=".55" />
+            {o.hero && o.bandages && near && (
+              <g>
+                <rect x={-44} y={-34} width={86} height={34} rx={4} fill="url(#gauzeS)" stroke="#7d7767" strokeWidth="2" />
+                <path d="M-44 -24 H42 M-44 -14 H42 M-44 -4 H42" stroke="#aaa392" strokeWidth="1.8" />
+                <ellipse cx={0} cy={-16} rx={22} ry={11} fill="#c4281c" opacity=".55" filter="url(#sBlur3)" />
+              </g>
+            )}
           </g>
         </g>
       </g>
     );
   };
 
-  const torsoP = 'M-34 -352 L44 -352 Q100 -336 120 -270 Q134 -190 130 -110 Q126 -50 104 -4 L-92 -4 Q-112 -60 -114 -130 Q-118 -230 -104 -296 Q-90 -340 -34 -352 Z';
   const art = (
     <g>
       <Arm near={false} ua={p.uaF} fa={p.faF} stump={stumpFar} />
@@ -206,40 +359,92 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         <g transform={`translate(0 -666) ${rot(p.torso)}`}>
           <rect x={-200} y={-330} width={110} height={250} rx={26} fill={sh('#8a8458', 0.2)} stroke={OUT} strokeWidth="3" />
           <rect x={-200} y={-330} width={110} height={250} rx={26} fill="url(#sideShade)" />
+          <rect x={-200} y={-330} width={110} height={250} rx={26} fill="url(#weaveS)" />
           <path d="M-190 -250 H-96 M-190 -170 H-96" stroke={OUT} strokeWidth="3" opacity=".5" />
+          <path d="M-150 -330 V-80" stroke={OUT} strokeWidth="2" opacity=".35" strokeDasharray="6 5" />
           <rect x={-176} y={-350} width={70} height={28} rx={12} fill="#6a6040" stroke={OUT} strokeWidth="2.5" />
+          <rect x={-168} y={-232} width={26} height={20} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" />
+          <path d="M-90 -320 Q-60 -330 -30 -330" stroke="#5a4a2a" strokeWidth="10" fill="none" />
         </g>
       )}
       <g transform={`translate(0 -666) ${rot(p.torso)} scale(1 ${p.br || 1})`}>
         <ellipse cx={0} cy={0} rx={96 * B} ry={64} fill={bot} stroke={OUT} strokeWidth="3" />
         <path d={torsoP} fill={top} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
-        <path d={torsoP} fill="url(#sideShade)" /><path d={torsoP} fill="url(#sideShadeV)" opacity=".7" />
-        <path d="M-92 -250 Q-100 -150 -88 -20" stroke="#fff" strokeWidth="6" opacity=".14" fill="none" filter="url(#sBlur3)" />
-        <path d="M112 -250 L122 -40" stroke={sh(top, 0.35)} strokeWidth="3" opacity=".6" />
-        {[-250, -180, -110, -50].map((y) => <circle key={y} cx={114 - (y > -120 ? 0 : 2)} cy={y} r={5} fill="#d9b24c" stroke="#6b5214" strokeWidth="1" />)}
-        <path d="M-60 -200 Q0 -176 70 -200 M-70 -120 Q-10 -96 80 -120" stroke={sh(top, 0.4)} strokeWidth="3" fill="none" opacity=".35" />
-        {/* pocket */}
-        <rect x={18} y={-262} width={66} height={58} rx={5} fill={hl(top, 0.06)} stroke={OUT} strokeWidth="2.5" />
-        <rect x={18} y={-262} width={66} height={20} rx={5} fill={sh(top, 0.1)} stroke={OUT} strokeWidth="2.5" />
-        <circle cx={51} cy={-244} r={5} fill="#d9b24c" />
+        <defs><clipPath id={tid}><path d={torsoP} /></clipPath></defs>
+        <g clipPath={`url(#${tid})`}>
+          <rect x={-130} y={-360} width={270} height={360} fill="url(#weaveS)" />
+          <rect x={-130} y={-360} width={270} height={360} fill="url(#sideShade)" />
+          <rect x={-130} y={-360} width={270} height={360} fill="url(#sideShadeV)" opacity=".7" />
+          {fine && <ellipse cx={20} cy={-336} rx={70} ry={24} fill="#000" opacity=".4" filter="url(#sBlur6)" />}
+          {fine && <path d="M124 -300 Q132 -160 108 -20" stroke="#000" strokeWidth="20" fill="none" opacity=".3" filter="url(#sBlur6)" />}
+          {fine && <rect x={-130} y={-44} width={270} height={22} fill="#000" opacity=".3" filter="url(#sBlur6)" />}
+          {fine && <path d="M-96 -300 Q-112 -160 -92 -30" stroke="#fff" strokeWidth="8" fill="none" opacity=".16" filter="url(#sBlur3)" />}
+          <path d="M-92 -196 Q-20 -164 70 -196 M-100 -128 Q-10 -100 100 -128 M-60 -260 Q-10 -242 40 -262 M-90 -64 Q-10 -48 90 -66" stroke={sh(top, 0.45)} strokeWidth="3" fill="none" opacity=".4" strokeLinecap="round" />
+          <path d="M104 -332 Q116 -170 108 -20" stroke={stitchC} strokeWidth="3" opacity=".55" fill="none" />
+          <path d="M96 -332 Q108 -170 100 -20" stroke={hl(top, 0.3)} strokeWidth="1.5" opacity=".6" fill="none" />
+          <path d="M-84 -334 Q-10 -354 56 -346" stroke={stitchC} strokeWidth="1.8" strokeDasharray="5 4" opacity=".7" fill="none" />
+          {fine && <rect x={-130} y={-360} width={270} height={360} filter="url(#clothS)" opacity=".22" />}
+        </g>
+        <path d={torsoP} fill="none" stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+        {/* tunic hem */}
+        <path d="M-92 -4 L104 -4" stroke={stitchC} strokeWidth="1.8" strokeDasharray="5 4" opacity=".7" />
+        {/* folded collar (+ tie for the hero) */}
+        {o.hero && <g><path d="M70 -326 L90 -322 L96 -236 L84 -218 L72 -236 Z" fill="#1f3d2c" stroke="#0f2418" strokeWidth="2" /><path d="M76 -318 L82 -240 M86 -318 L88 -240" stroke="#3a6a4c" strokeWidth="1.5" opacity=".7" /></g>}
+        <path d="M24 -354 L72 -352 L92 -330 L62 -308 L20 -336 Z" fill={hl(top, 0.1)} stroke={OUT} strokeWidth="2.5" strokeLinejoin="round" />
+        <path d="M24 -354 L72 -352 L92 -330 L62 -308 L20 -336 Z" fill="url(#sideShade)" opacity=".7" />
+        <path d="M28 -346 L66 -343 L82 -328 M26 -338 L60 -316" stroke={stitchC} strokeWidth="1.5" strokeDasharray="4 3" opacity=".75" fill="none" />
+        {o.hero && <path d="M66 -334 L92 -330 L90 -312 L70 -316 Z" fill="#1f3d2c" stroke="#0f2418" strokeWidth="1.8" />}
+        {/* epaulette on the near shoulder, seen edge-on */}
+        <g transform="rotate(-8 -10 -340)"><rect x={-56} y={-352} width={84} height={20} rx={5} fill={sh(top, 0.1)} stroke={OUT} strokeWidth="2.5" /><rect x={-56} y={-352} width={84} height={7} rx={3} fill={hl(top, 0.18)} opacity=".6" /><path d="M-50 -338 H22" stroke={stitchC} strokeWidth="1.4" strokeDasharray="4 3" opacity=".7" /></g>
+        <Button x={-34} y={-342} r={4.2} /><Button x={-6} y={-345} r={4.2} />
+        {/* chest pocket with flap, stitching, pleat, button + cast shadow */}
+        <g>
+          <rect x={26} y={-256} width={68} height={60} rx={6} fill="#000" opacity=".38" filter="url(#sBlur3)" transform="translate(3 5)" />
+          <rect x={22} y={-262} width={68} height={60} rx={6} fill={hl(top, 0.06)} stroke={OUT} strokeWidth="2.5" />
+          <path d="M26 -232 Q56 -224 86 -232" stroke={sh(top, 0.4)} strokeWidth="2" fill="none" opacity=".4" />
+          <rect x={22} y={-262} width={68} height={24} rx={6} fill={sh(top, 0.1)} stroke={OUT} strokeWidth="2.5" />
+          <path d="M26 -238 H86" stroke="#000" strokeWidth="4" opacity=".25" filter="url(#sBlur3)" />
+          <rect x={28} y={-256} width={56} height={13} rx={3} fill="none" stroke={stitchC} strokeWidth="1.6" strokeDasharray="4 3" opacity=".8" />
+          <path d="M52 -240 L56 -226 L60 -240 Z" fill={sh(top, 0.1)} stroke={OUT} strokeWidth="1.5" />
+          <Button x={56} y={-242} />
+        </g>
+        {/* lower patch pocket */}
+        <g>
+          <rect x={6} y={-132} width={84} height={48} rx={5} fill={hl(top, 0.04)} stroke={OUT} strokeWidth="2.5" />
+          <rect x={12} y={-126} width={72} height={13} fill="none" stroke={stitchC} strokeWidth="1.5" strokeDasharray="4 3" opacity=".75" />
+          <Button x={48} y={-110} r={4.5} />
+        </g>
+        {[-228, -160, -92, -50].map((y) => <Button key={y} x={y > -100 ? 112 : 116} y={y} r={5} />)}
         {o.hero && (
           <g>
-            <path d="M-62 -340 L-28 -350 L128 -150 L120 -108 Z" fill="#7a4a2a" stroke="#2a170c" strokeWidth="3" />
-            <path d="M-50 -336 L116 -126" stroke="#d9ab78" strokeWidth="2" strokeDasharray="9 6" opacity=".85" />
-            <rect x={64} y={-282} width={14} height={26} fill="#8c1f2a" /><rect x={78} y={-282} width={14} height={26} fill="#2a4a9a" /><rect x={92} y={-282} width={14} height={26} fill="#2a4a9a" /><rect x={106} y={-282} width={14} height={26} fill="#e6c53c" />
+            {/* Sam Browne cross strap: shadow, edge highlight, double stitching, keeper loop */}
+            <path d="M-62 -340 L-28 -350 L128 -150 L120 -108 Z" fill="#000" opacity=".35" filter="url(#sBlur3)" transform="translate(5 7)" />
+            <path d="M-62 -340 L-28 -350 L128 -150 L120 -108 Z" fill="url(#leatherS)" stroke="#2a170c" strokeWidth="3" />
+            <path d="M-62 -340 L-28 -350 L128 -150 L120 -108 Z" fill="url(#sideShade)" opacity=".5" />
+            <path d="M-54 -338 L116 -126" stroke="#d9ab78" strokeWidth="2" strokeDasharray="9 6" opacity=".85" />
+            <path d="M-34 -346 L122 -148" stroke="#d9ab78" strokeWidth="2" strokeDasharray="9 6" opacity=".6" />
+            <path d="M-60 -338 L118 -112" stroke="#ffd7a0" strokeWidth="2.5" opacity=".25" />
+            <path d="M-46 -346 L-18 -356 L-6 -340 L-34 -330 Z" fill="#5a3320" stroke="#2a170c" strokeWidth="2" />
+            {/* medal ribbons with sheen */}
+            <rect x={46} y={-280} width={64} height={30} rx={2} fill="#2a2a2a" opacity=".45" transform="translate(2 3)" />
+            <rect x={44} y={-282} width={16} height={28} fill="#8c1f2a" /><rect x={60} y={-282} width={16} height={28} fill="#2a4a9a" /><rect x={76} y={-282} width={16} height={28} fill="#2a4a9a" /><rect x={92} y={-282} width={16} height={28} fill="#e6c53c" />
+            <rect x={44} y={-282} width={64} height={9} fill="#fff" opacity=".22" /><rect x={44} y={-282} width={64} height={28} fill="none" stroke="#2b2412" strokeWidth="1.5" />
           </g>
         )}
-        {/* belt */}
-        <rect x={-96 * B} y={-26} width={206 * B} height={32} fill={pal.belt} stroke={OUT} strokeWidth="3" />
-        <path d={`M${-92 * B} -20 H${106 * B}`} stroke="#d9ab78" strokeWidth="2" strokeDasharray="8 6" opacity=".6" />
-        <rect x={86 * B} y={-30} width={32} height={40} rx={4} fill="#c9a24c" stroke="#5e4614" strokeWidth="3" /><rect x={94 * B} y={-20} width={16} height={20} fill="#3a2a0c" />
+        {/* waist belt: leather gradient, holes, double stitching, keepers, bevelled buckle with prong */}
+        <rect x={-96 * B} y={-20} width={206 * B} height={32} fill="#000" opacity=".4" filter="url(#sBlur3)" />
+        <rect x={-96 * B} y={-26} width={206 * B} height={32} fill="url(#leatherS)" stroke={OUT} strokeWidth="3" />
+        <path d={`M${-92 * B} -20 H${106 * B} M${-92 * B} 0 H${106 * B}`} stroke="#d9ab78" strokeWidth="1.8" strokeDasharray="7 5" opacity=".7" />
+        <path d={`M${-94 * B} -24 H${108 * B}`} stroke="#ffd7a0" strokeWidth="2" opacity=".28" />
+        {[0, 1, 2, 3].map((i) => <circle key={i} cx={(-40 + i * 24) * B} cy={-10} r={3} fill="#1d1109" />)}
+        <rect x={-60 * B} y={-30} width={14} height={40} rx={2} fill="#5a3320" stroke={OUT} strokeWidth="2" /><rect x={32 * B} y={-30} width={14} height={40} rx={2} fill="#5a3320" stroke={OUT} strokeWidth="2" />
+        <rect x={86 * B} y={-34} width={32} height={46} rx={5} fill="url(#goldS)" stroke="#5e4614" strokeWidth="3" />
+        <rect x={92 * B} y={-26} width={20} height={30} rx={2} fill="#3a2a0c" stroke="#8a6a22" strokeWidth="1.5" />
+        <rect x={96 * B} y={-14} width={12} height={5} fill="#d8b559" /><path d={`M${88 * B} -30 H${116 * B}`} stroke="#fff3bd" strokeWidth="2" opacity=".7" />
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
           <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} /></g>
         </g>
-        {o.hero && o.bandages && (
-          <g transform="translate(0 0)"><rect x={-5} y={0} width={0} height={0} /></g>
-        )}
       </g>
       <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} />
     </g>
