@@ -1,11 +1,13 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
+import {clock} from '../rig/clock';
+import {Embers, Smoke, Rain} from './fx';
 import {Character, place} from '../rig/Character';
 import {attach, reach} from '../rig/pose';
 import {AnimalArt} from '../rig/Animals';
 import {idlePose, runPose, walkPose} from '../rig/Side';
 import {H, mix, mulberry32, W} from '../world/util';
-import {Par, Birds, Clouds, civ, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, kid, man, Motes, Rays, SkyRect, Sil, Stars, Title, Tree} from './lib';
+import {liveFront, Par, Birds, Clouds, civ, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, kid, man, Motes, Rays, SkyRect, Sil, Stars, Title, Tree} from './lib';
 import {heroOld} from '../scenes/HeroSide';
 import {heroYoung} from '../scenes/BoerA';
 
@@ -49,7 +51,7 @@ const warfield = (extra?: React.ReactNode) => {
       {[[420, 930, 280], [1180, 990, 340], [1650, 920, 200]].map(([x, y, r], i) => <g key={i}><ellipse cx={x} cy={y} rx={r} ry={r * 0.14} fill="#050608" /><ellipse cx={x} cy={y + 3} rx={r * 0.86} ry={r * 0.1} fill="#7a6a62" opacity=".55" /><ellipse cx={x + r * 0.2} cy={y + 2} rx={r * 0.4} ry={r * 0.05} fill="#ffb060" opacity=".5" /></g>)}
       {Array.from({length: 7}, (_, i) => <ellipse key={i} cx={1480 + i * 38 + (i % 2) * 12} cy={862 - (i % 2) * 14} rx={28} ry={13} fill={mix('#5a5238', '#000', 0.2 + (i % 3) * 0.08)} />)}
       <Motes n={50} seed={7} x0={1100} x1={1800} y0={420} y1={800} c="#ffa050" o={0.9} r={2.4} />
-      <g stroke="#9fb4d8" strokeWidth={1.4} opacity=".18">{Array.from({length: 60}, (_, i) => { const x = q() * W, y = q() * H; return <line key={i} x1={x} y1={y} x2={x - 10} y2={y + 38} />; })}</g>
+      <Rain n={70} seed={4} o={0.2} c="#9fb4d8" />
 </Par>
       {extra}
     </>
@@ -98,7 +100,7 @@ const cuBg = (id: string) => {
   );
 };
 const S0_3: React.FC = () => (
-  <Frame night grade="contrast(1.1) saturate(.85)" over={<Character pose={{head: 2, blink: 1, yaw: 12, mouth: 0}} variant={{patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.2, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
+  <Frame night grade="contrast(1.1) saturate(.85)" over={<Character pose={liveFront({head: 2, blink: 1, yaw: 12, mouth: 0})} variant={{patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.2, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
     {cuBg('c3')}
   </Frame>
 );
@@ -107,7 +109,7 @@ const S0_4: React.FC = () => {
   const p = stumpPose();
   const [hx, hy] = attach('foreR', 700, 1040, p), [sx, sy] = place(hx, hy);
   return (
-    <Frame night grade="contrast(1.1) saturate(.85)" over={<Character pose={p} variant={{patch: true, scars: true, stump: true, bandages: true}} cam={{x: 0, y: 0, zoom: 3.4, px: sx - 40, py: sy - 40}} />}>
+    <Frame night grade="contrast(1.1) saturate(.85)" over={<Character pose={liveFront(p)} variant={{patch: true, scars: true, stump: true, bandages: true}} cam={{x: 0, y: 0, zoom: 3.4, px: sx - 40, py: sy - 40}} />}>
       {cuBg('c4')}
     </Frame>
   );
@@ -163,8 +165,7 @@ const S0_9: React.FC = () => {
       <g transform="translate(960 160)"><rect x={-26} y={-60} width={52} height={90} fill="#7a1a1a" /><rect x={-26} y={-60} width={52} height={90} fill="url(#houseShade)" /><circle cx={0} cy={50} r={32} fill="#b88a40" /><circle cx={0} cy={50} r={22} fill="none" stroke="#6a4a1c" strokeWidth={4} /><path d="M-10 50 h20 M0 40 v20" stroke="#6a4a1c" strokeWidth={6} /></g>
       <Title x={W / 2} y={520} text="ADRIAN" size={150} anchor="middle" ls={26} c="#f6e8c8" />
       <Title x={W / 2} y={660} text="CARTON DE WIART" size={96} anchor="middle" ls={14} c="#f6e8c8" />
-      <line x1={400} y1={800} x2={1520} y2={450} stroke="#b01818" strokeWidth={8} strokeLinecap="round" />
-      <line x1={400} y1={800} x2={1520} y2={450} stroke="#ff6a4a" strokeWidth={2} strokeLinecap="round" opacity=".6" />
+      {(() => { const sp = clock.t === 0 ? 1 : Math.min(1, Math.max(0, (clock.t - 1.8) / 0.5)); return <g opacity={sp > 0 ? 1 : 0}><line x1={400} y1={800} x2={400 + 1120 * sp} y2={800 - 350 * sp} stroke="#b01818" strokeWidth={8} strokeLinecap="round" /><line x1={400} y1={800} x2={400 + 1120 * sp} y2={800 - 350 * sp} stroke="#ff6a4a" strokeWidth={2} strokeLinecap="round" opacity=".6" /></g>; })()}
       <Title x={W / 2} y={790} text="prajurit yang tak bisa dibunuh" size={44} anchor="middle" ls={4} serif italic weight={400} c="#d9c7a0" />
       <rect x={560} y={850} width={800} height={3} fill="#e0b86a" />
       <Motes n={70} seed={4} c="#ffa050" o={0.7} r={2.4} y0={300} />

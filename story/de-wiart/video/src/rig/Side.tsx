@@ -23,6 +23,7 @@ export type SideOpts = {
   outfit?: 'trousers' | 'skirt' | 'gown' | 'thobe' | 'frock' | 'dress' | 'blazer';   // long skirt for women
   hairStyle?: 'bun' | 'long';
   stretch?: number;               // height multiplier (tall / short people)
+  nose?: number; jaw?: 'round' | 'long' | 'square'; eyeC?: string;   // face variety
   child?: boolean;                // big round head, big eyes, button nose, rosy cheeks
   apron?: boolean;
   rifle?: 'enfield' | 'mauser' | 'martini';   // model: British Lee-Enfield, German Gewehr 98, Martini-Henry (dervishes)
@@ -136,7 +137,7 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
         <path d="M-52 40 Q-30 56 -10 56" stroke={skinD} strokeWidth="2" fill="none" opacity=".35" />
       </g>
       {/* nose: bridge highlight, nostril, wing shade */}
-      <g transform={child ? 'translate(68 14) scale(.55) translate(-68 -14)' : undefined}>
+      <g transform={child ? 'translate(68 14) scale(.55) translate(-68 -14)' : (o.nose && o.nose !== 1 ? `translate(68 14) scale(${o.nose}) translate(-68 -14)` : undefined)}>
       <path d="M66 -10 Q92 14 77 26" stroke="#9c6544" strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".6" />
       <path d="M62 -8 Q70 8 70 16" stroke="#fff" strokeWidth="3" fill="none" opacity=".28" strokeLinecap="round" />
       <path d="M64 24 Q70 28 76 26" stroke="#6b3f24" strokeWidth="2.6" fill="none" strokeLinecap="round" />
@@ -157,7 +158,7 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
       {!(o.hero && o.patch && near) && (
         <g transform={`translate(42 -32) scale(${child ? 1.3 : 1} ${blink * (1 - 0.55 * squint) * (1 + 0.45 * wide) * (child ? 1.35 : 1)}) translate(-42 32)`}>
           <ellipse cx={42} cy={-32} rx={13} ry={8} fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5" />
-          <circle cx={46} cy={-32} r={6} fill="#4a86b8" /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.6} fill="#fff" />
+          <circle cx={46} cy={-32} r={6} fill={o.eyeC ?? '#4a86b8'} /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.6} fill="#fff" />
           <path d="M30 -34 Q42 -44 56 -34" stroke="#4a2a18" strokeWidth="2.6" fill="none" strokeLinecap="round" />
           <path d="M54 -36 l7 -3 M55 -32 l8 0" stroke="#4a2a18" strokeWidth="1.8" strokeLinecap="round" />
         </g>
@@ -693,7 +694,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         {sling && (<g><path d="M-40 -350 Q-92 -276 -112 -176" stroke="#3a2414" strokeWidth="11" fill="none" strokeLinecap="round" /><path d="M-40 -350 Q-90 -276 -110 -178" stroke="#8a5a32" strokeWidth="2" fill="none" strokeDasharray="7 5" opacity=".7" /><rect x={-58} y={-346} width={16} height={22} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" transform="rotate(-18 -50 -335)" /></g>)}
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
-          <g transform={`translate(10 -106) ${o.child ? 'translate(0 56) scale(1.32) translate(0 -56)' : ''}`}><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} smile={p.smile} wide={p.wide} /></g>
+          <g transform={`translate(10 -106) ${o.child ? 'translate(0 56) scale(1.32) translate(0 -56)' : ''} ${o.jaw === 'long' ? 'translate(0 56) scale(.95 1.07) translate(0 -56)' : o.jaw === 'square' ? 'translate(0 56) scale(1.06 .97) translate(0 -56)' : ''}`}><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} smile={p.smile} wide={p.wide} /></g>
         </g>
       </g>
       <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} hand={p.handN} />
@@ -705,7 +706,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
 };
 
 /** walking cycle (phase in radians); stride scales the swing */
-const blinkNow = (off = 0): number | undefined => { if (clock.t <= 0) return undefined; const k = (clock.t + off + 1.3) % 3.8; return 1 - 0.95 * Math.max(0, 1 - Math.abs(k - 0.1) / 0.09); };
+export const blinkNow = (off = 0): number | undefined => { if (clock.t <= 0) return undefined; const k = (clock.t + off + 1.3) % 3.8; return 1 - 0.95 * Math.max(0, 1 - Math.abs(k - 0.1) / 0.09); };
 export const walkPose = (phase0: number, stride = 1): SidePose => {
   const phase = phase0 + clock.t * 5.2;
   const s = Math.sin(phase), c = Math.cos(phase), sF = Math.sin(phase + Math.PI), cF = Math.cos(phase + Math.PI);
@@ -719,6 +720,7 @@ export const walkPose = (phase0: number, stride = 1): SidePose => {
 };
 export const idlePose = (t0: number): SidePose => { const t = t0 + clock.t * 1.5; return {blink: blinkNow(t0), torso: 0.6 * Math.sin(t), br: 1 + 0.006 * Math.sin(t), head: 0.8 * Math.sin(t * 0.7), uaN: 3, faN: -12, uaF: -2, faF: -10, shN: 3, shF: 3}; };
 export const aimPose = (t0: number): SidePose => { const t = t0 + clock.t * 1.2; return {blink: blinkNow(t0), grip: true, torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)}; };
+export const sitPose = (t: number): SidePose => ({thN: -88, shN: 88, ftN: 0, thF: -84, shF: 90, ftF: 0, torso: -2, head: 1, uaN: 18, faN: -64, uaF: 12, faF: -58, dy: 300, br: 1 + 0.005 * Math.sin(t)});
 export const kneelPose = (t: number): SidePose => ({torso: -8, head: 10, thN: -88, shN: 88, ftN: 0, thF: 0, shF: 90, ftF: -70, uaN: -45, faN: -50, uaF: -38, faF: -40, dy: 316, br: 1 + 0.005 * Math.sin(t)});
 
 export const runPose = (phase0: number): SidePose => {

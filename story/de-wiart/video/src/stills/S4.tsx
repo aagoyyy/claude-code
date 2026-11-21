@@ -3,7 +3,9 @@ import {Character} from '../rig/Character';
 import {aimPose, HandArt, idlePose, kneelAimPose, muzzleOf, ridePose, runPose, SideOpts, walkPose} from '../rig/Side';
 import {AnimalArt, saddleHeight} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
-import {HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, Tree, face} from './lib';
+import {Smoke, Ripples, Flash, Embers, Dust} from './fx';
+import {clock} from '../rig/clock';
+import {liveFront, HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, Tree, face} from './lib';
 import {gent, worker, lady, boy, young, P} from './S1';
 import {doctor, nurse, patient, MapArt, Ocean, Ship, Ref, Flag, trooper, sergeant, khakiOfficer, adrianY} from './S2';
 import {askari, camelRider, dervish, heroPith, officer} from '../scenes/SomaliA';
@@ -13,7 +15,7 @@ export const camelMount = (id: string, x: number, y: number, s: number, f: 'left
   const drop = (saddleHeight('camel') - 666) * s;
   return (
     <g>
-      <Fig id={`${id}c`} x={x} y={y} s={s} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat, mane: '#6a4a2a', face: f, tack: true}} p={{phase: phase ?? x / 130, stride: 0.9}} />} />
+      <Fig id={`${id}c`} x={x} y={y} s={s} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat, mane: '#6a4a2a', face: f, tack: true}} p={{phase: phase ?? x / 130, stride: 0.9, speed: 4.2}} />} />
       <Fig id={`${id}r`} x={x + (f === 'right' ? -20 : 20) * s} y={y - drop} s={s} o={{...rider, face: f}} p={{...ridePose(0.3), ...p}} />
     </g>
   );
@@ -34,7 +36,7 @@ export const sandGround = (y: number, c = '#d8b684') => (
 /* =============================== CHAPTER 4 : Somaliland, 1914 =============================== */
 const S4_1: React.FC = () => (
   <Frame grade="contrast(1.05) saturate(1.0)">
-    <MapArt focus={[1500, 470, 2.2]} route="M1440 430 C1470 470 1500 480 1520 540 C1540 580 1580 590 1610 610" mark={[1610, 610]} year="1914" labels={[{x: 1440, y: 400, t: 'Berbera', s: 22}, {x: 1530, y: 640, t: 'SOMALILAND', s: 34, big: true}, {x: 1420, y: 330, t: 'Teluk Aden', s: 24}, {x: 1700, y: 470, t: 'Laut Arab', s: 22}]} />
+    <MapArt focus={[1500, 470, 2.2]} pts={[[1440, 430], [1470, 470], [1500, 480], [1520, 540], [1540, 580], [1580, 590], [1610, 610]]} ship={[1440, 430, 0]} mark={[1610, 610]} year="1914" labels={[{x: 1440, y: 400, t: 'Berbera', s: 22}, {x: 1530, y: 640, t: 'SOMALILAND', s: 34, big: true}, {x: 1420, y: 330, t: 'Teluk Aden', s: 24}, {x: 1700, y: 470, t: 'Laut Arab', s: 22}]} />
   </Frame>
 );
 const S4_2: React.FC = () => (
@@ -61,7 +63,7 @@ const S4_3: React.FC = () => {
       <Par d={0.1}><SkyRect id="d43" stops={[[0, '#6aa0cc'], [1, '#f0d8a8']]} h={600} /><Glow id="d43g" x={280} y={260} r={500} c="#fff2d0" o={0.9} /></Par>
       <Par d={0.8}>{sandGround(600, '#d0a468')}</Par>
       <Par d={1.1}>
-        <Fig id="d43c" x={900} y={1180} s={1.75} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'right', tack: true}} p={{phase: 1.1, stride: 0.6}} />} />
+        <Fig id="d43c" x={900} y={1180} s={1.75} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'right', tack: true}} p={{phase: 1.1, stride: 0.7, speed: 4}} />} />
         {Array.from({length: 40}, (_, i) => <circle key={i} cx={560 + q() * 700} cy={930 + q() * 140} r={4 + q() * 12} fill="#d8b070" opacity={0.7} />)}
         <g fill="#8a6a30" opacity=".5" filter="url(#blS)">{[0, 1].map((i) => <ellipse key={i} cx={680 + i * 480} cy={1070} rx={160} ry={20} />)}</g>
       </Par>
@@ -136,7 +138,7 @@ const S4_9: React.FC = () => {
       <Par d={0.1}><SkyRect id="d49" stops={[[0, '#6aa0cc'], [1, '#f0d8a8']]} h={700} /><rect y={700} width={W} height={380} fill="#d0a468" /><Glow id="d49g" x={300} y={260} r={500} c="#fff2d0" o={0.7} /></Par>
       <Par d={1.1}>
         <Fig id="a49" x={x} y={y} s={s} o={askari('right', 'rifle')} p={P(aimPose(0.3), {squint: 0.85, brow: -0.4, mouth: 0.05})} light="desert" lit={0.9} />
-        <g transform={`translate(${x + mx * s} ${y + my * s})`}><ellipse rx={150} ry={50} fill="#fff4c0" opacity=".9" /><ellipse rx={70} ry={26} fill="#fff" /><Glow id="mz49" x={0} y={0} r={260} c="#ffb040" o={0.6} /></g>
+        <Flash x={x + mx * s} y={y + my * s} r={170} seed={9} rate={5} />
       </Par>
       <Par d={1}><Motes n={50} seed={8} c="#ffe0a0" o={0.5} /></Par>
     </Frame>
@@ -145,7 +147,7 @@ const S4_9: React.FC = () => {
 const S4_10: React.FC = () => <Ref src="f564" z={1.0} cx={900} cy={540} tint="#fff0d0" />;
 const S4_11: React.FC = () => <Ref src="f658h" z={1.5} cx={420} cy={480} tint="#fff0d0" />;
 const S4_12: React.FC = () => (
-  <Frame grade="contrast(1.12) saturate(1.0)" over={<Character pose={{head: 8, blink: 0.04, yaw: 10, mouth: 0.7}} variant={{young: true, patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.3, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}}>
+  <Frame grade="contrast(1.12) saturate(1.0)" over={<Character pose={liveFront({head: 8, blink: 0.04, yaw: 10, mouth: 0.7})} variant={{young: true, patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.3, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}}>
     <g transform="translate(850 360)"><path d="M0 0 q-6 40 4 80 q10 -30 -4 -80 Z" fill="#a8101a" opacity=".85" /><path d="M-40 -10 q4 30 -6 50" stroke="#a8101a" strokeWidth={8} fill="none" opacity=".7" strokeLinecap="round" /></g></Character>}>
     <defs><radialGradient id="b412" cx=".5" cy=".45" r=".8"><stop offset="0" stopColor="#d89060" /><stop offset=".6" stopColor="#5a2a28" /><stop offset="1" stopColor="#140a0a" /></radialGradient></defs>
     <rect width={W} height={H} fill="url(#b412)" />
@@ -271,7 +273,7 @@ const S4_19: React.FC = () => (
     <Par d={1.1}>
       {/* a gentleman's boot, a puddle, and a glass eye bouncing across the stones */}
       <path d="M1380 100 L1500 100 L1500 640 Q1700 650 1760 720 L1760 800 L1330 800 L1340 640 Z" fill="#1a1210" stroke="#000" strokeWidth={6} /><path d="M1380 100 L1500 100 L1500 640" fill="url(#sideShade)" /><path d="M1340 760 L1760 760" stroke="#000" strokeWidth={14} />
-      <ellipse cx={760} cy={880} rx={420} ry={90} fill="#8aa4c0" opacity=".55" /><ellipse cx={760} cy={880} rx={300} ry={60} fill="none" stroke="#fff" strokeWidth={4} opacity=".6" /><ellipse cx={760} cy={880} rx={180} ry={34} fill="none" stroke="#fff" strokeWidth={4} opacity=".5" />
+      <ellipse cx={760} cy={880} rx={420} ry={90} fill="#8aa4c0" opacity=".55" /><Ripples x={760} y={880} rx={420} ry={90} n={3} />
       {glassEye(880, 740, 56)}
       {[0, 1, 2].map((i) => <path key={i} d={`M${1040 + i * 40} ${560 - i * 10} Q${960 + i * 40} ${700} ${900 + i * 20} ${730}`} stroke="#fff" strokeWidth={4} fill="none" opacity={0.4 - i * 0.1} strokeLinecap="round" strokeDasharray="10 14" />)}
       {Array.from({length: 14}, (_, i) => <circle key={i} cx={760 + Math.cos(i * 1.3) * (120 + (i % 4) * 40)} cy={860 - (i % 5) * 26} r={4 + (i % 3) * 3} fill="#e8f4ff" opacity=".8" />)}
@@ -279,7 +281,7 @@ const S4_19: React.FC = () => (
   </Frame>
 );
 const S4_20: React.FC = () => (
-  <Frame night grade="contrast(1.14) saturate(.95)" over={<Character pose={{head: -2, blink: 1, yaw: 14, mouth: 0.03}} variant={{patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.4, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
+  <Frame night grade="contrast(1.14) saturate(.95)" over={<Character pose={liveFront({head: -2, blink: 1, yaw: 14, mouth: 0.03})} variant={{patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.4, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
     <defs><radialGradient id="p420" cx=".6" cy=".4" r=".8"><stop offset="0" stopColor="#7a5a40" /><stop offset=".5" stopColor="#2a1c14" /><stop offset="1" stopColor="#070504" /></radialGradient></defs>
     <rect width={W} height={H} fill="url(#p420)" />
     <Glow id="p420g" x={1300} y={300} r={600} c="#ffb070" o={0.4} />
@@ -297,7 +299,7 @@ export const loco = (x: number, y: number, s: number) => (
     <rect x={-300} y={-100} width={600} height={30} fill="#a8201e" />
     {[-210, -110, 0, 180, 250].map((cx, i) => <g key={i}><circle cx={cx} cy={-40} r={i === 2 ? 70 : 56} fill="#14100c" stroke="#555" strokeWidth={5} /><circle cx={cx} cy={-40} r={i === 2 ? 14 : 10} fill="#999" /></g>)}
     <line x1={-210} y1={-40} x2={0} y2={-40} stroke="#999" strokeWidth={8} />
-    <g filter="url(#blL)"><ellipse cx={-300} cy={-460} rx={120} ry={70} fill="#fff" opacity=".8" /><ellipse cx={-380} cy={-560} rx={170} ry={90} fill="#fff" opacity=".6" /><ellipse cx={-500} cy={-640} rx={210} ry={100} fill="#fff" opacity=".4" /></g>
+    <Smoke x={-300} y={-420} w={64} h={520} c="#f4f4f4" o={0.85} puffs={10} seed={5} drift={-240} />
   </g>
 );
 export const carriage = (x: number, y: number, s: number, c = '#2a4a3a') => (
@@ -395,7 +397,7 @@ const S5_6: React.FC = () => (
 );
 const S5_7: React.FC = () => (
   <Frame grade="contrast(1.05) saturate(1.0)">
-    <MapArt focus={[560, 200, 1.9]} trenches year="1914" route="M640 70 C 620 110 600 150 580 190" mark={[580, 200]} labels={[{x: 360, y: 110, t: 'Inggris', s: 30}, {x: 700, y: 170, t: 'Selat', s: 20}, {x: 520, y: 260, t: 'BELGIA', s: 24, big: true}, {x: 760, y: 290, t: 'PRANCIS', s: 28, big: true}, {x: 560, y: 410, t: 'FRONT BARAT', s: 34, big: true}]} />
+    <MapArt focus={[560, 200, 1.9]} trenches year="1914" pts={[[640, 70], [620, 110], [600, 150], [580, 190]]} ship={[640, 70, 90]} mark={[580, 200]} labels={[{x: 360, y: 110, t: 'Inggris', s: 30}, {x: 700, y: 170, t: 'Selat', s: 20}, {x: 520, y: 260, t: 'BELGIA', s: 24, big: true}, {x: 760, y: 290, t: 'PRANCIS', s: 28, big: true}, {x: 560, y: 410, t: 'FRONT BARAT', s: 34, big: true}]} />
   </Frame>
 );
 const S5_8: React.FC = () => (

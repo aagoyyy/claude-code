@@ -1,6 +1,8 @@
 import React from 'react';
 import {aimPose, handsUpPose, idlePose, runPose, SideOpts, swimPose, walkPose} from '../rig/Side';
 import {H, mix, mulberry32, W} from '../world/util';
+import {Smoke, Ripples, Splash, Embers, Flash, Boom, Steam} from './fx';
+import {clock} from '../rig/clock';
 import {arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, HandCU, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Stars, Title, Tree, face} from './lib';
 import {P, gent, lady} from './S1';
 import {doctor, nurse, MapArt, Ocean, Ship, Ref, Flag, trooper, khakiOfficer, desk} from './S2';
@@ -54,7 +56,7 @@ const S9_2: React.FC = () => (
     <Par d={0.1}><defs><Grad id="m92" stops={[[0, '#6a8a88'], [1, '#1a3a3a']]} /></defs><rect width={W} height={H} fill="url(#m92)" /><Glow id="m92g" x={300} y={200} r={700} c="#fff6d8" o={0.35} />{Array.from({length: 60}, (_, i) => <path key={i} d={`M${(i * 131) % W} ${(i * 67) % H} q60 -10 120 0`} stroke="#fff" strokeOpacity=".22" strokeWidth={3} fill="none" />)}</Par>
     <Par d={1.1}>
       <path d="M-80 640 L1100 560 Q1240 540 1360 470 L1240 700 L-80 800 Z" fill="#4a3220" stroke="#1a100a" strokeWidth={8} /><path d="M-80 640 L1100 560 Q1240 540 1360 470" fill="none" stroke="#8a6a44" strokeWidth={10} />
-      {[0, 1, 2, 3].map((i) => <ellipse key={i} cx={1250 + i * 70} cy={700 + i * 36} rx={200 + i * 70} ry={34 + i * 12} fill="none" stroke="#fff" strokeWidth={5} opacity={0.7 - i * 0.14} />)}
+      <Ripples x={1360} y={780} rx={520} ry={90} n={4} />
       {Array.from({length: 22}, (_, i) => <circle key={i} cx={1180 + Math.cos(i) * (80 + (i % 5) * 50)} cy={690 - (i % 6) * 28} r={4 + (i % 3) * 3} fill="#e8f8ff" opacity=".8" />)}
     </Par>
     <Par d={1.5} blur={9}>{reeds(9, 1100, 50, '#2a3a20')}</Par>
@@ -119,7 +121,7 @@ const S9_6: React.FC = () => (
 );
 const S9_7: React.FC = () => (
   <Frame grade="contrast(1.05) saturate(1.0)">
-    <MapArt focus={[820, 150, 2.0]} year="1939" route="M740 140 C 820 160 900 140 980 190" mark={[980, 190]} labels={[{x: 720, y: 110, t: 'POLANDIA', s: 28, big: true}, {x: 1000, y: 150, t: 'RUMANIA', s: 26, big: true}, {x: 900, y: 80, t: 'EROPA', s: 22}, {x: 880, y: 230, t: 'Laut Hitam', s: 20}]} />
+    <MapArt focus={[820, 150, 2.0]} year="1939" pts={[[740, 140], [820, 160], [900, 140], [980, 190]]} ship={[740, 140, 0]} mark={[980, 190]} labels={[{x: 720, y: 110, t: 'POLANDIA', s: 28, big: true}, {x: 1000, y: 150, t: 'RUMANIA', s: 26, big: true}, {x: 900, y: 80, t: 'EROPA', s: 22}, {x: 880, y: 230, t: 'Laut Hitam', s: 20}]} />
   </Frame>
 );
 const S9_8: React.FC = () => (
@@ -163,8 +165,8 @@ const S9_11: React.FC = () => (
     <Par d={0.03}><SkyRect id="b911" stops={[[0, '#5a6a7a'], [0.6, '#b8b8b0'], [1, '#e0dcc8']]} h={640} /><Clouds n={8} seed={5} y0={40} y1={400} c="#fff" o={0.5} /></Par>
     <Par d={0.6}><defs><Grad id="w911" stops={[[0, '#6a8aa0'], [1, '#14283a']]} /></defs><rect y={640} width={W} height={H - 640} fill="url(#w911)" /><rect y={820} width={W} height={H - 820} fill="#8a8478" /><rect y={820} width={W} height={H - 820} fill="url(#aoV)" /></Par>
     <Par d={1}>
-      {[0, 1, 2].map((i) => <g key={i} transform={`translate(${520 + i * 380} ${60 + i * 60}) rotate(${12 - i * 8})`}><ellipse rx={24} ry={64} fill="#2a2a30" stroke="#0a0a0e" strokeWidth={4} /><polygon points="-18,50 18,50 12,100 -12,100" fill="#2a2a30" /><path d="M-22 -30 H22" stroke="#d8c060" strokeWidth={5} /><path d="M0 -60 V-240" stroke="#fff" strokeWidth={4} opacity=".3" /></g>)}
-      <g filter="url(#blL)"><ellipse cx={1460} cy={740} rx={160} ry={300} fill="#e8f0f8" opacity=".85" /><ellipse cx={1460} cy={560} rx={110} ry={160} fill="#fff" opacity=".7" /></g>
+      {[0, 1, 2].map((i) => <g key={i} transform={`translate(${520 + i * 380 + clock.t * 40} ${60 + i * 60 + Math.min(clock.t * 520, 700 - i * 90)}) rotate(${12 - i * 8})`}><ellipse rx={24} ry={64} fill="#2a2a30" stroke="#0a0a0e" strokeWidth={4} /><polygon points="-18,50 18,50 12,100 -12,100" fill="#2a2a30" /><path d="M-22 -30 H22" stroke="#d8c060" strokeWidth={5} /><path d="M0 -60 V-240" stroke="#fff" strokeWidth={4} opacity=".3" /></g>)}
+      <Splash x={1460} y={800} t0={1.1} r={200} seed={11} />
       {[420, 760, 1080].map((x, i) => <Fig key={i} id={`b911${i}`} x={x} y={960 + (i % 2) * 24} s={0.56} o={{...tw('right', i % 2 ? '#c89870' : '#e0a880', 'rifle+pack'), head: 'brodie'}} p={P(idlePose(i * 1.1), {fall: 0.5 + i * 0.1, head: 20}, face.surprise)} light="night" lit={0.7} />)}
       <Fig id="a911" x={1700} y={990} s={0.64} o={oldA('left', {gear: 'none'})} p={P(idlePose(0.5), {uaN: -140, faN: -30, handN: 'point', head: -12}, face.angry)} light="night" lit={0.75} />
       {Array.from({length: 40}, (_, i) => <circle key={i} cx={1300 + (i * 61) % 360} cy={560 + (i * 37) % 340} r={3 + (i % 4) * 2} fill="#e8f4ff" opacity=".8" />)}
@@ -174,7 +176,7 @@ const S9_11: React.FC = () => (
 const S9_12: React.FC = () => (
   <Frame grade="contrast(1.1) saturate(1.0) hue-rotate(-6deg)">
     <Par d={0.03}><SkyRect id="r912" stops={[[0, '#2a3a5a'], [0.5, '#8a5a5a'], [1, '#f0903a']]} h={640} /><Clouds n={9} seed={7} y0={40} y1={440} c="#ff9a60" o={0.5} /><Glow id="r912g" x={1500} y={620} r={800} c="#ff7a2a" o={0.8} /></Par>
-    <Par d={0.25}><polygon points="1100,640 1300,420 1500,380 1920,500 1920,640" fill="#3a2a2a" /><g fill="#14100c">{[1250, 1420, 1580, 1740].map((x, i) => <g key={i}><rect x={x} y={560 - (i % 2) * 20} width={110} height={90} /><polygon points={`${x - 8},${560 - (i % 2) * 20} ${x + 55},${510 - (i % 2) * 20} ${x + 118},${560 - (i % 2) * 20}`} /></g>)}</g><g filter="url(#blL)">{[1300, 1500, 1700].map((x, i) => <ellipse key={i} cx={x} cy={420 - i * 30} rx={120} ry={200} fill="#2a2020" opacity=".8" />)}</g><Glow id="r912f" x={1500} y={600} r={380} c="#ffb040" o={0.9} /></Par>
+    <Par d={0.25}><polygon points="1100,640 1300,420 1500,380 1920,500 1920,640" fill="#3a2a2a" /><g fill="#14100c">{[1250, 1420, 1580, 1740].map((x, i) => <g key={i}><rect x={x} y={560 - (i % 2) * 20} width={110} height={90} /><polygon points={`${x - 8},${560 - (i % 2) * 20} ${x + 55},${510 - (i % 2) * 20} ${x + 118},${560 - (i % 2) * 20}`} /></g>)}</g><g filter="url(#blL)">{[1300, 1500, 1700].map((x, i) => <ellipse key={i} cx={x} cy={420 - i * 30} rx={120} ry={200} fill="#2a2020" opacity=".8" />)}</g><Glow id="r912f" x={1500} y={600} r={380} c="#ffb040" o={0.9} /><Smoke x={1450} y={560} w={90} h={480} c="#2a2020" o={0.85} puffs={10} seed={3} drift={-120} /><Embers n={44} seed={6} x0={1250} x1={1800} y0={200} y1={640} c="#ffb040" o={0.9} rise={120} /></Par>
     <Par d={0.6}><defs><Grad id="w912" stops={[[0, '#8a5a4a'], [1, '#14182a']]} /></defs><rect y={640} width={W} height={H - 640} fill="url(#w912)" />{Array.from({length: 40}, (_, i) => <path key={i} d={`M${(i * 97) % W} ${680 + (i * 41) % 380} q40 -8 80 0`} stroke="#ffb070" strokeOpacity=".3" strokeWidth={3} fill="none" />)}<ellipse cx={1500} cy={760} rx={420} ry={30} fill="#ff9a40" opacity=".4" filter="url(#blM)" /></Par>
     <Par d={1}><Ship x={720} y={880} s={0.9} smoke />{Array.from({length: 14}, (_, i) => <Fig key={i} id={`d912${i}`} x={380 + i * 54} y={742 - (i % 2) * 6} s={0.11} o={tw('right')} p={idlePose(i)} lo />)}</Par>
   </Frame>
@@ -229,7 +231,7 @@ const S10_3: React.FC = () => (
       <g><rect x={0} y={400} width={1100} height={360} rx={160} fill="#3a4a3a" stroke="#14140e" strokeWidth={8} /><rect x={0} y={400} width={1100} height={360} rx={160} fill="url(#houseShade)" />{Array.from({length: 10}, (_, i) => <circle key={i} cx={100 + i * 100} cy={420} r={6} fill="#14140e" />)}</g>
       <g transform="translate(1100 580)"><ellipse rx={120} ry={170} fill="#2a2a2a" stroke="#0a0a0a" strokeWidth={8} /><ellipse rx={100} ry={150} fill="#1a1a1a" />{[0, 1, 2, 3].map((i) => <path key={i} d={`M0 0 L${Math.cos(i * 1.57) * 400} ${Math.sin(i * 1.57) * 110}`} stroke="#3a3a3a" strokeWidth={30} strokeLinecap="round" opacity=".7" />)}</g>
       <g filter="url(#blL)">{[0, 1, 2, 3, 4].map((i) => <ellipse key={i} cx={1300 + i * 150} cy={560 - i * 60} rx={80 + i * 36} ry={50 + i * 20} fill="#14100c" opacity={0.85 - i * 0.12} />)}</g>
-      <g><Glow id="e103" x={1100} y={620} r={360} c="#ff7a2a" o={0.8} /><path d="M1060 560 q30 -80 70 -10 q-20 -50 50 -40 q-30 40 -40 90 Z" fill="#ffd070" opacity=".9" /></g>
+      <g><Glow id="e103" x={1100} y={620} r={360} c="#ff7a2a" o={0.8} /><Smoke x={1100} y={620} w={70} h={420} c="#14100c" o={0.9} puffs={9} seed={6} drift={260} /><Embers n={30} seed={2} x0={1000} x1={1300} y0={300} y1={700} c="#ffb040" o={0.9} rise={140} /></g>
     </Par>
     <Par d={1}><Motes n={50} seed={4} c="#ffa060" o={0.8} r={2.4} /></Par>
   </Frame>
@@ -239,7 +241,7 @@ const S10_5: React.FC = () => <Ref src="g1690h" z={1.0} cx={900} cy={540} tint="
 const S10_6: React.FC = () => <Ref src="g1800h" z={1.0} cx={900} cy={540} tint="#a8b0d0" />;
 const S10_7: React.FC = () => (
   <CUFront night pose={{head: -6, blink: 0.5, yaw: 6, mouth: 0.5}} variant={{patch: true, scars: true, stump: true}} c1="#6a8aa0" c2="#0a1a2a" zoom={4.2} py={380}
-    fx={<g><rect x={0} y={640} width={W} height={440} fill="#2a5a7a" opacity=".85" />{Array.from({length: 8}, (_, i) => <path key={i} d={`M${i * 260 - 40} ${650 + (i % 3) * 18} q60 -26 120 0 t120 0`} stroke="#fff" strokeWidth={6} fill="none" opacity=".6" />)}{Array.from({length: 26}, (_, i) => <circle key={i} cx={600 + (i * 71) % 760} cy={300 + (i * 37) % 360} r={3 + (i % 5) * 3} fill="#e8f8ff" opacity=".85" />)}</g>} />
+    fx={<g><rect x={0} y={640} width={W} height={440} fill="#2a5a7a" opacity=".85" />{Array.from({length: 9}, (_, i) => <path key={i} d={`M${(i * 260 - 40 + clock.t * 70) % 2200 - 240} ${650 + (i % 3) * 18 + Math.sin(clock.t * 2 + i) * 8} q60 -26 120 0 t120 0`} stroke="#fff" strokeWidth={6} fill="none" opacity=".6" />)}{Array.from({length: 26}, (_, i) => <circle key={i} cx={600 + (i * 71) % 760} cy={300 + (i * 37) % 360} r={3 + (i % 5) * 3} fill="#e8f8ff" opacity=".85" />)}</g>} />
 );
 const S10_8: React.FC = () => (
   <Frame grade="contrast(1.08) saturate(.95) hue-rotate(-4deg)">

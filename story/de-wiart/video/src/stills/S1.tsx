@@ -1,9 +1,9 @@
 import React from 'react';
 import {Character} from '../rig/Character';
-import {HandArt, idlePose, runPose, SideOpts, walkPose} from '../rig/Side';
+import {HandArt, idlePose, runPose, sitPose, SideOpts, walkPose} from '../rig/Side';
 import {AnimalArt} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
-import {HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
+import {liveFront as _lf, HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
 import {heroYoung} from '../scenes/BoerA';
 
 /* ----------------------------- archetypes ----------------------------- */
@@ -100,7 +100,7 @@ const S1_2: React.FC = () => (
         <path d="M20 -230 Q180 -272 340 -230" fill="#1a1012" /><rect x={0} y={-60} width={360} height={20} fill="#1a1012" /><rect x={350} y={-252} width={14} height={34} fill="#ffe0a0" />
         {wheel(90, 70)}{wheel(290, 70)}
       </g>
-      <Fig id="hz" x={930} y={950} s={0.52} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'horse', coat: '#5a3a22', mane: '#1e140c', face: 'left', tack: true}} p={{phase: 0.4, head: 6}} />} />
+      <Fig id="hz" x={930} y={950} s={0.52} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'horse', coat: '#5a3a22', mane: '#1e140c', face: 'left', tack: true}} p={{phase: 0.4, head: 6, speed: 0}} />} />
       <Fig id="drv" x={1640} y={1010} s={0.5} o={worker('left', '#3a3028')} p={P(idlePose(0.4), arms.hips, face.angry, face.talk(5))} />
       {/* the quarrel on the pavement: gentleman pointing at the driver, a lady holding her ears */}
       <Fig id="g2" x={620} y={990} s={0.5} o={gent('right', '#3a2a2a', 'bowler')} p={P(idlePose(0.7), arms.point, face.angry, face.talk(2), {torso: -3})} />
@@ -207,7 +207,7 @@ const S1_4: React.FC = () => (
     </Par>
     <Par d={1}>
       {/* camel far back, scaled to its ground line */}
-      <Fig id="k4b" x={1380} y={925} s={0.3} o={{pal: khaki, head: 'none', face: 'left'}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'left'}} p={{phase: 0}} />} lo />
+      <Fig id="k4b" x={1380} y={925} s={0.3} o={{pal: khaki, head: 'none', face: 'left'}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'left'}} p={{phase: 0, speed: 4}} />} lo />
       <Fig id="k4m" x={760} y={1030} s={0.5} o={effendi('right')} p={P(idlePose(0.5), arms.offer, face.talk(2), face.smile)} />
       <Fig id="k4t" x={1040} y={1040} s={0.5} o={P(young('left'), {outfit: 'frock', head: 'boater', hat: '#e8dcc0'})} p={P(idlePose(1.6), arms.crossed, face.bored, {head: 2})} />
       <Fig id="k4k" x={420} y={1000} s={0.3} o={boy('right', '#e8dcc0')} p={P(runPose(0.4), {smile: 1})} lit={0.8} lo />
@@ -245,7 +245,7 @@ const S1_5: React.FC = () => (
       {[40, 560, 1120, 1560].map((x) => <Cast key={x} x={x} y={812} w={420} h={260} o={0.26} />)}
     </Par>
     <Par d={1}>
-      <Fig id="cm" x={1000} y={846} s={0.3} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#a8784a', mane: '#6a4a2a', face: 'right'}} p={{phase: 0}} />} lo />
+      <Fig id="cm" x={1000} y={846} s={0.3} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#a8784a', mane: '#6a4a2a', face: 'right'}} p={{phase: 0, speed: 0}} />} lo />
       {[600, 740, 1080].map((x, i) => <Fig key={i} id={`kb${i}`} x={x} y={856} s={0.3} o={i === 1 ? lady('left', '#b86a4a') : fellah(i % 2 ? 'left' : 'right')} p={P(idlePose(i), i === 1 ? arms.offer : arms.crossed)} lit={0.8} lo />)}
       {/* left stall: vendor holds up a fruit, a customer points at it, both smiling */}
       <Fig id="v1" x={330} y={900} s={0.5} o={effendi('right', '#d8c8a0')} p={P(idlePose(0.2), arms.offer, face.talk(3), face.smile)} />
@@ -425,13 +425,13 @@ const S1_10: React.FC = () => {
         ].map(({r, c, hair, act}, i) => {
           const x = 900 + c * 250 - r * 60 + (i % 2) * 14, y = 800 + r * 110;
           return <g key={i}>
-            <Fig id={`st${i}`} x={x} y={y - 18} s={0.38 + r * 0.045} o={scholar('left', hair, {build: 0.95})} p={P(idlePose(i * 1.3), act)} lo />
+            <Fig id={`st${i}`} x={x} y={y - 18} s={0.38 + r * 0.045} o={scholar('left', hair, {build: 0.95})} p={P(sitPose(i * 1.3), act)} lo />
             <rect x={x - 100} y={y - 50} width={200} height={26} fill="#6a4228" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="#4a2e1a" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="url(#woodP)" opacity=".4" />
             <rect x={x - 60} y={y - 58} width={46} height={10} fill="#e8dcb8" /><circle cx={x + 40} cy={y - 56} r={6} fill="#1a1410" />
           </g>;
         })}
         {/* Adrian at the back: a huge yawn, arms stretched up */}
-        <Fig id="a10" x={1760} y={830} s={0.52} o={P(young('left'), {outfit: 'gown', pal: {...young('left').pal, top: '#15121a', bottom: '#15121a'}})} p={P(idlePose(0.5), arms.stretch, face.yawn)} />
+        <Fig id="a10" x={1760} y={830} s={0.52} o={P(young('left'), {outfit: 'gown', pal: {...young('left').pal, top: '#15121a', bottom: '#15121a'}})} p={P(sitPose(0.5), arms.stretch, face.yawn)} />
         <rect x={1630} y={650} width={230} height={26} fill="#6a4228" /><rect x={1630} y={676} width={230} height={170} fill="#4a2e1a" />
       </Par>
       <Par d={1}><Motes n={90} seed={3} y0={80} y1={700} c="#fff6d8" o={0.55} r={3} /></Par>
@@ -462,7 +462,7 @@ const S1_11: React.FC = () => (
       <g transform="translate(1400 884)"><rect x={0} y={0} width={60} height={50} rx={6} fill="#1a1a2a" /><rect x={20} y={-16} width={20} height={18} fill="#1a1a2a" /><path d="M30 -10 q60 -120 130 -150" stroke="#e8dcb8" strokeWidth={5} fill="none" /></g>
       <g transform="translate(1180 930)"><polygon points="0,0 240,-8 250,60 8,70" fill="#6a3a2a" /><polygon points="10,-8 120,-14 124,52 14,60" fill="#e8dcb8" /><polygon points="128,-14 236,-20 244,46 132,52" fill="#d8ccA8" /></g>
     </Par>
-    <Par d={1.1}><Fig id="a11" x={600} y={2420} s={1.7} o={P(young('right'), {outfit: 'gown'})} p={P(idlePose(0.7), arms.chin, face.yawn, {head: -6, torso: 6})} light="indoor" lit={0.9} /></Par>
+    <Par d={1.1}><Fig id="a11" x={600} y={1910} s={1.7} o={P(young('right'), {outfit: 'gown'})} p={P(sitPose(0.7), arms.chin, face.yawn, {head: -6, torso: 6})} light="indoor" lit={0.9} /></Par>
     <Par d={1}><Glow id="a11g" x={1370} y={420} r={700} c="#fff2d0" o={0.25} /><Motes n={70} seed={5} x0={400} x1={1700} y0={100} y1={900} o={0.55} r={3} /></Par>
   </Frame>
 );

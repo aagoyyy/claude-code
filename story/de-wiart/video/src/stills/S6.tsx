@@ -3,7 +3,9 @@ import {AbsoluteFill} from 'remotion';
 import {Character, place} from '../rig/Character';
 import {aimPose, deadPose, handsUpPose, idlePose, kneelAimPose, runPose, SideOpts, walkPose} from '../rig/Side';
 import {H, mix, mulberry32, W} from '../world/util';
-import {arms, BackFig, Birds, Cast, civ, Clouds, Dirt, Fig, Fog, Frame, Glow, Grad, HandCU, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, face} from './lib';
+import {Rain, Embers, Smoke, Boom, Flash} from './fx';
+import {clock} from '../rig/clock';
+import {liveFront, arms, BackFig, Birds, Cast, civ, Clouds, Dirt, Fig, Fog, Frame, Glow, Grad, HandCU, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, face} from './lib';
 import {P} from './S1';
 import {doctor, nurse, Ref} from './S2';
 import {german, heroTrench, medic, tommyW1} from '../scenes/YpresA';
@@ -11,10 +13,7 @@ import {heroOld} from '../scenes/HeroSide';
 
 export const hTrench = (f: 'left' | 'right', extra: Partial<SideOpts> = {}): SideOpts => ({...heroTrench(f), patch: true, scars: true, head: 'cap', hat: '#6e6c4a', ...extra});
 export const tw = (f: 'left' | 'right', skin = '#e0a880', gear: SideOpts['gear'] = 'rifle'): SideOpts => ({...tommyW1(f, skin), gear});
-const rain = (n = 90, seed = 3, o = 0.3) => {
-  const q = mulberry32(seed);
-  return <g stroke="#cfe0ee" strokeWidth={1.6} opacity={o}>{Array.from({length: n}, (_, i) => { const x = q() * W, y = q() * H; return <line key={i} x1={x} y1={y} x2={x - 14} y2={y + 56} />; })}</g>;
-};
+const rain = (n = 90, seed = 3, o = 0.3) => <Rain n={n} seed={seed} o={o} />;
 
 /** a trench in section: revetment wall, sandbag parapet, duckboards, puddles, flares in a wet sky */
 export const TrenchBG: React.FC<{dawn?: boolean; seed?: number}> = ({dawn, seed = 1}) => {
@@ -130,7 +129,7 @@ const S6_11: React.FC = () => (
   </Frame>
 );
 export const CUFront: React.FC<{pose?: any; variant?: any; zoom?: number; py?: number; c1?: string; c2?: string; label?: React.ReactNode; fx?: React.ReactNode; grade?: string; night?: boolean}> = ({pose = {}, variant = {patch: true, scars: true}, zoom = 4.3, py = 330, c1 = '#d89060', c2 = '#2a1a14', label, fx, grade = 'contrast(1.12) saturate(.95)', night = true}) => (
-  <Frame night={night} grade={grade} over={<Character pose={{head: 0, blink: 1, ...pose}} variant={variant} cam={{x: 0, y: 0, zoom, px: 797, py}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
+  <Frame night={night} grade={grade} over={<Character pose={liveFront({head: 0, blink: 1, ...pose})} variant={variant} cam={{x: 0, y: 0, zoom, px: 797, py}} light={{key: '#ffd9a0', rim: '#ffcf98'}} />}>
     <defs><radialGradient id="cuf" cx=".5" cy=".45" r=".8"><stop offset="0" stopColor={c1} /><stop offset=".6" stopColor={mix(c1, c2, 0.7)} /><stop offset="1" stopColor={c2} /></radialGradient></defs>
     <rect width={W} height={H} fill="url(#cuf)" />
     <g filter="url(#blL)" opacity=".5">{Array.from({length: 14}, (_, i) => <circle key={i} cx={(i * 337) % W} cy={(i * 211) % H} r={40 + (i % 4) * 30} fill={['#ffc080', '#8aa4c8', '#a0607a'][i % 3]} opacity={0.3} />)}</g>
@@ -177,8 +176,8 @@ const S7: React.FC<{k: number}> = ({k}) => {
       <defs><radialGradient id="b7" cx=".5" cy=".5" r=".75"><stop offset="0" stopColor="#3a2418" /><stop offset=".6" stopColor="#140c08" /><stop offset="1" stopColor="#050302" /></radialGradient></defs>
       <rect width={W} height={H} fill="url(#b7)" />
       <Rays id="b7r" x={960} y={-60} ang={1.57} spread={0.5} len={1300} n={6} o={0.07} />
-      {Array.from({length: 8}, (_, i) => { const [x, y] = place(wounds[i].at[0], wounds[i].at[1]); const X = (x + OFF - 960) * 1.35 + 960, Y = (y - 935) * 1.35 + 935; return i <= k ? <g key={i} opacity={i === k ? 1 : 0.55}><Glow id={`wg${i}`} x={X} y={Y} r={wounds[i].r * 1.35} c="#e0301a" o={0.9} /><circle cx={X} cy={Y} r={14} fill="#ff6a4a" /></g> : null; })}
-      {(() => { const X = (sx + OFF - 960) * 1.35 + 960, Y = (sy - 935) * 1.35 + 935; return <g><circle cx={X} cy={Y} r={wounds[k].r * 0.8} fill="none" stroke="#ff6a4a" strokeWidth={4} opacity=".9" /><line x1={X + wounds[k].r * 0.8} y1={Y} x2={X + 340} y2={Y - 60} stroke="#ff6a4a" strokeWidth={3} /></g>; })()}
+      {Array.from({length: 8}, (_, i) => { const [x, y] = place(wounds[i].at[0], wounds[i].at[1]); const X = (x + OFF - 960) * 1.35 + 960, Y = (y - 935) * 1.35 + 935; return i <= k ? <g key={i} opacity={i === k ? 1 : 0.55}><Glow id={`wg${i}`} x={X} y={Y} r={wounds[i].r * 1.35 * (1 + 0.12 * Math.sin(clock.t * 4 + i))} c="#e0301a" o={0.9} /><circle cx={X} cy={Y} r={14 + 3 * Math.sin(clock.t * 5)} fill="#ff6a4a" /></g> : null; })}
+      {(() => { const X = (sx + OFF - 960) * 1.35 + 960, Y = (sy - 935) * 1.35 + 935; return <g><circle cx={X} cy={Y} r={wounds[k].r * 0.8 * (1 + 0.1 * Math.sin(clock.t * 4))} fill="none" stroke="#ff6a4a" strokeWidth={4} opacity=".9" /><line x1={X + wounds[k].r * 0.8} y1={Y} x2={X + 340} y2={Y - 60} stroke="#ff6a4a" strokeWidth={3} /></g>; })()}
       <Title x={1480} y={290} text={`LUKA ${k + 1} / 8`} size={34} c="#ff8a6a" ls={8} />
       <Title x={1480} y={350} text={w.t} size={52} c="#f6e8c8" ls={6} />
       <Title x={1480} y={396} text="menurut memoarnya" size={26} c="#c8b898" ls={3} weight={400} serif italic />
@@ -264,7 +263,7 @@ const S8_7: React.FC = () => (
     <Par d={0.9}><rect y={760} width={W} height={H - 760} fill="#3a2c20" /><Mat kind="mud" o={0.8} light={0.2}><rect y={760} width={W} height={H - 760} fill="#3a2c20" /></Mat></Par>
     <Par d={1.1}>
       <Fig id="g87" x={1300} y={1900} s={1.45} o={german('left')} p={P(aimPose(0.2), {squint: 0.8, brow: -0.5, mouth: 0.2})} light="night" lit={0.55} />
-      <g transform="translate(700 560)">{Array.from({length: 7}, (_, i) => <g key={i} transform={`rotate(${(i - 3) * 6})`}><ellipse cx={-i * 24} rx={150 - i * 12} ry={26 - i * 2} fill="#fff4c0" opacity=".85" /></g>)}<ellipse rx={60} ry={24} fill="#fff" /><Glow id="mg87" x={0} y={0} r={360} c="#ffb040" o={0.6} /></g>
+      <Flash x={700} y={560} r={190} seed={8} rate={9} angle={180} />
       {Array.from({length: 12}, (_, i) => <line key={i} x1={680 - i * 90} y1={560 + (i % 3) * 20 - 20} x2={380 - i * 90} y2={600 + (i % 4) * 30 - 40} stroke="#ffdc80" strokeWidth={4} opacity={0.8 - i * 0.05} />)}
     </Par>
     <Par d={1}>{rain(70, 4, 0.3)}<Motes n={50} seed={7} c="#ffb060" o={0.7} r={2.4} /></Par>
@@ -340,21 +339,16 @@ const S8_12: React.FC = () => {
     </Frame>
   );
 };
-const S8_13: React.FC = () => {
-  const q = mulberry32(13);
-  return (
-    <Frame night grade="contrast(1.14) saturate(1.0)">
-      <Par d={0.1}><SkyRect id="w813" stops={[[0, '#20242c'], [1, '#6a4a38']]} /></Par>
-      <Par d={1}>
-        <Glow id="bx1" x={960} y={640} r={900} c="#ff7a2a" o={0.8} /><Glow id="bx2" x={960} y={640} r={520} c="#ffd070" o={0.95} /><circle cx={960} cy={640} r={240} fill="#fff4c0" opacity=".9" filter="url(#blM)" />
-        {Array.from({length: 26}, (_, i) => { const a = q() * 6.283, d = 160 + q() * 420; return <g key={i} transform={`translate(${960 + Math.cos(a) * d} ${640 + Math.sin(a) * d * 0.8}) rotate(${q() * 360})`}><rect width={14 + q() * 38} height={6 + q() * 12} fill="#14100c" /></g>; })}
-        {Array.from({length: 40}, (_, i) => { const a = q() * 6.283, d = 100 + q() * 560; return <circle key={i} cx={960 + Math.cos(a) * d} cy={640 + Math.sin(a) * d * 0.8} r={3 + q() * 8} fill="#ff9a40" opacity={0.8} />; })}
-        <g filter="url(#blL)"><ellipse cx={960} cy={300} rx={420} ry={260} fill="#2a2420" opacity=".85" /></g>
-        {[300, 520, 1380, 1620].map((x, i) => <g key={i} fill="#05060a" transform={`translate(${x} ${900 + (i % 2) * 40})`}><circle cy={-86} r={26} /><rect x={-24} y={-62} width={48} height={110} rx={12} /><rect x={-70} y={-62} width={50} height={14} transform="rotate(-30 -45 -55)" /></g>)}
-      </Par>
-    </Frame>
-  );
-};
+const S8_13: React.FC = () => (
+  <Frame night grade="contrast(1.14) saturate(1.0)">
+    <Par d={0.1}><SkyRect id="w813" stops={[[0, '#20242c'], [1, '#6a4a38']]} /></Par>
+    <Par d={1}>
+      <Boom x={960} y={700} t0={0.5} r={300} seed={13} />
+      {[300, 520, 1380, 1620].map((x, i) => <g key={i} fill="#05060a" transform={`translate(${x} ${900 + (i % 2) * 40})`}><circle cy={-86} r={26} /><rect x={-24} y={-62} width={48} height={110} rx={12} /><rect x={-70} y={-62} width={50} height={14} transform="rotate(-30 -45 -55)" /></g>)}
+      <Embers n={60} seed={4} y0={200} y1={1000} c="#ff9a40" o={0.9} rise={90} />
+    </Par>
+  </Frame>
+);
 const S8_14: React.FC = () => <Ref src="g1452h" z={1.0} cx={900} cy={540} tint="#ffe0b0" />;
 
 export const S6: Record<string, React.FC> = {

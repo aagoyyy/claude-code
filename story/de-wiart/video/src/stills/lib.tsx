@@ -109,9 +109,14 @@ export const civ = (top: string, bottom: string, hair = '#3a2a1c', skin = '#e0a8
 export const kid = (face: 'left' | 'right', top = '#6a7a9a'): SideOpts => ({pal: civ(top, '#3a3a4a', '#5a3a22'), head: 'none', build: 0.78, stretch: 0.52, face});
 export const man = (face: 'left' | 'right', top: string, bottom: string, extra: Partial<SideOpts> = {}): SideOpts => ({pal: civ(top, bottom), head: 'none', face, ...extra});
 
-export const Fig: React.FC<{id: string; x: number; y: number; s?: number; o: SideOpts; p: any; light?: LightName; lit?: number; lo?: boolean; alpha?: number; art?: React.ReactNode}> = ({id, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo, alpha, art}) => (
-  <Figure uid={id} x={x} y={y} s={s} o={o} p={p} light={light} lit={lit} lo={lo} alpha={alpha} art={art} />
-);
+const hsh = (id: string) => { let h = 11; for (let i = 0; i < id.length; i++) h = (h * 33 + id.charCodeAt(i)) >>> 0; return h; };
+const EYES = ['#4a86b8', '#6a4a2a', '#4a7a5a', '#7a8a9a', '#3a3a2a'];
+export const Fig: React.FC<{id: string; x: number; y: number; s?: number; o: SideOpts; p: any; light?: LightName; lit?: number; lo?: boolean; alpha?: number; art?: React.ReactNode}> = ({id, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo, alpha, art}) => {
+  const h = hsh(id), u = (k: number) => ((h >> k) % 100) / 100;
+  const vo: SideOpts = o.hero || art ? o : {...o, build: o.build ?? 0.88 + 0.3 * u(0), stretch: o.stretch ?? 0.94 + 0.14 * u(5), nose: o.nose ?? 0.78 + 0.5 * u(9), jaw: o.jaw ?? (['round', 'long', 'square'] as const)[(h >> 3) % 3], eyeC: o.eyeC ?? EYES[(h >> 11) % 5]};
+  return <Figure uid={id} x={x} y={y} s={s} o={vo} p={p} light={light} lit={lit} lo={lo} alpha={alpha} art={art} />;
+};
+
 
 export const Title: React.FC<{x: number; y: number; text: string; size?: number; c?: string; anchor?: 'start' | 'middle' | 'end'; ls?: number; weight?: number; serif?: boolean; italic?: boolean; o?: number}> = ({x, y, text, size = 40, c = '#f6e8c8', anchor = 'start', ls = 6, weight = 800, serif, italic, o = 1}) => (
   <text x={x} y={y} textAnchor={anchor} fontFamily={serif ? 'Georgia, serif' : "'Helvetica Neue', Arial, sans-serif"} fontWeight={weight} fontStyle={italic ? 'italic' : 'normal'} fontSize={size} letterSpacing={ls} fill={c} opacity={o}>{text}</text>
@@ -149,7 +154,7 @@ export const Dirt: React.FC<{children: React.ReactNode; o?: number; light?: numb
 export const Rays: React.FC<{id: string; x: number; y: number; ang: number; spread: number; len: number; n?: number; c?: string; o?: number; seed?: number}> = ({id, x, y, ang, spread, len, n = 7, c = '#fff2c8', o = 0.18, seed = 4}) => {
   const r = mulberry32(seed);
   return (
-    <g style={{mixBlendMode: 'screen'} as any}>
+    <g style={{mixBlendMode: 'screen', opacity: 0.88 + 0.12 * Math.sin(clock.t * 0.9 + x)} as any}>
       <defs><linearGradient id={id} gradientUnits="userSpaceOnUse" x1={x} y1={y} x2={x + Math.cos(ang) * len} y2={y + Math.sin(ang) * len}><stop offset="0" stopColor={c} stopOpacity={o * 2} /><stop offset="1" stopColor={c} stopOpacity="0" /></linearGradient></defs>
       {Array.from({length: n}, (_, i) => {
         const a0 = ang + (r() - 0.5) * spread, w = 0.02 + r() * 0.05;
@@ -161,8 +166,8 @@ export const Rays: React.FC<{id: string; x: number; y: number; ang: number; spre
 };
 
 export const Motes: React.FC<{n?: number; seed?: number; x0?: number; x1?: number; y0?: number; y1?: number; c?: string; o?: number; r?: number}> = ({n = 70, seed = 2, x0 = 0, x1 = W, y0 = 0, y1 = H, c = '#fff4d8', o = 0.5, r = 3}) => {
-  const q = mulberry32(seed);
-  return <g>{Array.from({length: n}, (_, i) => <circle key={i} cx={x0 + q() * (x1 - x0)} cy={y0 + q() * (y1 - y0)} r={0.8 + q() * r} fill={c} opacity={o * (0.3 + q() * 0.7)} filter={q() > 0.7 ? 'url(#blS)' : undefined} />)}</g>;
+  const q = mulberry32(seed), t = clock.t;
+  return <g>{Array.from({length: n}, (_, i) => { const bx = x0 + q() * (x1 - x0), by = y0 + q() * (y1 - y0), sp = 6 + q() * 16, ph = q() * 6.28, rr = 0.8 + q() * r, soft = q() > 0.7, op = o * (0.3 + q() * 0.7); const x = x0 + ((bx - x0 + Math.sin(t * 0.6 + ph) * 18 + t * sp * 0.4) % (x1 - x0) + (x1 - x0)) % (x1 - x0); const y = y0 + ((by - y0 - t * sp + (y1 - y0) * 10) % (y1 - y0)); return <circle key={i} cx={x} cy={y} r={rr} fill={c} opacity={op * (0.6 + 0.4 * Math.sin(t * 2 + ph))} filter={soft ? 'url(#blS)' : undefined} />; })}</g>;
 };
 
 export const Leaves: React.FC<{x: number; y: number; r: number; seed: number; c1: string; c2: string; n?: number}> = ({x, y, r, seed, c1, c2, n = 46}) => {
@@ -261,11 +266,11 @@ export const Facade: React.FC<{x: number; y: number; w: number; h: number; wall:
 
 export const Birds: React.FC<{n?: number; seed?: number; x0?: number; x1?: number; y0?: number; y1?: number; c?: string; s?: number}> = ({n = 7, seed = 6, x0 = 300, x1 = 1600, y0 = 120, y1 = 360, c = '#1a1420', s = 1}) => {
   const q = mulberry32(seed);
-  return <g>{Array.from({length: n}, (_, i) => { const x = x0 + q() * (x1 - x0), y = y0 + q() * (y1 - y0), k = (10 + q() * 16) * s; return <path key={i} d={`M${x - k} ${y} Q${x - k / 2} ${y - k * 0.6} ${x} ${y} Q${x + k / 2} ${y - k * 0.6} ${x + k} ${y}`} stroke={c} strokeWidth={2.4 * s} fill="none" strokeLinecap="round" />; })}</g>;
+  return <g>{Array.from({length: n}, (_, i) => { const k = (10 + q() * 16) * s, bx = q() * (x1 - x0), x = x0 + ((bx + clock.t * (30 + (i % 3) * 14)) % (x1 - x0 + 200)), y = y0 + q() * (y1 - y0) + Math.sin(clock.t * 0.8 + i) * 6, fl = 0.35 + 0.65 * Math.abs(Math.sin(clock.t * 7 + i * 1.7)); return <path key={i} d={`M${x - k} ${y} Q${x - k / 2} ${y - k * 0.6 * fl} ${x} ${y} Q${x + k / 2} ${y - k * 0.6 * fl} ${x + k} ${y}`} stroke={c} strokeWidth={2.4 * s} fill="none" strokeLinecap="round" />; })}</g>;
 };
 export const Clouds: React.FC<{n?: number; seed?: number; y0?: number; y1?: number; c?: string; o?: number}> = ({n = 8, seed = 3, y0 = 60, y1 = 360, c = '#fff', o = 0.5}) => {
   const q = mulberry32(seed);
-  return <g filter="url(#blM)">{Array.from({length: n}, (_, i) => { const x = q() * W, y = y0 + q() * (y1 - y0), r = 90 + q() * 160; return <g key={i} opacity={o * (0.4 + q() * 0.6)}><ellipse cx={x} cy={y} rx={r} ry={r * 0.17} fill={c} /><ellipse cx={x + r * 0.3} cy={y - r * 0.07} rx={r * 0.55} ry={r * 0.16} fill={c} /></g>; })}</g>;
+  return <g filter="url(#blM)">{Array.from({length: n}, (_, i) => { const x = ((q() * W + clock.t * (4 + (i % 3) * 3)) % (W + 600)) - 300, y = y0 + q() * (y1 - y0), r = 90 + q() * 160; return <g key={i} opacity={o * (0.4 + q() * 0.6)}><ellipse cx={x} cy={y} rx={r} ry={r * 0.17} fill={c} /><ellipse cx={x + r * 0.3} cy={y - r * 0.07} rx={r * 0.55} ry={r * 0.16} fill={c} /></g>; })}</g>;
 };
 
 /* =============================== v3 additions =============================== */
@@ -403,3 +408,7 @@ export const HandCU: React.FC<{kind?: 'open' | 'relaxed' | 'point' | 'grip' | 'p
     </g>
   );
 };
+
+import {blinkNow} from '../rig/Side';
+/** make a front-rig pose breathe, sway and blink with the film clock */
+export const liveFront = (pose: any = {}) => ({...pose, blink: blinkNow(0.4) ?? pose.blink, br: 1 + 0.008 * Math.sin(clock.t * 1.7), head: (pose.head || 0) + 1.4 * Math.sin(clock.t * 0.9), yaw: (pose.yaw || 0) + 3 * Math.sin(clock.t * 0.65)});
