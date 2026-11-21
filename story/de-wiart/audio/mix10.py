@@ -8,6 +8,11 @@ head = head.replace('TOT=2272', 'TOT=15720')           # 655 s at 24 fps
 ns = {'__file__': os.path.join(D, 'mix2.py')}
 exec(compile(head, 'mix2_head', 'exec'), ns)
 globals().update(ns)
+import ast
+_t = ast.parse(src)
+_fn = [n for n in _t.body if isinstance(n, ast.FunctionDef) and n.name in ('pad', 'cello', 'timp', 'pulse', 'riser')]
+exec(compile(ast.Module(body=_fn, type_ignores=[]), 'mix2_fns', 'exec'), globals())
+T = np.arange(N) / SR
 
 shots = re.findall(r"id: '([\d.]+)', dur: (\d+), ch: (\d+)", open(os.path.join(D, '..', 'video', 'src', 'stills', 'shots.ts')).read())
 start = {}; acc = 0.0; chs = {}
@@ -64,7 +69,9 @@ for c, (a, b) in chs.items():
     while t < b - 3:
         cello(pads[c][0] * 2 * rng.choice([1, 1.125, 1.2, 1.334]), t, rng.uniform(2.5, 4.5), 1.0); t += rng.uniform(5, 9)
 for sid in ('2.12', '4.11', '6.7', '8.10', '10.4', '10.17', '10.21', '1.12', '8.13'): timp(T0(sid) - 0.02, 1.2)
-for c, (a, b) in chs.items(): timp(a, 0.8); riser(a - 1.6, 1.6, 0.5)
+for c, (a, b) in chs.items():
+    timp(a, 0.8)
+    if a > 2: riser(a - 1.6, 1.6, 0.5)
 for t in np.arange(T0('10.17'), 654.0, 0.32): timp(t, 0.18)
 pulse(T0('10.17'), 654.0, 110, 3.2, 0.12)
 MUS *= np.minimum(1, np.minimum(T / 2.5, (655 - T) / 5)).clip(0, 1)
