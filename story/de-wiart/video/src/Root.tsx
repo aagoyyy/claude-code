@@ -13,9 +13,11 @@ import {Somali2, SOMALI2_FRAMES} from './scenes/Somali2';
 import {Ypres2, YPRES2_FRAMES} from './scenes/Ypres2';
 import {Story, STORY_FRAMES, BoerChapter, BOERCH, SomaliChapter, SOMCH, YpresChapter, YPRCH} from './scenes/Story';
 import {BoerA, BOERA_FRAMES} from './scenes/BoerA';
+import {Still} from './stills/Still';
 
 export const Root: React.FC = () => (
   <>
+    <Composition id="Still" component={Still as any} durationInFrames={1} fps={24} width={1920} height={1080} defaultProps={{id: '0.1'}} />
     <Composition id="Boer" component={Boer} durationInFrames={BOER_FRAMES} fps={FPS} width={1920} height={1080} />
     <Composition id="Somali" component={Somali} durationInFrames={SOMALI_FRAMES} fps={FPS} width={1920} height={1080} />
     <Composition id="Ypres" component={Ypres} durationInFrames={YPRES_FRAMES} fps={FPS} width={1920} height={1080} />
