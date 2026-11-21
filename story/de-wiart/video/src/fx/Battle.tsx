@@ -243,6 +243,7 @@ export const Actors: React.FC<{specs: Spec[]; f: number; effects?: boolean; camT
       <FigureDefs />
       {/* motion-blur ghosts for fast movers: the same pose a fraction of a frame earlier, drawn faint and cheap */}
       {ghosts && st.map(({a, st: s}) => {
+        if (a.s < 0.4) return null;
         const fast = !s.dead && (s.mode === 'run') || (a.dieAt !== undefined && f - a.dieAt >= 0 && f - a.dieAt < 28 && (a.die === 'blast' || a.die === 'stumble'));
         if (!fast) return null;
         return [0.7, 0.4].map((dt, i) => {

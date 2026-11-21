@@ -29,6 +29,12 @@ export type Props = {
 
 const LIGHT: Record<string, LightName> = {savanna: 'warm', desert: 'desert', trench: 'night'};
 
+const FxCtx = React.createContext<{fb: (d: number) => number; bx: number}>({fb: () => 0, bx: 0});
+const LF: React.FC<React.ComponentProps<typeof Layer>> = (q) => {
+  const c = React.useContext(FxCtx);
+  return <Layer {...q} blur={(q.blur || 0) + c.fb(q.depth)} bx={c.bx} />;
+};
+
 export const ProfileBattle: React.FC<Props> = (P) => {
   const f = useCurrentFrame();
   const T = P.T(f);
@@ -60,7 +66,6 @@ export const ProfileBattle: React.FC<Props> = (P) => {
   };
   const mbf = (d: number) => Math.min(18, Math.abs(dT) * d * 0.55);
   const fb = (d: number) => (P.focus ? Math.max(0, Math.abs(d - P.focus(f)) - 0.25) * 8 : 0);
-  const LF: React.FC<React.ComponentProps<typeof Layer>> = (q) => <Layer {...q} blur={(q.blur || 0) + fb(q.depth)} bx={Math.min(10, sh * 0.6)} />;
   const cIn = P.caption ? easeOut((f - P.caption.from) / 12) : 0, cOut = P.caption ? 1 - easeOut((f - P.caption.to) / 14) : 1;
   const fade = (P.fadeIn ? clamp(f / 12) : 1) * (P.fadeOut ? 1 - clamp((f - (P.frames - 6)) / 6) : 1);
   const dark = P.kind === 'trench';
@@ -68,6 +73,7 @@ export const ProfileBattle: React.FC<Props> = (P) => {
   const inkS = dark ? '#d9c7a0' : P.kind === 'desert' ? '#6a4630' : '#d9c7a0';
 
   return (
+    <FxCtx.Provider value={{fb, bx: Math.min(10, sh * 0.6)}}>
     <AbsoluteFill style={{background: '#000', filter: grade, transform: P.roll ? `rotate(${P.roll(f)}deg) scale(1.08)` : undefined}}>
       {P.kind === 'savanna' && <>
         <LF cam={camFar} depth={0.02}><Sky f={f} /></LF>
@@ -83,7 +89,7 @@ export const ProfileBattle: React.FC<Props> = (P) => {
         <LF cam={cam0} depth={0.5}>
           <Scroll off={T * 0.5} mb={mbf(0.5)}><Plains seed={6} y0={770} y1={880} count={800} haze0={0.35} haze1={0.22} fade={1} /></Scroll>
           <Scroll off={T * 0.5} P={3000} mb={mbf(0.5)}><Acacia x={1560} y={812} s={0.95} seed={31} haze={0.3} /><Acacia x={300} y={806} s={0.62} seed={32} haze={0.36} /><Acacia x={2300} y={808} s={0.8} seed={33} haze={0.32} /></Scroll>
-          {mk(P.mid, 0.5, T, false)}
+          {mk(P.mid, 0.5, T, true)}
         </LF>
         <LF cam={cam0} depth={0.78}>
           <Scroll off={T * 0.78} mb={mbf(0.78)}><Plains seed={7} y0={850} y1={960} count={900} haze0={0.18} haze1={0.1} fade={1} /></Scroll>
@@ -109,7 +115,7 @@ export const ProfileBattle: React.FC<Props> = (P) => {
         <LF cam={cam0} depth={0.5}>
           <Scroll off={T * 0.5} mb={mbf(0.5)}><Plains seed={16} y0={770} y1={880} count={460} haze0={0.35} haze1={0.22} fade={1} colorAt={dcol} haze="#fbe2b4" /></Scroll>
           <Scroll off={T * 0.5} P={2720} mb={mbf(0.5)}><Scrub seed={3} count={9} y0={790} y1={870} f={f} /></Scroll>
-          {mk(P.mid, 0.5, T, false)}
+          {mk(P.mid, 0.5, T, true)}
         </LF>
         <LF cam={cam0} depth={0.78}>
           <Scroll off={T * 0.78} mb={mbf(0.78)}><Plains seed={17} y0={850} y1={960} count={500} haze0={0.18} haze1={0.1} fade={1} colorAt={dcol} haze="#fbe2b4" /></Scroll>
@@ -136,7 +142,7 @@ export const ProfileBattle: React.FC<Props> = (P) => {
         <LF cam={cam0} depth={0.5}>
           <Scroll off={T * 0.5} mb={mbf(0.5)}><Plains seed={26} y0={770} y1={880} count={420} haze0={0.4} haze1={0.28} fade={1} colorAt={mcol} haze={NHAZE} /></Scroll>
           <Scroll off={T * 0.5} P={3000} mb={mbf(0.5)}><Wire y={846} x0={0} x1={3000} s={0.85} haze={0.4} seed={3} f={f} hits={wireHits(0.5)} /><DeadTree x={1740} y={850} s={0.9} haze={0.4} seed={9} /><DeadTree x={420} y={850} s={0.8} haze={0.42} seed={10} /></Scroll>
-          {mk(P.mid, 0.5, T, false)}
+          {mk(P.mid, 0.5, T, true)}
         </LF>
         <LF cam={cam0} depth={0.78}><Scroll off={T * 0.78} mb={mbf(0.78)}><Plains seed={27} y0={850} y1={960} count={460} haze0={0.22} haze1={0.12} fade={1} colorAt={mcol} haze={NHAZE} /><Puddles f={f} seed={5} y0={872} y1={950} glow={G} /></Scroll></LF>
         <LF cam={cam0} depth={0.8}>{mk(P.back, 0.8, T, false)}</LF>
@@ -157,5 +163,6 @@ export const ProfileBattle: React.FC<Props> = (P) => {
       {P.caption && <ChapterCaption f={f} title={P.caption.title} sub={P.caption.sub} from={P.caption.from} to={P.caption.to} dark={dark} desert={P.kind === 'desert'} />}
       <Post f={f} fade={fade} flash={P.flash ? Math.min(0.5, 0.45 * P.flash(f)) : 0} night={dark} />
     </AbsoluteFill>
+    </FxCtx.Provider>
   );
 };

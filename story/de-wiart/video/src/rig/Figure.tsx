@@ -51,7 +51,7 @@ export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`} opacity={alpha}>
       <defs>
-        <g id={`${uid}a`}>{art ?? <SideArt o={lo ? {...o, fine: false} : o} p={p} />}</g>
+        <g id={`${uid}a`}>{art ?? <SideArt o={lo || s < 0.5 ? {...o, fine: false} : o} p={p} />}</g>
         {!lo && <mask id={`${uid}m`} maskUnits="userSpaceOnUse" x={box[0]} y={box[1]} width={box[2]} height={box[3]} style={{maskType: 'alpha'} as any}><use href={`#${uid}a`} /></mask>}
       </defs>
       <ellipse cx={20} cy={4} rx={190} ry={22} fill="#1a0e08" opacity={0.5 * sh / 0.5} filter={lo ? undefined : 'url(#fBlurC)'} />
