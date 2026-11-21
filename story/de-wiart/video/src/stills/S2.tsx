@@ -4,7 +4,7 @@ import {Character} from '../rig/Character';
 import {HandArt, idlePose, ridePose, runPose, SideOpts, walkPose, kneelAimPose, aimPose} from '../rig/Side';
 import {AnimalArt, saddleHeight} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
-import {arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
+import {HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
 import {gent, worker, lady, boy, young, P, scholar} from './S1';
 import {tommy, boer, horseOfficer} from '../scenes/BoerA';
 import {officer} from '../scenes/SomaliA';
@@ -90,7 +90,7 @@ const desk = (x: number, y: number, w: number, h: number) => (
 );
 const Ref: React.FC<{src: string; z: number; cx: number; cy: number; tint?: string}> = ({src, z, cx, cy, tint}) => (
   <AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
-    <Img src={staticFile(`ref/${src}.png`)} style={{width: W, height: H, transform: `scale(${z})`, transformOrigin: `${cx}px ${cy}px`, filter: 'contrast(1.1) saturate(1.1)'}} />
+    <Img src={staticFile(`ref/${src}.${src.endsWith('h') ? 'jpg' : 'png'}`)} style={{width: W, height: H, transform: `scale(${z})`, transformOrigin: `${cx}px ${cy}px`, filter: 'contrast(1.1) saturate(1.1)'}} />
     {tint && <AbsoluteFill style={{background: tint, mixBlendMode: 'soft-light' as any}} />}
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0}}><defs><radialGradient id="rv"><stop offset=".5" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".55" /></radialGradient><filter id="rg"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" /><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .8 0" /></filter></defs><rect width={W} height={H} filter="url(#rg)" opacity=".16" /><rect width={W} height={H} fill="url(#rv)" /></svg>
   </AbsoluteFill>
@@ -172,7 +172,7 @@ const S2_3: React.FC = () => (
     </Par>
     <Par d={1.15}>
       {/* the signing hand, holding the pen */}
-      <g transform="translate(1200 200) rotate(20) scale(2.1)"><rect x={-46} y={-260} width={92} height={270} fill="#3a4a3a" /><rect x={-46} y={-260} width={92} height={270} fill="url(#sideShade)" /><rect x={-52} y={-14} width={104} height={26} fill="#2a3a2a" /><HandArt kind="relaxed" skin="#e0a880" /><g transform="translate(6 110) rotate(-28)"><rect x={-5} y={-30} width={10} height={190} fill="#1a1410" /><polygon points="-5,160 5,160 0,196" fill="#c8a040" /><rect x={-6} y={-30} width={12} height={40} fill="#c8a040" /></g></g>
+      <g transform="translate(1200 200) rotate(20) scale(1.3)"><g transform="translate(-4 150) rotate(-24)"><rect x={-5} y={-130} width={10} height={250} fill="#1a1410" /><polygon points="-5,120 5,120 0,160" fill="#c8a040" /><rect x={-6} y={-130} width={12} height={40} fill="#c8a040" /></g><HandCU kind="pinch" skin="#e0a880" sleeve="#3a4a3a" /></g>
     </Par>
   </Frame>
 );
@@ -232,8 +232,8 @@ const S2_6: React.FC = () => (
 
 /* 2.7  A-shots re-framed from the finished battle frames */
 const S2_7: React.FC = () => <Ref src="f40" z={1.0} cx={900} cy={540} tint="#ffb080" />;
-const S2_8: React.FC = () => <Ref src="f336" z={2.3} cx={1230} cy={470} tint="#ffa060" />;
-const S2_9: React.FC = () => <Ref src="f125" z={1.9} cx={1361} cy={498} tint="#ffb080" />;
+const S2_8: React.FC = () => <Ref src="f336h" z={2.3} cx={1230} cy={470} tint="#ffa060" />;
+const S2_9: React.FC = () => <Ref src="f125h" z={1.9} cx={1361} cy={498} tint="#ffb080" />;
 const S2_10: React.FC = () => <Ref src="f100" z={1.15} cx={900} cy={620} tint="#ff9060" />;
 
 /* 2.11 CU a Boer farmer takes aim */
@@ -248,7 +248,7 @@ const S2_11: React.FC = () => (
     <Par d={1}><Motes n={50} seed={8} c="#ffe0a0" o={0.5} /></Par>
   </Frame>
 );
-const S2_12: React.FC = () => <Ref src="f194" z={1.5} cx={1020} cy={520} tint="#ffd0a0" />;
+const S2_12: React.FC = () => <Ref src="f194h" z={1.5} cx={1020} cy={520} tint="#ffd0a0" />;
 
 /* 2.13 CU: shock — the front rig, wide-eyed and open-mouthed */
 const S2_13: React.FC = () => (
@@ -259,8 +259,8 @@ const S2_13: React.FC = () => (
     <Motes n={80} seed={11} c="#ffd8a0" o={0.6} r={3} />
   </Frame>
 );
-const S2_14: React.FC = () => <Ref src="f336" z={1.0} cx={900} cy={540} tint="#ffb080" />;
-const S2_15: React.FC = () => <Ref src="f376" z={1.5} cx={640} cy={700} tint="#ffa070" />;
+const S2_14: React.FC = () => <Ref src="f336h" z={1.0} cx={900} cy={540} tint="#ffb080" />;
+const S2_15: React.FC = () => <Ref src="f376h" z={1.5} cx={640} cy={700} tint="#ffa070" />;
 
 /* 2.16 the hospital ship */
 const S2_16: React.FC = () => (
@@ -375,8 +375,8 @@ const S3_2: React.FC = () => (
     <Par d={0.1}><defs><radialGradient id="r32" cx=".5" cy=".45" r=".8"><stop offset="0" stopColor="#fff2d8" /><stop offset=".6" stopColor="#c8a888" /><stop offset="1" stopColor="#4a3228" /></radialGradient></defs><rect width={W} height={H} fill="url(#r32)" /><g filter="url(#blL)" opacity=".6">{Array.from({length: 14}, (_, i) => <circle key={i} cx={(i * 313) % W} cy={(i * 197) % 700} r={50 + (i % 3) * 30} fill={['#fff', '#ffd0d8', '#ffe8a0'][i % 3]} opacity={0.5} />)}</g></Par>
     <Par d={1.1}>
       {/* the bride's open hand, lace cuff, ring finger up; the groom's fingers set the ring on */}
-      <g transform="translate(700 340) rotate(160) scale(3)"><rect x={-50} y={-250} width={100} height={260} fill="#f4efe6" /><rect x={-50} y={-250} width={100} height={260} fill="url(#sideShade)" /><path d={`M-52 -10 q8 14 16 0 t16 0 t16 0 t16 0 t16 0 t16 0`} stroke="#d8d0c0" strokeWidth={4} fill="#fff" /><HandArt kind="open" skin="#e8b48a" /></g>
-      <g transform="translate(1340 760) rotate(-20) scale(2.6)"><rect x={-44} y={-250} width={88} height={260} fill="#2a2a34" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><rect x={-48} y={-12} width={96} height={26} fill="#f4efe6" /><HandArt kind="point" skin="#e0a880" /></g>
+      <g transform="translate(700 340) rotate(160) scale(1.9)"><HandCU kind="open" skin="#e8b48a" sleeve="#f4efe6" shirt="#ffffff" id="hl" /></g>
+      <g transform="translate(1340 760) rotate(-20) scale(1.61)"><HandCU kind="point" skin="#e0a880" sleeve="#2a2a34" /></g>
       <g transform="translate(1010 690)"><ellipse rx={24} ry={20} fill="none" stroke="#e8b830" strokeWidth={11} /><ellipse rx={24} ry={20} fill="none" stroke="#fff3a0" strokeWidth={3} transform="translate(-3 -3)" opacity=".8" /><polygon points="-9,-24 9,-24 13,-34 -13,-34" fill="#bfe8ff" stroke="#6a8aaa" strokeWidth={2} /></g>
       <g style={{mixBlendMode: 'screen'} as any}><path d="M1010 640 l0 -50 M985 650 l-34 -34 M1035 650 l34 -34" stroke="#fff" strokeWidth={5} strokeLinecap="round" /></g>
     </Par>
@@ -494,7 +494,7 @@ const S3_7: React.FC = () => (
     <Par d={0.1}><SkyRect id="p37" stops={[[0, '#5a9ac8'], [1, '#f0d8a8']]} h={640} /><rect y={640} width={W} height={440} fill="#b8a050" /><Mat kind="grass" o={0.55} light={0.3}><rect y={640} width={W} height={440} fill="#b8a050" /></Mat></Par>
     <Par d={1.2}>
       <g transform="translate(700 100) rotate(30)"><rect x={-9} y={0} width={18} height={820} fill="#8a5a2a" stroke="#2a1a10" strokeWidth={3} /><polygon points="-26,820 26,820 0,990" fill="#c8ccd0" stroke="#3a3a3a" strokeWidth={4} /><polygon points="0,820 26,820 0,990" fill="#8a9098" /></g>
-      <g transform="translate(560 330) rotate(-60) scale(2.6)"><rect x={-44} y={-250} width={88} height={260} fill="#e8e0d0" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><HandArt kind="relaxed" skin="#e0a880" /></g>
+      <g transform="translate(540 340) rotate(-60) scale(1.5)"><HandCU kind="grip" skin="#e0a880" sleeve="#e8e0d0" /></g>
       <g fill="#c8a860" opacity=".8" filter="url(#blS)">{Array.from({length: 22}, (_, i) => <circle key={i} cx={1180 + (i * 41) % 280} cy={820 + (i * 23) % 120} r={6 + (i % 5) * 3} />)}</g>
       <ellipse cx={1250} cy={900} rx={220} ry={40} fill="#6a5a2a" opacity=".6" filter="url(#blM)" />
     </Par>
@@ -533,7 +533,7 @@ const S3_9: React.FC = () => (
       {[0.2, 0.4, 0.6, 0.8].map((k, i) => <ellipse key={i} cx={1200} cy={770} rx={540 * k} ry={160 * k} fill="none" stroke="#fff" strokeWidth={4} opacity={0.7 - i * 0.12} />)}
       <ellipse cx={1200} cy={770} rx={60} ry={18} fill="#fff" opacity=".5" />{Array.from({length: 16}, (_, i) => <circle key={i} cx={1200 + Math.cos(i) * (80 + (i % 5) * 20)} cy={740 - (i % 4) * 36} r={5 + (i % 3) * 3} fill="#e8f4ff" opacity=".8" />)}
       <g transform="translate(1200 420)"><ellipse rx={26} ry={18} fill="#5a5a5a" stroke="#2a2a2a" strokeWidth={3} /><ellipse cx={-6} cy={-5} rx={9} ry={5} fill="#fff" opacity=".35" /></g>
-      <g transform="translate(560 220) rotate(150) scale(2.8)"><rect x={-44} y={-250} width={88} height={260} fill="#e8e0d0" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><HandArt kind="open" skin="#e0a880" /></g>
+      <g transform="translate(560 220) rotate(150) scale(1.74)"><HandCU kind="open" skin="#e0a880" sleeve="#e8e0d0" /></g>
       <g opacity=".4">{[0, 1, 2].map((i) => <path key={i} d={`M${1010 - i * 20} ${380 + i * 14} q80 20 150 40`} stroke="#fff" strokeWidth={5} fill="none" strokeLinecap="round" />)}</g>
     </Par>
     <Par d={1}><Motes n={50} seed={6} c="#fff0d0" o={0.4} /></Par>

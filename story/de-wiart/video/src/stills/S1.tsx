@@ -3,7 +3,7 @@ import {Character} from '../rig/Character';
 import {HandArt, idlePose, runPose, SideOpts, walkPose} from '../rig/Side';
 import {AnimalArt} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
-import {arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
+import {HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
 import {heroYoung} from '../scenes/BoerA';
 
 /* ----------------------------- archetypes ----------------------------- */
@@ -13,7 +13,7 @@ export const lady = (f: 'left' | 'right', c = '#7a2a3a'): SideOpts => ({pal: civ
 export const effendi = (f: 'left' | 'right', c = '#e8dcc0'): SideOpts => ({pal: civ(c, c, '#2a1c14', '#c8925e'), head: 'fez', hat: '#a82a1a', outfit: 'thobe', mustache: true, face: f});
 export const fellah = (f: 'left' | 'right', c = '#8a6a4a'): SideOpts => ({pal: civ(c, c, '#1a120c', '#b8844e'), head: 'turban', hat: '#e8e0d0', outfit: 'thobe', beard: true, face: f});
 export const scholar = (f: 'left' | 'right', hair: string, extra: Partial<SideOpts> = {}): SideOpts => ({pal: civ('#15121a', '#15121a', hair), head: 'none', outfit: 'gown', face: f, ...extra});
-export const boy = (f: 'left' | 'right', c = '#2a3a5a', hair = '#4a3020'): SideOpts => ({pal: civ(c, c, hair), head: 'flatcap', hat: c, outfit: 'blazer', build: 0.8, stretch: 0.56, face: f});
+export const boy = (f: 'left' | 'right', c = '#2a3a5a', hair = '#4a3020'): SideOpts => ({pal: civ(c, c, hair), head: 'flatcap', hat: c, outfit: 'blazer', build: 0.8, stretch: 0.56, child: true, face: f});
 export const young = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'frock', pal: {...heroYoung(f).pal, top: '#3a4a3a', bottom: '#2a2a2a'}});
 export const athlete = (f: 'left' | 'right'): SideOpts => ({...heroYoung(f), head: 'none', outfit: 'blazer', pal: {...heroYoung(f).pal, top: '#8a1a2a', bottom: '#e8e0d0', puttee: '#e8e0d0'}});
 export const P = (...a: any[]) => Object.assign({}, ...a);
@@ -498,7 +498,7 @@ const S1_12: React.FC = () => {
       </Par>
       <Par d={1.15}>
         {/* a real hand: sleeve, wrist, thumb and four fingers gripping the torn corner */}
-        <g transform="translate(1560 300) rotate(118) scale(1.9)"><rect x={-44} y={-230} width={88} height={240} fill="#3a4a3a" /><rect x={-44} y={-230} width={88} height={240} fill="url(#sideShade)" /><rect x={-48} y={-14} width={96} height={24} fill="#2a3a2a" /><HandArt kind="relaxed" skin="#e0a880" /></g>
+        <g transform="translate(1560 300) rotate(118) scale(1.18)"><HandCU kind="pinch" skin="#e0a880" sleeve="#3a4a3a" /></g>
         <g transform="translate(1290 160) rotate(20)"><polygon points="0,0 150,20 120,140 -10,110" fill="#e8dcb8" /><path d="M20 30 H120 M20 60 H110" stroke="#8a1a1a" strokeWidth={5} opacity=".6" /></g>
         {Array.from({length: 7}, (_, i) => <polygon key={i} points={`0,0 ${10 + q() * 16},${q() * 8} ${q() * 12},${12 + q() * 10}`} fill="#e8dcb8" transform={`translate(${1180 + q() * 380} ${380 + q() * 420}) rotate(${q() * 360})`} />)}
       </Par>

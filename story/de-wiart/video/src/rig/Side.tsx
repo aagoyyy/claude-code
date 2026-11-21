@@ -22,6 +22,7 @@ export type SideOpts = {
   outfit?: 'trousers' | 'skirt' | 'gown' | 'thobe' | 'frock' | 'dress' | 'blazer';   // long skirt for women
   hairStyle?: 'bun' | 'long';
   stretch?: number;               // height multiplier (tall / short people)
+  child?: boolean;                // big round head, big eyes, button nose, rosy cheeks
   apron?: boolean;
   rifle?: 'enfield' | 'mauser' | 'martini';   // model: British Lee-Enfield, German Gewehr 98, Martini-Henry (dervishes)
   fine?: boolean;                 // full-detail (cloth grain, AO blurs); false for far/background figures
@@ -100,9 +101,10 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
   const skinD = sh(pal.skin, 0.3), skinL = hl(pal.skin, 0.22), skinM = sh(pal.skin, 0.12);
   const hatC = o.hat || '#9a9462';
   const cid = nid();
-  const faceP = 'M-70 -20 C-80 -90 -40 -100 10 -98 C50 -96 66 -66 66 -44 L69 -30 L66 -10 Q92 14 77 26 L63 31 L61 46 L63 56 Q61 76 48 82 L20 86 Q-20 92 -44 66 L-62 30 Q-78 10 -70 -20 Z';
+  const faceP = o.child ? 'M-70 -20 C-82 -92 -40 -102 10 -100 C52 -98 68 -68 68 -44 L70 -30 L68 -10 Q80 4 74 16 L64 24 L62 44 L64 56 Q64 80 48 86 L20 90 Q-22 96 -48 70 L-66 30 Q-80 10 -70 -20 Z' : 'M-70 -20 C-80 -90 -40 -100 10 -98 C50 -96 66 -66 66 -44 L69 -30 L66 -10 Q92 14 77 26 L63 31 L61 46 L63 56 Q61 76 48 82 L20 86 Q-20 92 -44 66 L-62 30 Q-78 10 -70 -20 Z';
   const hairP = 'M-72 -14 C-86 -92 -40 -108 12 -104 C46 -102 62 -80 66 -58 Q40 -80 14 -78 Q-20 -74 -34 -54 Q-44 -30 -40 -4 Q-52 10 -58 36 Q-80 20 -72 -14 Z';
   const hairless = o.head === 'turban';
+  const child = !!o.child;
   const old = !o.young && o.hero;
   return (
     <g>
@@ -133,10 +135,13 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
         <path d="M-52 40 Q-30 56 -10 56" stroke={skinD} strokeWidth="2" fill="none" opacity=".35" />
       </g>
       {/* nose: bridge highlight, nostril, wing shade */}
+      <g transform={child ? 'translate(68 14) scale(.55) translate(-68 -14)' : undefined}>
       <path d="M66 -10 Q92 14 77 26" stroke="#9c6544" strokeWidth="2.4" fill="none" strokeLinecap="round" opacity=".6" />
       <path d="M62 -8 Q70 8 70 16" stroke="#fff" strokeWidth="3" fill="none" opacity=".28" strokeLinecap="round" />
       <path d="M64 24 Q70 28 76 26" stroke="#6b3f24" strokeWidth="2.6" fill="none" strokeLinecap="round" />
       <ellipse cx={72} cy={24} rx={3.4} ry={2.6} fill="#4a2a18" opacity=".7" />
+      </g>
+      {child && <g><ellipse cx={34} cy={34} rx={28} ry={20} fill="#e8806a" opacity=".42" filter="url(#sBlur3)" /><circle cx={20} cy={28} r={2.2} fill="#b0704a" opacity=".5" /><circle cx={30} cy={24} r={2} fill="#b0704a" opacity=".5" /><circle cx={42} cy={28} r={2.2} fill="#b0704a" opacity=".5" /></g>}
       {/* hair / sideburn / strands */}
       {!hairless && <path d={hairP} fill={pal.hair} stroke={sh(pal.hair, 0.45)} strokeWidth="2.5" />}
       {!hairless && <path d={hairP} fill="url(#sideShade)" />}
@@ -149,7 +154,7 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
         <path d="M30 -54 l4 -6 M38 -58 l3 -6 M46 -58 l3 -5" stroke={sh(pal.hair, 0.3)} strokeWidth="1.8" strokeLinecap="round" />
       </g>
       {!(o.hero && o.patch && near) && (
-        <g transform={`translate(42 -32) scale(1 ${blink * (1 - 0.55 * squint) * (1 + 0.45 * wide)}) translate(-42 32)`}>
+        <g transform={`translate(42 -32) scale(${child ? 1.3 : 1} ${blink * (1 - 0.55 * squint) * (1 + 0.45 * wide) * (child ? 1.35 : 1)}) translate(-42 32)`}>
           <ellipse cx={42} cy={-32} rx={13} ry={8} fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5" />
           <circle cx={46} cy={-32} r={6} fill="#4a86b8" /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.6} fill="#fff" />
           <path d="M30 -34 Q42 -44 56 -34" stroke="#4a2a18" strokeWidth="2.6" fill="none" strokeLinecap="round" />
@@ -687,7 +692,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         {sling && (<g><path d="M-40 -350 Q-92 -276 -112 -176" stroke="#3a2414" strokeWidth="11" fill="none" strokeLinecap="round" /><path d="M-40 -350 Q-90 -276 -110 -178" stroke="#8a5a32" strokeWidth="2" fill="none" strokeDasharray="7 5" opacity=".7" /><rect x={-58} y={-346} width={16} height={22} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" transform="rotate(-18 -50 -335)" /></g>)}
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
-          <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} smile={p.smile} wide={p.wide} /></g>
+          <g transform={`translate(10 -106) ${o.child ? 'translate(0 56) scale(1.32) translate(0 -56)' : ''}`}><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} smile={p.smile} wide={p.wide} /></g>
         </g>
       </g>
       <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} hand={p.handN} />

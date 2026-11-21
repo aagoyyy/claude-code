@@ -335,3 +335,64 @@ export const arms = {
   press: {uaN: -72, faN: -22, handN: 'open'} as SidePose,
   write: {uaN: -36, faN: -88, handN: 'relaxed', head: 16, torso: 5} as SidePose,
 };
+
+/* =============================== detailed close-up hand (back of the hand) =============================== */
+/** wrist at (0,0), fingers toward +y. kind: open | relaxed | point | grip | pinch. Sleeve runs up to y=-300. */
+export const HandCU: React.FC<{kind?: 'open' | 'relaxed' | 'point' | 'grip' | 'pinch'; skin?: string; sleeve?: string; cuff?: string; shirt?: string; id?: string}> = ({kind = 'relaxed', skin = '#e0a880', sleeve = '#3a4a3a', cuff, shirt = '#ece6d6', id = 'hc'}) => {
+  const d = mix(skin, '#000000', 0.32), l = mix(skin, '#ffffff', 0.22), m = mix(skin, '#000000', 0.14), ln = mix(skin, '#000000', 0.55);
+  const sd = mix(sleeve, '#000000', 0.4), sl = mix(sleeve, '#ffffff', 0.12);
+  // finger: three tapered phalanges with joint creases, a nail on the back
+  const finger = (x: number, len: number, rot: number, w: number, curl: number[], k: number, nail = true) => {
+    const L = [len * 0.42, len * 0.33, len * 0.25];
+    const seg = (i: number): React.ReactNode => {
+      if (i > 2) return null;
+      const w0 = w * (1 - i * 0.1), w1 = w * (1 - (i + 1) * 0.1), l = L[i];
+      return (
+        <g transform={i === 0 ? undefined : `rotate(${curl[i]})`}>
+          <path d={`M${-w0 / 2} 0 L${-w1 / 2} ${l} Q0 ${l + w1 * 0.45} ${w1 / 2} ${l} L${w0 / 2} 0 Z`} fill={`url(#${id}F)`} stroke={ln} strokeWidth="2.4" strokeLinejoin="round" />
+          <path d={`M${-w0 * 0.22} ${l * 0.1} L${-w1 * 0.22} ${l * 0.92}`} stroke="#fff" strokeWidth="2.6" opacity=".22" strokeLinecap="round" />
+          <path d={`M${-w1 * 0.4} ${l - 3} Q0 ${l + 4} ${w1 * 0.4} ${l - 3}`} stroke={d} strokeWidth="2" fill="none" opacity=".7" />
+          {i === 2 && nail && <g><path d={`M${-w1 * 0.34} ${l * 0.18} L${-w1 * 0.3} ${l * 0.84} Q0 ${l * 0.98} ${w1 * 0.3} ${l * 0.84} L${w1 * 0.34} ${l * 0.18} Z`} fill="#f2cdb6" stroke={m} strokeWidth="1.6" /><path d={`M${-w1 * 0.2} ${l * 0.28} L${-w1 * 0.18} ${l * 0.7}`} stroke="#fff" strokeWidth="2" opacity=".6" strokeLinecap="round" /></g>}
+          {i < 2 && <g transform={`translate(0 ${l})`}>{seg(i + 1)}</g>}
+        </g>
+      );
+    };
+    return <g key={k} transform={`translate(${x} 78) rotate(${rot})`}>{seg(0)}<ellipse cx={0} cy={4} rx={w * 0.62} ry={w * 0.42} fill={m} opacity=".55" /><ellipse cx={-w * 0.12} cy={2} rx={w * 0.3} ry={w * 0.18} fill={l} opacity=".35" /></g>;
+  };
+  const F = {open: [[-30, 94, 9, 22, [0, 4, 3, 2]], [-10, 112, 3, 23, [0, 3, 2, 2]], [11, 104, -3, 22, [0, 3, 2, 2]], [30, 82, -10, 20, [0, 4, 3, 3]]],
+    relaxed: [[-30, 80, 12, 22, [0, 24, 26, 20]], [-10, 90, 6, 23, [0, 30, 30, 24]], [11, 86, 1, 22, [0, 30, 32, 24]], [30, 70, -4, 20, [0, 32, 30, 24]]],
+    point: [[-10, 112, 3, 23, [0, 2, 2, 2]], [11, 70, -2, 22, [0, 70, 68, 40]], [30, 60, -6, 20, [0, 74, 70, 44]], [-30, 66, 8, 22, [0, 70, 66, 40]]],
+    grip: [[-30, 84, 6, 22, [0, 56, 60, 50]], [-10, 94, 3, 23, [0, 58, 62, 52]], [11, 90, 0, 22, [0, 60, 62, 52]], [30, 76, -4, 20, [0, 60, 60, 50]]],
+    pinch: [[-10, 104, -2, 23, [0, 28, 36, 20]], [11, 78, -2, 22, [0, 66, 70, 40]], [30, 66, -6, 20, [0, 72, 72, 42]], [-30, 72, 8, 22, [0, 70, 70, 40]]]}[kind] as any[];
+  const thumb = kind === 'pinch' ? {r: 26, len: 82, c: [0, 20]} : kind === 'point' || kind === 'grip' ? {r: 38, len: 74, c: [0, 40]} : {r: 44, len: 86, c: [0, 14]};
+  return (
+    <g>
+      <defs>
+        <linearGradient id={`${id}F`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor={l} /><stop offset=".45" stopColor={skin} /><stop offset="1" stopColor={d} /></linearGradient>
+        <linearGradient id={`${id}B`} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={l} /><stop offset=".5" stopColor={skin} /><stop offset="1" stopColor={d} /></linearGradient>
+        <linearGradient id={`${id}S`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor={sl} /><stop offset=".55" stopColor={sleeve} /><stop offset="1" stopColor={sd} /></linearGradient>
+      </defs>
+      {/* sleeve: tube with folds, weave, stitched cuff, button, shirt cuff beneath */}
+      <path d="M-58 -304 L-48 0 L48 0 L58 -304 Z" fill={`url(#${id}S)`} stroke={mix(sleeve, '#000000', 0.6)} strokeWidth="3" />
+      <rect x={-58} y={-304} width={116} height={304} fill="url(#weaveS)" opacity=".7" />
+      {[[-34, -240, 4], [-6, -190, 5], [26, -130, 4], [-40, -90, 3], [14, -60, 3]].map(([fx, fy, w], i) => <path key={i} d={`M${fx} ${fy} q${18} ${26} ${4} ${70}`} stroke={sd} strokeWidth={w * 2.2} fill="none" opacity=".35" strokeLinecap="round" />)}
+      {[[-30, -250], [10, -200], [36, -150], [-14, -110]].map(([fx, fy], i) => <path key={i} d={`M${fx} ${fy} q-10 22 -2 52`} stroke="#fff" strokeWidth="5" fill="none" opacity=".1" strokeLinecap="round" />)}
+      <rect x={-52} y={-34} width={104} height={30} fill={shirt} stroke="#8a8676" strokeWidth="2.5" /><rect x={-52} y={-34} width={104} height={30} fill="url(#sideShade)" opacity=".7" />
+      <path d="M-50 -88 L-46 -34 L46 -34 L50 -88 Z" fill={cuff ?? sleeve} stroke={mix(sleeve, '#000000', 0.6)} strokeWidth="2.5" /><path d="M-48 -84 H48" stroke="#d9ab78" strokeWidth="2" strokeDasharray="6 5" opacity=".7" /><path d="M-47 -40 H47" stroke={sd} strokeWidth="3" opacity=".6" />
+      <circle cx={30} cy={-62} r={8} fill="#b0903a" stroke="#4a3a14" strokeWidth="2" /><circle cx={28} cy={-64} r={3} fill="#fff" opacity=".5" />
+      <ellipse cx={0} cy={-34} rx={54} ry={9} fill="#000" opacity=".25" filter="url(#blS)" />
+      {/* thumb (behind the back of the hand) */}
+      <g transform={`translate(-34 40) rotate(${thumb.r})`}>
+        <path d={`M-18 0 Q-24 30 -14 ${thumb.len * 0.5} L14 ${thumb.len * 0.5} Q22 30 18 0 Z`} fill={m} stroke={ln} strokeWidth="2.4" />
+        <g transform={`translate(0 ${thumb.len * 0.5}) rotate(${thumb.c[1]})`}><path d={`M-15 0 L-12 ${thumb.len * 0.5} Q0 ${thumb.len * 0.55 + 10} 12 ${thumb.len * 0.5} L15 0 Z`} fill={`url(#${id}F)`} stroke={ln} strokeWidth="2.4" strokeLinejoin="round" /><path d={`M-9 ${thumb.len * 0.12} L-7 ${thumb.len * 0.44} Q0 ${thumb.len * 0.5} 8 ${thumb.len * 0.44} L9 ${thumb.len * 0.12} Z`} fill="#f2cdb6" stroke={m} strokeWidth="1.6" /></g>
+      </g>
+      {/* back of the hand: knuckles, tendons, a vein, wrist crease */}
+      <path d="M-36 0 Q-56 44 -52 90 Q0 108 52 90 Q56 44 36 0 Z" fill={`url(#${id}B)`} stroke={ln} strokeWidth="3" />
+      <path d="M-14 8 Q-18 50 -26 86 M6 6 Q4 52 -2 92 M24 8 Q28 52 30 88" stroke={d} strokeWidth="2.6" fill="none" opacity=".4" strokeLinecap="round" />
+      <path d="M-20 16 q16 20 10 50 q10 -16 22 -10" stroke="#7a6a9a" strokeWidth="3.4" fill="none" opacity=".28" strokeLinecap="round" />
+      {[-30, -10, 11, 30].map((kx, i) => <ellipse key={i} cx={kx} cy={84 - (i === 1 ? 4 : 0)} rx={13} ry={9} fill={l} opacity=".45" />)}
+      <path d="M-34 6 Q0 18 34 6" stroke={d} strokeWidth="2.6" fill="none" opacity=".5" />
+      {F.map(([x, len, rot, w, curl]: any, i: number) => finger(x, len, rot, w, curl, i))}
+    </g>
+  );
+};

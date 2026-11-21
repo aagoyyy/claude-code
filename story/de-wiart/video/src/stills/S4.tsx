@@ -3,7 +3,7 @@ import {Character} from '../rig/Character';
 import {aimPose, HandArt, idlePose, kneelAimPose, muzzleOf, ridePose, runPose, SideOpts, walkPose} from '../rig/Side';
 import {AnimalArt, saddleHeight} from '../rig/Animals';
 import {H, mix, mulberry32, W} from '../world/util';
-import {arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, Tree, face} from './lib';
+import {HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, Title, Tree, face} from './lib';
 import {gent, worker, lady, boy, young, P} from './S1';
 import {doctor, nurse, patient, MapArt, Ocean, Ship, Ref, Flag, trooper, sergeant, khakiOfficer, adrianY} from './S2';
 import {askari, camelRider, dervish, heroPith, officer} from '../scenes/SomaliA';
@@ -85,7 +85,7 @@ const S4_5: React.FC = () => (
     <Par d={1.1}>
       <Fig id="d45" x={560} y={2500} s={1.75} o={hero('right', {gear: 'none', hat: '#eadfc4'})} p={P(idlePose(0.5), arms.behind, {squint: 0.8, brow: -0.3, head: 2})} light="desert" lit={0.9} />
       <g transform="translate(640 470)"><rect x={0} y={-36} width={170} height={30} rx={11} fill="#1a1a22" stroke="#000" strokeWidth={3} /><rect x={0} y={6} width={170} height={30} rx={11} fill="#1a1a22" stroke="#000" strokeWidth={3} /><rect x={-16} y={-14} width={44} height={34} fill="#2a2a34" /><ellipse cx={170} cy={-21} rx={11} ry={15} fill="#7aaad0" /><ellipse cx={170} cy={21} rx={11} ry={15} fill="#7aaad0" /><path d="M10 -30 H150" stroke="#fff" strokeWidth={3} opacity=".3" /></g>
-      <g transform="translate(700 700) rotate(-70) scale(1.7)"><rect x={-44} y={-250} width={88} height={260} fill="#a39c66" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><HandArt kind="relaxed" skin="#e0a880" /></g>
+      <g transform="translate(660 650) rotate(208) scale(1.05)"><HandCU kind="grip" skin="#e0a880" sleeve="#a39c66" /></g>
     </Par>
     <Par d={1}><Glow id="d45s" x={300} y={260} r={500} c="#fff2d0" o={0.4} /><Motes n={60} seed={5} c="#fff0d0" o={0.5} r={3} /></Par>
   </Frame>
@@ -143,7 +143,7 @@ const S4_9: React.FC = () => {
   );
 };
 const S4_10: React.FC = () => <Ref src="f564" z={1.0} cx={900} cy={540} tint="#fff0d0" />;
-const S4_11: React.FC = () => <Ref src="f658" z={1.5} cx={420} cy={480} tint="#fff0d0" />;
+const S4_11: React.FC = () => <Ref src="f658h" z={1.5} cx={420} cy={480} tint="#fff0d0" />;
 const S4_12: React.FC = () => (
   <Frame grade="contrast(1.12) saturate(1.0)" over={<Character pose={{head: 8, blink: 0.04, yaw: 10, mouth: 0.7}} variant={{young: true, patch: true, scars: true}} cam={{x: 0, y: 0, zoom: 4.3, px: 797, py: 330}} light={{key: '#ffd9a0', rim: '#ffcf98'}}>
     <g transform="translate(850 360)"><path d="M0 0 q-6 40 4 80 q10 -30 -4 -80 Z" fill="#a8101a" opacity=".85" /><path d="M-40 -10 q4 30 -6 50" stroke="#a8101a" strokeWidth={8} fill="none" opacity=".7" strokeLinecap="round" /></g></Character>}>
@@ -166,8 +166,8 @@ const S4_14: React.FC = () => (
       <path d="M720 490 q10 22 -2 40" stroke="#c4281c" strokeWidth={14} fill="none" opacity=".6" strokeLinecap="round" />
       <path d="M580 400 L860 440 M590 450 L860 500 M610 500 L840 540" stroke="#aaa392" strokeWidth={2} fill="none" />
       {/* the nurse's hands winding the roll */}
-      <g transform="translate(1180 330) rotate(150) scale(2.2)"><rect x={-44} y={-250} width={88} height={260} fill="#f2f0e8" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><HandArt kind="relaxed" skin="#e8b48a" /></g>
-      <g transform="translate(1260 860) rotate(30) scale(2.0)"><rect x={-44} y={-250} width={88} height={260} fill="#f2f0e8" /><rect x={-44} y={-250} width={88} height={260} fill="url(#sideShade)" /><HandArt kind="open" skin="#e8b48a" /></g>
+      <g transform="translate(1180 330) rotate(150) scale(1.36)"><HandCU kind="relaxed" skin="#e8b48a" sleeve="#f2f0e8" /></g>
+      <g transform="translate(1260 860) rotate(30) scale(1.24)"><HandCU kind="open" skin="#e8b48a" sleeve="#f2f0e8" /></g>
       <path d="M860 420 Q1000 400 1080 520" stroke="#ece8d8" strokeWidth={30} fill="none" strokeLinecap="round" />
     </Par>
   </Frame>
@@ -257,7 +257,7 @@ const S4_18: React.FC = () => {
       </Par>
       <Par d={0.8}><path d="M1100 0 L1100 1080 L1920 1080 L1920 0 Z" fill="#14100c" /><rect x={1060} y={720} width={880} height={50} fill="#5a3a24" /></Par>
       <Par d={1.15}>
-        <g transform="translate(1250 260) rotate(100) scale(2.8)"><rect x={-46} y={-250} width={92} height={270} fill="#3a4a3a" /><rect x={-46} y={-250} width={92} height={270} fill="url(#sideShade)" /><rect x={-50} y={-14} width={100} height={26} fill="#2a3a2a" /><HandArt kind="open" skin="#e0a880" /></g>
+        <g transform="translate(1250 260) rotate(100) scale(1.74)"><HandCU kind="open" skin="#e0a880" sleeve="#3a4a3a" /></g>
         {glassEye(640, 440, 40)}
         {[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${760 + i * 20} ${380 + i * 20} q-120 20 -300 100`} stroke="#fff" strokeWidth={5} fill="none" opacity={0.5 - i * 0.08} strokeLinecap="round" />)}
       </Par>
