@@ -3,8 +3,9 @@ import {mix} from '../world/util';
 
 /** Side-view (profile) rig. Local space: feet on y=0, figure faces +x, ~1270 tall. Mirror with `face='left'`. */
 export type Pal = {skin: string; hair: string; top: string; bottom: string; belt: string; boots: string; puttee?: string; metal?: string};
-export type Head = 'none' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina' | 'flatcap' | 'scarf' | 'nursecap';
-export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; hatLag?: number; slingLag?: number; packBounce?: number; spin?: number; mouth?: number; brow?: number; squint?: number; grimace?: number};
+export type HandKind = 'fist' | 'open' | 'point' | 'relaxed';
+export type Head = 'none' | 'bowler' | 'top' | 'mortar' | 'boater' | 'fez' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina' | 'flatcap' | 'scarf' | 'nursecap';
+export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; hatLag?: number; slingLag?: number; packBounce?: number; spin?: number; mouth?: number; brow?: number; squint?: number; grimace?: number; smile?: number; wide?: number; handN?: HandKind; handF?: HandKind};
 
 export type SideOpts = {
   pal: Pal;
@@ -18,7 +19,7 @@ export type SideOpts = {
   hat?: string;                   // headgear colour
   scars?: boolean;
   bayonet?: boolean;
-  outfit?: 'trousers' | 'skirt';   // long skirt for women
+  outfit?: 'trousers' | 'skirt' | 'gown' | 'thobe' | 'frock' | 'dress' | 'blazer';   // long skirt for women
   hairStyle?: 'bun' | 'long';
   stretch?: number;               // height multiplier (tall / short people)
   apron?: boolean;
@@ -93,7 +94,7 @@ const Button: React.FC<{x: number; y: number; r?: number}> = ({x, y, r = 5.5}) =
   <g><circle cx={x} cy={y} r={r} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.2" /><circle cx={x - r * 0.3} cy={y - r * 0.3} r={r * 0.32} fill="#fff6c8" /></g>
 );
 
-const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: number; mouth?: number; brow?: number; squint?: number; grimace?: number}> = ({o, near, blink, hatLag = 0, mouth = 0, brow = 0, squint = 0, grimace = 0}) => {
+const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: number; mouth?: number; brow?: number; squint?: number; grimace?: number; smile?: number; wide?: number}> = ({o, near, blink, hatLag = 0, mouth = 0, brow = 0, squint = 0, grimace = 0, smile = 0, wide = 0}) => {
   const {pal} = o;
   const fine = o.fine !== false;
   const skinD = sh(pal.skin, 0.3), skinL = hl(pal.skin, 0.22), skinM = sh(pal.skin, 0.12);
@@ -148,7 +149,7 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
         <path d="M30 -54 l4 -6 M38 -58 l3 -6 M46 -58 l3 -5" stroke={sh(pal.hair, 0.3)} strokeWidth="1.8" strokeLinecap="round" />
       </g>
       {!(o.hero && o.patch && near) && (
-        <g transform={`translate(42 -32) scale(1 ${blink * (1 - 0.55 * squint)}) translate(-42 32)`}>
+        <g transform={`translate(42 -32) scale(1 ${blink * (1 - 0.55 * squint) * (1 + 0.45 * wide)}) translate(-42 32)`}>
           <ellipse cx={42} cy={-32} rx={13} ry={8} fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5" />
           <circle cx={46} cy={-32} r={6} fill="#4a86b8" /><circle cx={47} cy={-32} r={2.8} fill="#0f1822" /><circle cx={49} cy={-34} r={1.6} fill="#fff" />
           <path d="M30 -34 Q42 -44 56 -34" stroke="#4a2a18" strokeWidth="2.6" fill="none" strokeLinecap="round" />
@@ -164,7 +165,8 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
           <ellipse cx={50} cy={56 + 12 * mouth} rx={8} ry={3 + 3 * mouth} fill="#b0504a" opacity=".85" />
         </g>
       )}
-      <path d={`M62 ${56 - 3 * grimace} Q50 ${61 - 2 * grimace} 38 ${56 + 2 * grimace}`} stroke="#a85c46" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      <path d={`M62 ${56 - 3 * grimace - 9 * smile} Q50 ${61 - 2 * grimace + 9 * smile} 38 ${56 + 2 * grimace - 7 * smile}`} stroke="#a85c46" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      {smile > 0.05 && <g><ellipse cx={46} cy={40} rx={20} ry={12} fill="#e08a70" opacity={0.3 * smile} filter="url(#sBlur3)" /><path d="M66 46 Q72 52 66 60" stroke={skinD} strokeWidth="2.4" fill="none" opacity={0.6 * smile} strokeLinecap="round" /></g>}
       <path d={`M60 ${64 + 14 * mouth} Q52 ${70 + 16 * mouth} 42 ${66 + 14 * mouth}`} stroke="#b9705a" strokeWidth="3" fill="none" strokeLinecap="round" opacity=".7" />
       {grimace > 0.05 && <path d="M64 30 Q74 40 66 52 M30 28 Q40 46 36 58" stroke={skinD} strokeWidth="3" fill="none" strokeLinecap="round" opacity={0.7 * grimace} />}
       <path d="M50 78 Q56 76 58 70" stroke={skinD} strokeWidth="2" fill="none" opacity=".5" />
@@ -199,6 +201,16 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: num
 const HeadGear: React.FC<{kind: Head; c: string}> = ({kind, c}) => {
   const d = sh(c, 0.3), l = hl(c, 0.25);
   switch (kind) {
+    case 'bowler':
+      return (<g><ellipse cx={4} cy={-52} rx={104} ry={13} fill={d} stroke={OUT} strokeWidth="3" /><path d="M-70 -52 Q-72 -140 6 -144 Q84 -140 80 -52 Z" fill={c} stroke={OUT} strokeWidth="3" /><path d="M-70 -52 Q-72 -140 6 -144 Q84 -140 80 -52 Z" fill="url(#sideShade)" /><rect x={-70} y={-72} width={150} height={16} fill="#14100c" /><path d="M-44 -118 Q-10 -136 36 -126" stroke={l} strokeWidth="5" fill="none" opacity=".45" strokeLinecap="round" /></g>);
+    case 'top':
+      return (<g><ellipse cx={4} cy={-52} rx={96} ry={12} fill={d} stroke={OUT} strokeWidth="3" /><path d="M-62 -52 L-56 -214 Q6 -226 70 -214 L78 -52 Z" fill={c} stroke={OUT} strokeWidth="3" /><path d="M-62 -52 L-56 -214 Q6 -226 70 -214 L78 -52 Z" fill="url(#sideShade)" /><ellipse cx={8} cy={-214} rx={64} ry={9} fill={l} stroke={OUT} strokeWidth="2.5" /><rect x={-60} y={-80} width={136} height={18} fill="#14100c" /><path d="M-40 -190 L-36 -90" stroke="#fff" strokeWidth="5" opacity=".25" /></g>);
+    case 'mortar':
+      return (<g><path d="M-62 -52 Q-60 -104 6 -106 Q72 -104 74 -52 Z" fill={c} stroke={OUT} strokeWidth="3" /><path d="M-62 -52 Q-60 -104 6 -106 Q72 -104 74 -52 Z" fill="url(#sideShade)" /><polygon points="-120,-112 8,-132 150,-108 22,-88" fill="#14100c" stroke={OUT} strokeWidth="3" /><polygon points="-120,-112 8,-132 150,-108 22,-88" fill="url(#sideShade)" opacity=".6" /><path d="M10 -112 Q-30 -70 -70 -60" stroke="#d9b24c" strokeWidth="4" fill="none" /><circle cx={10} cy={-112} r={7} fill="#d9b24c" /></g>);
+    case 'boater':
+      return (<g><ellipse cx={4} cy={-56} rx={112} ry={14} fill={hl(c, 0.2)} stroke={OUT} strokeWidth="3" /><path d="M-72 -56 L-70 -112 Q6 -122 80 -112 L82 -56 Z" fill={hl(c, 0.2)} stroke={OUT} strokeWidth="3" /><path d="M-72 -56 L-70 -112 Q6 -122 80 -112 L82 -56 Z" fill="url(#sideShade)" /><rect x={-72} y={-84} width={154} height={14} fill="#2a3a6a" /></g>);
+    case 'fez':
+      return (<g><path d="M-60 -50 L-48 -150 Q6 -164 64 -150 L74 -50 Z" fill={c} stroke={OUT} strokeWidth="3" /><path d="M-60 -50 L-48 -150 Q6 -164 64 -150 L74 -50 Z" fill="url(#sideShade)" /><path d="M10 -158 Q60 -150 66 -100" stroke="#14100c" strokeWidth="6" fill="none" strokeLinecap="round" /><circle cx={66} cy={-96} r={7} fill="#14100c" /></g>);
     case 'brodie':
       return (<g><path d="M-92 -36 Q-84 -128 6 -134 Q92 -128 104 -40 L112 -32 L-100 -30 Z" fill={c} stroke={OUT} strokeWidth="3" /><path d="M-92 -36 Q-84 -128 6 -134 Q92 -128 104 -40 L112 -32 L-100 -30 Z" fill="url(#sideShade)" /><path d="M-60 -92 Q-10 -124 50 -112" stroke={l} strokeWidth="4" fill="none" opacity=".5" strokeLinecap="round" /><path d="M-20 -30 Q10 40 40 40" stroke={d} strokeWidth="3" fill="none" /></g>);
     case 'pith':
@@ -326,6 +338,37 @@ const gripAngles = (uaN: number, faN: number): [number, number] => {
   return [A1, A2 - A1];
 };
 
+
+/** hand shapes other than the default fist; drawn at the wrist, fingers pointing along +y */
+export const HandArt: React.FC<{kind: HandKind; skin: string}> = ({kind, skin}) => {
+  const ln = '#6b3f24', sd = sh(skin, 0.28), lt = hl(skin, 0.18);
+  const finger = (x: number, len: number, rot: number, w = 12, k = 0) => (
+    <g key={k} transform={`translate(${x} 40) rotate(${rot})`}>
+      <path d={`M${-w} 0 L${-w + 1} ${len - w} Q0 ${len + w * 0.5} ${w - 1} ${len - w} L${w} 0 Z`} fill={skin} stroke={ln} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d={`M${-w + 3} 6 L${-w + 4} ${len - w}`} stroke="#fff" strokeWidth="2.4" opacity=".25" fill="none" strokeLinecap="round" />
+      <path d={`M${-w + 2} ${len * 0.34} Q0 ${len * 0.34 + 5} ${w - 2} ${len * 0.34} M${-w + 2} ${len * 0.66} Q0 ${len * 0.66 + 5} ${w - 2} ${len * 0.66}`} stroke={sd} strokeWidth="1.8" fill="none" opacity=".7" />
+      <ellipse cx={0} cy={len - w * 0.7} rx={w * 0.6} ry={w * 0.5} fill={lt} opacity=".35" />
+    </g>
+  );
+  const palm = <><path d="M-26 -4 Q-36 22 -30 52 Q0 68 30 52 Q38 22 26 -4 Z" fill={skin} stroke={ln} strokeWidth="3" /><path d="M-26 -4 Q-36 22 -30 52 Q0 68 30 52 Q38 22 26 -4 Z" fill="url(#sideShade)" /><path d="M-16 12 Q0 26 18 14" stroke={sd} strokeWidth="2.4" fill="none" opacity=".6" /></>;
+  const thumb = (rot: number, len = 64) => (
+    <g transform={`translate(-22 12) rotate(${rot})`}>
+      <path d={`M-14 0 Q-18 ${len * 0.6} -8 ${len} Q4 ${len + 8} 12 ${len - 4} Q16 ${len * 0.5} 12 0 Z`} fill={skin} stroke={ln} strokeWidth="2.6" strokeLinejoin="round" />
+      <path d={`M-8 10 Q-10 ${len * 0.5} -4 ${len - 6}`} stroke="#fff" strokeWidth="2.4" fill="none" opacity=".25" />
+    </g>
+  );
+  if (kind === 'open') return <g>{[[-20, 88, 7], [-6, 104, 2], [8, 98, -3], [21, 78, -9]].map(([x, l, r], i) => finger(x, l, r, 11, i))}{thumb(34, 62)}{palm}</g>;
+  if (kind === 'relaxed') return <g>{[[-20, 70, 14], [-6, 80, 8], [8, 76, 3], [21, 62, -2]].map(([x, l, r], i) => finger(x, l, r, 11, i))}{thumb(20, 54)}{palm}</g>;
+  if (kind === 'point') return (
+    <g>
+      {[[-6, 40, 28], [8, 38, 22], [21, 34, 18]].map(([x, l, r], i) => finger(x, l, r, 11, i + 4))}
+      {finger(-18, 112, -4, 11, 9)}
+      {thumb(40, 46)}{palm}
+    </g>
+  );
+  return null;
+};
+
 export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const {pal} = o;
   const flip = o.face === 'left';
@@ -338,6 +381,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const rot = (a?: number) => `rotate(${(a || 0).toFixed(2)})`;
   const stitchC = sh(top, 0.5);
   const hasRifle = o.gear === 'rifle' || o.gear === 'rifle+pack';
+  const civ = !!o.outfit && o.outfit !== 'trousers';
   const sling = !!p.sling && hasRifle;
   const rk = o.rifle || 'enfield';
   const fg = p.grip && hasRifle && !sling ? gripAngles(p.uaN || 0, p.faN || 0) : null;
@@ -345,7 +389,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const tid = nid();
   const torsoP = 'M-34 -352 L44 -352 Q100 -336 120 -270 Q134 -190 130 -110 Q126 -50 104 -4 L-92 -4 Q-112 -60 -114 -130 Q-118 -230 -104 -296 Q-90 -340 -34 -352 Z';
 
-  const Arm: React.FC<{near: boolean; ua?: number; fa?: number; stump?: boolean}> = ({near, ua, fa, stump}) => {
+  const Arm: React.FC<{near: boolean; ua?: number; fa?: number; stump?: boolean; hand?: HandKind}> = ({near, ua, fa, stump, hand}) => {
     const c = near ? top : sh(top, 0.22);
     const sc = sh(c, 0.5);
     return (
@@ -379,7 +423,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
               <path d="M-14 66 l6 22 l12 -16 z" fill="#ebe5d3" stroke="#7d7767" strokeWidth="1.5" />
             </g>
           ) : (
-            <g transform="translate(0 200)">
+            hand && hand !== 'fist' && !hasRifle ? <g transform="translate(0 196)"><HandArt kind={hand} skin={pal.skin} /></g> : <g transform="translate(0 200)">
               {/* fist: palm, four curled fingers with knuckles, thumb, wrist crease */}
               <path d="M-22 -4 Q-34 20 -30 46 Q-12 66 18 60 Q36 40 30 6 Q22 -8 -22 -4 Z" fill={pal.skin} stroke="#6b3f24" strokeWidth="3" />
               <path d="M-22 -4 Q-34 20 -30 46 Q-12 66 18 60 Q36 40 30 6 Q22 -8 -22 -4 Z" fill="url(#sideShade)" />
@@ -488,7 +532,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
 
   const art = (
     <g>
-      <Arm near={false} ua={uaF} fa={faF} stump={stumpFar} />
+      <Arm near={false} ua={uaF} fa={faF} stump={stumpFar} hand={p.handF} />
       <Leg near={false} th={p.thF} shn={p.shF} ft={p.ftF} />
       <Leg near th={p.thN} shn={p.shN} ft={p.ftN} />
       {o.outfit === 'skirt' && (
@@ -497,6 +541,30 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           <path d="M-92 0 L96 0 Q150 280 160 560 L-150 560 Q-140 280 -92 0 Z" fill="url(#sideShade)" opacity=".8" />
           <path d="M-40 40 Q-50 300 -70 556 M20 40 Q22 300 24 556 M70 30 Q90 300 110 556" stroke={sh(bot, 0.45)} strokeWidth="3" fill="none" opacity=".45" />
           {o.apron && <path d="M-70 -10 L80 -10 L120 520 L-110 520 Z" fill="#f1ede2" stroke={OUT} strokeWidth="2.5" opacity=".96" />}
+        </g>
+      )}
+      {(o.outfit === 'gown' || o.outfit === 'thobe' || o.outfit === 'dress') && (
+        <g transform={`translate(0 -690) ${rot(p.torso)}`}>
+          {(() => {
+            const sw = (p.thN || 0) * 1.4, sf = (p.thF || 0) * 1.4;
+            const hem = o.outfit === 'dress' ? 600 : 570, flare = o.outfit === 'thobe' ? 30 : 70;
+            const bust = o.outfit === 'dress' ? 'M-92 0 L96 0 Q200 150 ' : 'M-100 0 L104 0 Q150 200 ';
+            return (<g>
+              <path d={`${bust}${160 + flare + sw} ${hem} L${-150 - flare + sf} ${hem} Q${-150 - flare * 0.4} 200 -100 0 Z`} fill={bot} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+              <path d={`${bust}${160 + flare} ${hem} L${-150 - flare} ${hem} Q${-150} 200 -100 0 Z`} fill="url(#sideShade)" opacity=".85" />
+              <path d={`M-70 40 Q-84 300 ${-110 - flare * 0.6} ${hem - 8} M-20 40 Q-24 300 -28 ${hem - 8} M30 40 Q36 300 44 ${hem - 8} M80 30 Q104 300 ${130 + flare * 0.6} ${hem - 8}`} stroke={sh(bot, 0.5)} strokeWidth="3" fill="none" opacity=".5" />
+              <path d={`M-150 ${hem - 6} H160`} stroke={o.outfit === 'dress' ? '#e8dcc8' : sh(bot, 0.55)} strokeWidth={o.outfit === 'dress' ? 10 : 5} opacity=".8" strokeDasharray={o.outfit === 'dress' ? '14 8' : undefined} />
+              {o.outfit === 'dress' && <path d="M-92 20 Q-190 90 -170 250 Q-140 140 -92 80 Z" fill={bot} stroke={OUT} strokeWidth="3" />}
+            </g>);
+          })()}
+        </g>
+      )}
+      {o.outfit === 'frock' && (
+        <g transform={`translate(0 -666) ${rot(p.torso)}`}>
+          <path d={`M-96 -10 L110 -10 Q150 120 ${122 + (p.thN || 0) * 1.2} 330 L10 300 L-18 330 Q-110 300 ${-118 + (p.thF || 0)} 330 Q-110 150 -96 -10 Z`} fill={top} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+          <path d={`M-96 -10 L110 -10 Q150 120 122 330 L10 300 L-18 330 Q-110 300 -118 330 Q-110 150 -96 -10 Z`} fill="url(#sideShade)" opacity=".8" />
+          <path d="M-40 -6 Q-46 150 -62 310 M34 -6 Q40 150 56 312" stroke={sh(top, 0.5)} strokeWidth="3" fill="none" opacity=".45" />
+          <path d="M-10 300 L10 300 L2 -10 Z" fill="#000" opacity=".3" />
         </g>
       )}
       {(o.gear === 'pack' || o.gear === 'rifle+pack') && (
@@ -533,6 +601,30 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           {fine && <rect x={-130} y={-360} width={270} height={360} filter="url(#clothS)" opacity=".22" />}
         </g>
         <path d={torsoP} fill="none" stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+        {o.outfit === 'frock' && (
+          <g>
+            <path d="M30 -352 L66 -346 L112 -120 L112 -40 L30 -40 Z" fill="#c8b890" stroke={OUT} strokeWidth="2.5" />
+            <path d="M30 -352 L66 -346 L112 -120 L112 -40 L30 -40 Z" fill="url(#sideShade)" opacity=".5" />
+            {[-300, -240, -180, -120, -70].map((y) => <circle key={y} cx={96} cy={y} r={4.5} fill="#3a2a1a" />)}
+            <path d="M26 -352 L62 -350 L50 -326 L22 -334 Z" fill="#f4efe0" stroke={OUT} strokeWidth="2" />
+            <path d="M38 -332 L70 -320 L60 -262 L44 -296 Z" fill="#7a1a2a" stroke={OUT} strokeWidth="2" />
+            <path d="M-84 -334 Q-10 -354 56 -346 L90 -300 L48 -200 L20 -330 Z" fill="none" stroke={sh(top, 0.45)} strokeWidth="2.5" opacity=".7" />
+          </g>
+        )}
+        {(o.outfit === 'gown' || o.outfit === 'thobe') && (
+          <g>
+            <path d="M30 -352 L60 -346 L112 -4" stroke={sh(top, 0.5)} strokeWidth="4" fill="none" opacity=".7" />
+            {o.outfit === 'gown' && <><path d="M20 -352 L60 -346 L100 -300 L58 -332 Z" fill="#f4efe0" stroke={OUT} strokeWidth="2" /><path d="M60 -346 Q96 -180 112 -4" stroke="#6a1a2a" strokeWidth="14" fill="none" opacity=".85" /></>}
+            {o.outfit === 'thobe' && <><path d="M70 -330 L80 -250" stroke="#e8dcc0" strokeWidth="6" /><circle cx={78} cy={-300} r={4} fill="#c8a040" /><circle cx={80} cy={-270} r={4} fill="#c8a040" /></>}
+          </g>
+        )}
+        {o.outfit === 'dress' && (
+          <g>
+            <path d="M-92 -120 Q0 -90 104 -120 L104 -70 Q0 -40 -92 -70 Z" fill={sh(top, 0.2)} stroke={OUT} strokeWidth="2.5" />
+            <path d="M18 -352 L66 -346 L76 -318 L40 -306 Z" fill="#f4efe0" stroke={OUT} strokeWidth="2" />
+            {[-300, -250, -200, -160].map((y) => <circle key={y} cx={98} cy={y} r={4} fill="#e8dcc8" />)}
+          </g>
+        )}
         {/* tunic hem */}
         <path d="M-92 -4 L104 -4" stroke={stitchC} strokeWidth="1.8" strokeDasharray="5 4" opacity=".7" />
         {/* folded collar (+ tie for the hero) */}
@@ -541,6 +633,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         <path d="M24 -354 L72 -352 L92 -330 L62 -308 L20 -336 Z" fill="url(#sideShade)" opacity=".7" />
         <path d="M28 -346 L66 -343 L82 -328 M26 -338 L60 -316" stroke={stitchC} strokeWidth="1.5" strokeDasharray="4 3" opacity=".75" fill="none" />
         {o.hero && <path d="M66 -334 L92 -330 L90 -312 L70 -316 Z" fill="#1f3d2c" stroke="#0f2418" strokeWidth="1.8" />}
+        {!civ && (<g>
         {/* epaulette on the near shoulder, seen edge-on */}
         <g transform="rotate(-8 -10 -340)"><rect x={-56} y={-352} width={84} height={20} rx={5} fill={sh(top, 0.1)} stroke={OUT} strokeWidth="2.5" /><rect x={-56} y={-352} width={84} height={7} rx={3} fill={hl(top, 0.18)} opacity=".6" /><path d="M-50 -338 H22" stroke={stitchC} strokeWidth="1.4" strokeDasharray="4 3" opacity=".7" /></g>
         <Button x={-34} y={-342} r={4.2} /><Button x={-6} y={-345} r={4.2} />
@@ -562,6 +655,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           <Button x={48} y={-110} r={4.5} />
         </g>
         {[-228, -160, -92, -50].map((y) => <Button key={y} x={y > -100 ? 112 : 116} y={y} r={5} />)}
+        </g>)}
         {o.hero && (
           <g>
             {/* Sam Browne cross strap: shadow, edge highlight, double stitching, keeper loop */}
@@ -578,6 +672,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
             <rect x={44} y={-282} width={64} height={9} fill="#fff" opacity=".22" /><rect x={44} y={-282} width={64} height={28} fill="none" stroke="#2b2412" strokeWidth="1.5" />
           </g>
         )}
+        {!civ && (<g>
         {/* waist belt: leather gradient, holes, double stitching, keepers, bevelled buckle with prong */}
         <rect x={-96 * B} y={-20} width={206 * B} height={32} fill="#000" opacity=".4" filter="url(#sBlur3)" />
         <rect x={-96 * B} y={-26} width={206 * B} height={32} fill="url(#leatherS)" stroke={OUT} strokeWidth="3" />
@@ -588,13 +683,14 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         <rect x={86 * B} y={-34} width={32} height={46} rx={5} fill="url(#goldS)" stroke="#5e4614" strokeWidth="3" />
         <rect x={92 * B} y={-26} width={20} height={30} rx={2} fill="#3a2a0c" stroke="#8a6a22" strokeWidth="1.5" />
         <rect x={96 * B} y={-14} width={12} height={5} fill="#d8b559" /><path d={`M${88 * B} -30 H${116 * B}`} stroke="#fff3bd" strokeWidth="2" opacity=".7" />
+        </g>)}
         {sling && (<g><path d="M-40 -350 Q-92 -276 -112 -176" stroke="#3a2414" strokeWidth="11" fill="none" strokeLinecap="round" /><path d="M-40 -350 Q-90 -276 -110 -178" stroke="#8a5a32" strokeWidth="2" fill="none" strokeDasharray="7 5" opacity=".7" /><rect x={-58} y={-346} width={16} height={22} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" transform="rotate(-18 -50 -335)" /></g>)}
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
-          <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} /></g>
+          <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} smile={p.smile} wide={p.wide} /></g>
         </g>
       </g>
-      <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} />
+      <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} hand={p.handN} />
     </g>
   );
   const fk = p.fall || 0;

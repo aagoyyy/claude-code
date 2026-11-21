@@ -5,7 +5,7 @@ import {attach, reach} from '../rig/pose';
 import {AnimalArt} from '../rig/Animals';
 import {idlePose, runPose, walkPose} from '../rig/Side';
 import {H, mix, mulberry32, W} from '../world/util';
-import {Birds, Clouds, civ, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, kid, man, Motes, Rays, SkyRect, Sil, Stars, Title, Tree} from './lib';
+import {Par, Birds, Clouds, civ, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, kid, man, Motes, Rays, SkyRect, Sil, Stars, Title, Tree} from './lib';
 import {heroOld} from '../scenes/HeroSide';
 import {heroYoung} from '../scenes/BoerA';
 
@@ -24,20 +24,25 @@ const warfield = (extra?: React.ReactNode) => {
   const q = mulberry32(12);
   return (
     <>
-      <SkyRect id="w0" stops={[[0, '#070c18'], [0.4, '#1f2a42'], [0.7, '#5a4e58'], [1, '#b08a5e']]} h={800} />
+      <Par d={0.03}><SkyRect id="w0" stops={[[0, '#070c18'], [0.4, '#1f2a42'], [0.7, '#5a4e58'], [1, '#b08a5e']]} h={800} />
       <Stars n={80} seed={3} ymax={380} />
       <Clouds n={6} seed={9} y0={80} y1={300} c="#6a6a88" o={0.35} />
       <Glow id="wg" x={1450} y={740} r={600} c="#ff8a3a" o={0.8} />
-      <Glow id="wg2" x={400} y={760} r={380} c="#ff9a4a" o={0.4} />
+      <Glow id="wg2" x={400} y={760} r={380} c="#ff9a4a" o={0.4} /></Par>
+<Par d={0.15}>
       {[1500, 1280, 1700, 420].map((x, i) => smokeCol(x, 760, 420 - i * 50, 90 + i * 20, '#3a3440', 0.55, i))}
       <Sil seed={4} base={735} amp={60} fill="#2b3346" o={0.9} />
       <g fill="#10131c" opacity=".85">{[1000, 1060, 1120, 1170, 1240].map((x, i) => <g key={i}><circle cx={x} cy={718 - (i % 2) * 3} r={4} /><rect x={x - 4} y={722 - (i % 2) * 3} width={8} height={22} /><line x1={x + 4} y1={726} x2={x + 16} y2={708} stroke="#10131c" strokeWidth={2} /></g>)}<rect x={740} y={726} width={46} height={16} /><circle cx={750} cy={744} r={9} /><circle cx={778} cy={744} r={9} /></g>
+</Par>
+<Par d={0.3}>
       <Fog id="wf1" y={620} h={240} c="#8a8f9c" o={0.4} />
       <Sil seed={9} base={806} amp={44} fill="#181c28" />
       {[260, 470, 700, 1290, 1540, 1760].map((x, i) => <g key={i} stroke="#0c0e16" strokeWidth={5}><line x1={x} y1={836} x2={x} y2={756 - (i % 2) * 10} /><line x1={x - 36} y1={796} x2={x + 36} y2={806} strokeWidth={2.5} /></g>)}
       {[190, 880, 1380].map((x, i) => coil(x, 820, 9, i))}
       <g stroke="#0a0c14" strokeWidth={9} fill="none" strokeLinecap="round"><path d="M1660 840 Q1650 700 1668 600 M1664 640 Q1700 600 1740 596 M1660 700 Q1620 660 1590 656 M1668 600 Q1650 560 1664 520" /></g>
       <Birds n={6} seed={4} x0={1500} x1={1800} y0={420} y1={540} c="#0a0c14" s={0.9} />
+</Par>
+<Par d={0.9}>
       <rect y={850} width={W} height={H - 850} fill="#14161f" />
       <Dirt o={0.8} light={0.2}><rect y={850} width={W} height={H - 850} fill="#6a5a48" /></Dirt>
       <rect y={850} width={W} height={H - 850} fill="url(#aoV)" />
@@ -45,6 +50,7 @@ const warfield = (extra?: React.ReactNode) => {
       {Array.from({length: 7}, (_, i) => <ellipse key={i} cx={1480 + i * 38 + (i % 2) * 12} cy={862 - (i % 2) * 14} rx={28} ry={13} fill={mix('#5a5238', '#000', 0.2 + (i % 3) * 0.08)} />)}
       <Motes n={50} seed={7} x0={1100} x1={1800} y0={420} y1={800} c="#ffa050" o={0.9} r={2.4} />
       <g stroke="#9fb4d8" strokeWidth={1.4} opacity=".18">{Array.from({length: 60}, (_, i) => { const x = q() * W, y = q() * H; return <line key={i} x1={x} y1={y} x2={x - 10} y2={y + 38} />; })}</g>
+</Par>
       {extra}
     </>
   );

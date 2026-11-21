@@ -1,7 +1,8 @@
 import React from 'react';
 import {S01} from './S01';
+import {S1} from './S1';
 
-export const REG: Record<string, React.FC> = {...S01};
+export const REG: Record<string, React.FC> = {...S01, ...S1};
 
 export const Still: React.FC<{id: string}> = ({id}) => {
   const C = REG[id];

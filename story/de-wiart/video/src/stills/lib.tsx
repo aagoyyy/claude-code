@@ -1,19 +1,24 @@
 import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Post} from '../fx/Post';
-import {H, mix, mulberry32, ridge, W} from '../world/util';
+import {Cam, camT, H, mix, mulberry32, ridge, W} from '../world/util';
+import {Character} from '../rig/Character';
+import {SidePose} from '../rig/Side';
 import {Figure, FigureDefs, LightName} from '../rig/Figure';
 import {Pal, SideOpts} from '../rig/Side';
 
 /** one full-frame still: svg children + grading/grain/vignette */
-export const Frame: React.FC<{grade?: string; night?: boolean; children: React.ReactNode; over?: React.ReactNode}> = ({grade, night, children, over}) => (
+export const CamCtx = React.createContext<Cam>({x: 0, y: 0, zoom: 1});
+export const Frame: React.FC<{grade?: string; night?: boolean; children: React.ReactNode; over?: React.ReactNode; cam?: Cam}> = ({grade, night, children, over, cam = {x: 0, y: 0, zoom: 1}}) => (
   <AbsoluteFill style={{background: '#000', filter: grade}}>
+    <CamCtx.Provider value={cam}>
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0}}>
       <FigureDefs />
-      <DetailDefs /><HouseDefs /><GroundDefs />
+      <DetailDefs /><MatDefs /><HouseDefs /><GroundDefs />
       {children}
     </svg>
     {over}
+    </CamCtx.Provider>
     <Post f={3} fade={1} night={night} />
   </AbsoluteFill>
 );
@@ -257,4 +262,76 @@ export const Birds: React.FC<{n?: number; seed?: number; x0?: number; x1?: numbe
 export const Clouds: React.FC<{n?: number; seed?: number; y0?: number; y1?: number; c?: string; o?: number}> = ({n = 8, seed = 3, y0 = 60, y1 = 360, c = '#fff', o = 0.5}) => {
   const q = mulberry32(seed);
   return <g filter="url(#blM)">{Array.from({length: n}, (_, i) => { const x = q() * W, y = y0 + q() * (y1 - y0), r = 90 + q() * 160; return <g key={i} opacity={o * (0.4 + q() * 0.6)}><ellipse cx={x} cy={y} rx={r} ry={r * 0.17} fill={c} /><ellipse cx={x + r * 0.3} cy={y - r * 0.07} rx={r * 0.55} ry={r * 0.16} fill={c} /></g>; })}</g>;
+};
+
+/* =============================== v3 additions =============================== */
+/** a parallax plane: moves/zooms with the camera by `d` (far ~0, character plane 1, foreground >1) and can be defocused */
+export const Par: React.FC<{d: number; blur?: number; o?: number; children: React.ReactNode}> = ({d, blur = 0, o = 1, children}) => {
+  const cam = React.useContext(CamCtx);
+  return <g transform={camT(cam, d)} style={blur ? {filter: `blur(${blur}px)`} : undefined} opacity={o}>{children}</g>;
+};
+/** perspective: figure scale from its ground y (adult ~0.567 at y=935 with the horizon at 620) */
+export const sc = (y: number, hz = 620, k = 0.0018) => Math.max(0.12, (y - hz) * k);
+/** soft cast shadow on the ground, falling to the right (sun low at left) */
+export const Cast: React.FC<{x: number; y: number; w: number; h: number; k?: number; o?: number}> = ({x, y, w, h, k = 0.55, o = 0.3}) => (
+  <polygon points={`${x},${y} ${x + w},${y} ${x + w + h * k},${y + h * 0.12} ${x + h * k},${y + h * 0.12}`} fill="#06040a" opacity={o} filter="url(#blM)" />
+);
+/** material noise: kind picks the grain (stone, wood grain, sand, grass, mud, cloth) */
+export const Mat: React.FC<{kind: 'stone' | 'wood' | 'sand' | 'grass' | 'mud' | 'cloth'; o?: number; light?: number; children: React.ReactNode}> = ({kind, o = 0.5, light = 0.25, children}) => (
+  <g><g filter={`url(#nz_${kind}D)`} opacity={o}>{children}</g><g filter={`url(#nz_${kind}L)`} opacity={light}>{children}</g></g>
+);
+export const MatDefs: React.FC = () => {
+  const spec: Record<string, [string, number, number]> = {stone: ['.018 .02', 5, 1], wood: ['.004 .14', 3, 2], sand: ['.5 .5', 2, 3], grass: ['.06 .5', 3, 4], mud: ['.03 .035', 5, 5], cloth: ['.7 .7', 1, 6]};
+  return (
+    <defs>
+      {Object.entries(spec).map(([k, [f, oc, sd]]) => (
+        <React.Fragment key={k}>
+          <filter id={`nz_${k}D`} x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency={f} numOctaves={oc} seed={sd} /><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.8 -.6" /><feComposite in2="SourceAlpha" operator="in" /></filter>
+          <filter id={`nz_${k}L`} x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency={f} numOctaves={oc} seed={sd + 9} /><feColorMatrix values="0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .84  0 0 0 1.6 -.85" /><feComposite in2="SourceAlpha" operator="in" /></filter>
+        </React.Fragment>
+      ))}
+    </defs>
+  );
+};
+
+/** a figure seen from behind, as a dark foreground silhouette (front rig + hair/hat cover) */
+export const BackFig: React.FC<{x: number; y: number; s: number; hat?: 'bowler' | 'top' | 'cap' | 'none'; hair?: string; dark?: number; pose?: any}> = ({x, y, s, hat = 'bowler', hair = '#2a1c14', dark = 0.32, pose = {}}) => {
+  const z = s / 0.567;
+  const hx = 797, hy = 331;
+  return (
+    <div style={{position: 'absolute', left: 0, top: 0, width: W, height: H, filter: `brightness(${dark}) saturate(.55) blur(3px)`}}>
+      <Character pose={{head: 0, ...pose}} variant={{}} cam={{x: (800 - x) / z, y: (935 - y) / z, zoom: z, px: 800, py: 935}} lit={0.2}>
+        <ellipse cx={hx} cy={hy + 10} rx={64} ry={84} fill={hair} />
+        <ellipse cx={hx - 3} cy={hy - 4} rx={58} ry={70} fill={mix(hair, '#000000', 0.25)} opacity=".5" />
+        {hat === 'bowler' && <g><ellipse cx={hx} cy={hy - 46} rx={96} ry={13} fill="#14100c" /><path d={`M${hx - 62} ${hy - 46} Q${hx - 64} ${hy - 128} ${hx} ${hy - 130} Q${hx + 64} ${hy - 128} ${hx + 62} ${hy - 46} Z`} fill="#14100c" /></g>}
+        {hat === 'top' && <g><ellipse cx={hx} cy={hy - 46} rx={86} ry={12} fill="#14100c" /><path d={`M${hx - 56} ${hy - 46} L${hx - 50} ${hy - 190} Q${hx} ${hy - 200} ${hx + 50} ${hy - 190} L${hx + 56} ${hy - 46} Z`} fill="#14100c" /></g>}
+        {hat === 'cap' && <g><path d={`M${hx - 68} ${hy - 40} Q${hx - 60} ${hy - 112} ${hx} ${hy - 114} Q${hx + 62} ${hy - 110} ${hx + 68} ${hy - 40} Z`} fill="#14100c" /></g>}
+      </Character>
+    </div>
+  );
+};
+
+/* ---- acting presets (spread into a SidePose) ---- */
+export const face = {
+  yawn: {mouth: 1.15, squint: 1, brow: 0.3, head: -9} as SidePose,
+  bored: {squint: 0.5, brow: -0.25, head: 6, torso: 3} as SidePose,
+  surprise: {brow: 1, wide: 1, mouth: 0.65, head: -4} as SidePose,
+  angry: {brow: -1, grimace: 0.9, squint: 0.35, mouth: 0.45, head: 3} as SidePose,
+  smile: {smile: 1, squint: 0.2} as SidePose,
+  laugh: {smile: 1, mouth: 0.6, squint: 0.7, head: -5} as SidePose,
+  wonder: {wide: 0.6, brow: 0.6, smile: 0.25, head: -4} as SidePose,
+  talk: (f: number): SidePose => ({mouth: 0.15 + 0.5 * Math.abs(Math.sin(f * 0.9)), brow: 0.1}),
+};
+export const arms = {
+  point: {uaN: -82, faN: -4, handN: 'point'} as SidePose,
+  explain: {uaN: -52, faN: -64, handN: 'open', uaF: -20, faF: -50, handF: 'relaxed'} as SidePose,
+  offer: {uaN: -58, faN: -28, handN: 'open'} as SidePose,
+  wave: {uaN: -150, faN: -26, handN: 'open'} as SidePose,
+  stretch: {uaN: -168, faN: -6, uaF: -160, faF: -10, handN: 'open', handF: 'open', torso: -4} as SidePose,
+  chin: {uaN: -64, faN: -128, handN: 'relaxed'} as SidePose,
+  crossed: {uaN: -34, faN: -118, uaF: -30, faF: -112, handN: 'relaxed', handF: 'relaxed'} as SidePose,
+  hips: {uaN: 28, faN: -104, handN: 'relaxed', uaF: 24, faF: -100, handF: 'relaxed'} as SidePose,
+  behind: {uaN: 22, faN: -8, uaF: 18, faF: -6, handN: 'relaxed'} as SidePose,
+  press: {uaN: -72, faN: -22, handN: 'open'} as SidePose,
+  write: {uaN: -36, faN: -88, handN: 'relaxed', head: 16, torso: 5} as SidePose,
 };

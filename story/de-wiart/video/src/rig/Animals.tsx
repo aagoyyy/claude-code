@@ -12,16 +12,16 @@ let UID = 0;
 const Leg: React.FC<{x: number; belly: number; up: number; lo: number; th: number; sh2: number; c: string; w: number}> = ({x, belly, up, lo, th, sh2, c, w}) => (
   <g transform={`translate(${x} ${-belly}) rotate(${th})`}>
     {/* thigh / forearm: thick muscle tapering to the knee */}
-    <path d={`M${-w * 0.62} 0 Q${-w * 0.6} ${up * 0.4} ${-w * 0.26} ${up} L${w * 0.26} ${up} Q${w * 0.6} ${up * 0.4} ${w * 0.62} 0 Z`} fill={c} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+    <path d={`M${-w * 0.92} 0 Q${-w * 0.9} ${up * 0.42} ${-w * 0.36} ${up} L${w * 0.36} ${up} Q${w * 0.9} ${up * 0.42} ${w * 0.92} 0 Z`} fill={c} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
     <path d={`M${-w * 0.4} ${up * 0.1} Q${-w * 0.2} ${up * 0.5} ${-w * 0.16} ${up * 0.9}`} stroke="#fff" strokeWidth="6" fill="none" opacity=".16" />
     <path d={`M${w * 0.3} ${up * 0.1} Q${w * 0.22} ${up * 0.5} ${w * 0.14} ${up * 0.9}`} stroke="#000" strokeWidth="8" fill="none" opacity=".18" />
     <g transform={`translate(0 ${up}) rotate(${sh2})`}>
-      <circle cx={0} cy={0} r={w * 0.3} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" />
+      <circle cx={0} cy={0} r={w * 0.4} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" />
       {/* cannon bone, fetlock joint, pastern, hoof */}
-      <path d={`M${-w * 0.2} 0 L${w * 0.2} 0 L${w * 0.14} ${lo} L${-w * 0.14} ${lo} Z`} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" strokeLinejoin="round" />
+      <path d={`M${-w * 0.28} 0 L${w * 0.28} 0 L${w * 0.2} ${lo} L${-w * 0.2} ${lo} Z`} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" strokeLinejoin="round" />
       <circle cx={0} cy={lo} r={w * 0.2} fill={sh(c, 0.12)} stroke={OUT} strokeWidth="2.5" />
-      <path d={`M${-w * 0.13} ${lo} L${w * 0.17} ${lo} L${w * 0.2} ${lo + 30} L${-w * 0.14} ${lo + 30} Z`} fill={sh(c, 0.14)} stroke={OUT} strokeWidth="2.5" />
-      <path d={`M${-w * 0.24} ${lo + 26} L${w * 0.3} ${lo + 26} L${w * 0.36} ${lo + 54} L${-w * 0.3} ${lo + 54} Z`} fill="#241a12" stroke={OUT} strokeWidth="2.5" />
+      <path d={`M${-w * 0.2} ${lo} L${w * 0.24} ${lo} L${w * 0.28} ${lo + 30} L${-w * 0.2} ${lo + 30} Z`} fill={sh(c, 0.14)} stroke={OUT} strokeWidth="2.5" />
+      <path d={`M${-w * 0.32} ${lo + 26} L${w * 0.4} ${lo + 26} L${w * 0.48} ${lo + 56} L${-w * 0.4} ${lo + 56} Z`} fill="#241a12" stroke={OUT} strokeWidth="2.5" />
       <path d={`M${-w * 0.14} 8 L${-w * 0.1} ${lo - 6}`} stroke="#fff" strokeWidth="3" opacity=".14" />
     </g>
   </g>
@@ -41,7 +41,7 @@ export const AnimalArt: React.FC<{o: AnimalOpts; p: AnimalPose}> = ({o, p}) => {
   const id = `an${++UID}`;
   const body = camel
     ? 'M-360 -900 Q-380 -1130 -240 -1230 Q-120 -1330 0 -1290 Q60 -1380 140 -1370 Q230 -1360 250 -1260 Q360 -1210 380 -1060 Q360 -900 260 -850 Q0 -800 -260 -840 Z'
-    : 'M-340 -700 Q-380 -910 -240 -990 Q0 -1070 240 -1000 Q360 -960 370 -820 Q350 -700 260 -650 Q0 -610 -260 -640 Z';
+    : 'M-350 -700 Q-410 -930 -250 -1010 Q0 -1090 250 -1020 Q400 -980 410 -800 Q380 -640 260 -600 Q0 -570 -270 -610 Z';
   const neck = camel
     ? 'M130 -1120 Q330 -1230 370 -1400 Q390 -1520 480 -1560 L610 -1540 Q550 -1500 566 -1420 Q560 -1250 480 -1000 Z'
     : 'M170 -1000 Q320 -1210 440 -1290 L580 -1190 Q480 -1100 470 -860 Z';
