@@ -228,15 +228,15 @@ export const HitSpark: React.FC<{x: number; y: number; age: number; r: number}> 
   );
 };
 
-export const Actors: React.FC<{specs: Spec[]; f: number; effects?: boolean; camT?: number; depth?: number; aimShift?: number; dT?: number; lights?: {x: number; y: number; k: number}[]; ghosts?: boolean}> = ({specs, f, effects = true, camT = 0, depth = 1, aimShift = 0, dT = 0, lights = [], ghosts = true}) => {
+export const Actors: React.FC<{specs: Spec[]; f: number; effects?: boolean; camT?: number; depth?: number; aimShift?: number; dT?: number; lights?: {x: number; y: number; k: number; color?: string}[]; ghosts?: boolean}> = ({specs, f, effects = true, camT = 0, depth = 1, aimShift = 0, dT = 0, lights = [], ghosts = true}) => {
   const st = specs.map((a) => ({a, st: actorAt(a, f, camT, depth, dT)}));
   // dynamic lights: this slot's muzzle flashes + shell bursts handed in by the scene
-  const L: {x: number; y: number; k: number}[] = [...lights];
+  const L: {x: number; y: number; k: number; color?: string}[] = [...lights];
   st.forEach(({a, st: s}) => { if (s.muzzle && s.shot < 3) L.push({x: s.muzzle[0], y: s.muzzle[1], k: (1 - s.shot / 3) * 0.55 * Math.max(0.4, Math.min(1, a.s * 2.2))}); });
   const glowFor = (a: Spec, s: ActorState) => {
-    let best = 0, gx = 0, gy = 0;
-    L.forEach((l) => { const d = Math.hypot(l.x - s.x, l.y - (a.y - 380 * a.s)); const k = l.k * Math.max(0, 1 - d / 1100); if (k > best) { best = k; gx = (l.x - s.x) / a.s; gy = (l.y - a.y) / a.s; } });
-    return best > 0.02 ? {x: gx, y: gy, k: best} : undefined;
+    let best = 0, gx = 0, gy = 0, gc: string | undefined;
+    L.forEach((l) => { const d = Math.hypot(l.x - s.x, l.y - (a.y - 380 * a.s)); const k = l.k * Math.max(0, 1 - d / 1100); if (k > best) { best = k; gx = (l.x - s.x) / a.s; gy = (l.y - a.y) / a.s; gc = l.color; } });
+    return best > 0.02 ? {x: gx, y: gy, k: best, color: gc} : undefined;
   };
   return (
     <>

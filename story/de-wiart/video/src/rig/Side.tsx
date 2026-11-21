@@ -12,7 +12,7 @@ export type SideOpts = {
   face?: 'left' | 'right';
   hero?: boolean;                 // Sam Browne strap, ribbons, mustache, scars...
   patch?: boolean; stump?: boolean; young?: boolean; bandages?: boolean;
-  gear?: 'none' | 'rifle' | 'pack' | 'rifle+pack' | 'spear';
+  gear?: 'none' | 'rifle' | 'pack' | 'rifle+pack' | 'spear' | 'spade';
   mustache?: boolean; beard?: boolean;
   build?: number;                 // width multiplier of the torso/limbs
   hat?: string;                   // headgear colour
@@ -393,6 +393,9 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           {near && hasRifle && !sling && (
             <g transform="translate(0 204) rotate(-3)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g>
           )}
+          {near && o.gear === 'spade' && (
+            <g transform="translate(0 214) rotate(-4)"><rect x={-6} y={-260} width={12} height={560} rx={4} fill="#7a5230" stroke={OUT} strokeWidth="2" /><rect x={-9} y={-270} width={18} height={22} rx={4} fill="#5a3a20" stroke={OUT} strokeWidth="2" /><path d="M-34 300 L34 300 L40 390 Q0 430 -40 390 Z" fill="#8a919c" stroke={OUT} strokeWidth="2.5" /><path d="M-22 306 L-26 380" stroke="#e6ebf2" strokeWidth="4" opacity=".6" /></g>
+          )}
           {near && o.gear === 'spear' && (
             <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /><path d="M-1 -515 L-1 -425" stroke="#fff" strokeWidth="2" opacity=".6" /></g>
           )}
@@ -631,3 +634,16 @@ export const muzzleOf = (p: SidePose): [number, number] => {
 };
 
 export const ridePose = (t: number): SidePose => ({thN: -30, shN: 44, ftN: 18, thF: -26, shF: 40, ftF: 18, torso: 1, head: 0, uaN: -34, faN: -76, uaF: -30, faF: -80, br: 1 + 0.005 * Math.sin(t)});
+
+/** swimming: body horizontal (use with fall = -1), arms windmill, legs flutter */
+export const swimPose = (f: number): SidePose => {
+  const a = f * 20;
+  return {fall: -1, uaN: a % 360, faN: -12, uaF: (a + 180) % 360, faF: -12, thN: 14 * Math.sin(f * 0.9), thF: -14 * Math.sin(f * 0.9), shN: 10, shF: 10, head: -26 + 6 * Math.sin(f * 0.2), torso: 0};
+};
+/** surrender: both arms high */
+export const handsUpPose = (t: number): SidePose => ({uaN: -168, faN: -6, uaF: -160, faF: -10, head: 4, torso: -2, br: 1 + 0.006 * Math.sin(t)});
+/** digging while kneeling: spade driven forward and back */
+export const digPose = (f: number, seed = 0): SidePose => {
+  const s = Math.sin(f * 0.3 + seed), k = (s + 1) / 2;
+  return {...kneelPose(f), torso: 6 + 10 * k, head: 14, uaN: -34 - 36 * k, faN: -50 + 24 * k, uaF: -30 - 30 * k, faF: -60 + 18 * k, grip: false};
+};

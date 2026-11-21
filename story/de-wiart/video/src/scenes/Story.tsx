@@ -7,13 +7,14 @@ import {SomaliShot1, SomaliShot3} from './SomaliBattle';
 import {Ypres, YPRES_FRAMES} from './Ypres';
 import {YpresShot1} from './YpresBattle';
 import {MapTransition, MAP_FRAMES, MedalInsert, MEDAL_FRAMES} from './Inserts';
+import {WW2Chapter, WW2_FRAMES} from './WW2';
 const TRANS_FRAMES = MAP_FRAMES;
 
 const SH = 132;
 export const BOERCH = SH + BOER_FRAMES + SH;
 export const SOMCH = SH + SOMALI_FRAMES + SH;
 export const YPRCH = SH + YPRES_FRAMES;
-export const STORY_FRAMES = BOERCH + TRANS_FRAMES + SOMCH + TRANS_FRAMES + YPRCH + MEDAL_FRAMES;
+export const STORY_FRAMES = BOERCH + TRANS_FRAMES + SOMCH + TRANS_FRAMES + YPRCH + MEDAL_FRAMES + TRANS_FRAMES + WW2_FRAMES;
 
 export const BoerChapter: React.FC = () => (
   <AbsoluteFill>
@@ -47,6 +48,8 @@ export const Story: React.FC = () => {
       <Sequence from={seq(TRANS_FRAMES)} durationInFrames={TRANS_FRAMES}><MapTransition from={[930, 420, 'Somaliland']} to={[480, -90, 'Ypres, Belgia']} y0={1914} y1={1915} sub="YPRES, BELGIA" /></Sequence>
       <Sequence from={seq(YPRCH)} durationInFrames={YPRCH}><YpresChapter /></Sequence>
       <Sequence from={seq(MEDAL_FRAMES)} durationInFrames={MEDAL_FRAMES}><MedalInsert /></Sequence>
+      <Sequence from={seq(TRANS_FRAMES)} durationInFrames={TRANS_FRAMES}><MapTransition from={[480, -90, 'Ypres, Belgia']} to={[590, 150, 'Libya']} y0={1915} y1={1941} sub="LIBYA" /></Sequence>
+      <Sequence from={seq(WW2_FRAMES)} durationInFrames={WW2_FRAMES}><WW2Chapter /></Sequence>
     </AbsoluteFill>
   );
 };
