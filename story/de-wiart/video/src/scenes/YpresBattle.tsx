@@ -10,7 +10,7 @@ const germans = (aim: (f: number) => [number, number], from = 4): Spec[] => [101
 /* shot 1: trench raid — soldiers return fire over the parapet, shells land in no-man's land, a man falls */
 export const YpresShot1: React.FC = () => (
   <ProfileBattle
-    kind="trench" frames={132} fadeIn
+    kind="trench" frames={132}
     T={(f) => f * 9}
     caption={{title: 'YPRES, BELGIA', sub: '1915 · Perang Dunia I', from: 10, to: 100}}
     shake={[{t: 36, a: 12}, {t: 78, a: 14}, {t: 112, a: 10}]}

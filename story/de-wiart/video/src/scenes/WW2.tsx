@@ -22,6 +22,15 @@ const FPS = 24;
 export const WW2_A = 120, WW2_H = 60, WW2_B = 180, WW2_K = 60, WW2_C = 132, WW2_D = 180;
 export const WW2_FRAMES = WW2_A + WW2_H + WW2_B + WW2_K + WW2_C + WW2_D;
 
+const Sack: React.FC<{rx?: number; ry?: number; full?: number}> = ({rx = 70, ry = 40, full = 1}) => (
+  <g>
+    <path d={`M${-rx} 0 Q${-rx * 1.05} ${-ry * 0.9 * full} ${-rx * 0.5} ${-ry * 1.05 * full} Q${-rx * 0.2} ${-ry * 1.5 * full} ${-rx * 0.08} ${-ry * 1.7 * full} L${rx * 0.12} ${-ry * 1.7 * full} Q${rx * 0.25} ${-ry * 1.4 * full} ${rx * 0.55} ${-ry * 1.0 * full} Q${rx * 1.08} ${-ry * 0.7 * full} ${rx} 0 Q${rx * 0.4} ${ry * 0.55} ${-rx * 0.2} ${ry * 0.5} Q${-rx * 0.8} ${ry * 0.4} ${-rx} 0 Z`} fill="#a88e62" stroke="#2a1c10" strokeWidth="3" strokeLinejoin="round" />
+    <path d={`M${-rx * 0.9} ${-ry * 0.1} Q${-rx * 0.3} ${-ry * 0.5} ${rx * 0.1} ${-ry * 0.2} M${-rx * 0.6} ${ry * 0.2} Q0 ${-ry * 0.1} ${rx * 0.7} ${ry * 0.05} M${-rx * 0.5} ${-ry * 0.8 * full} Q${-rx * 0.1} ${-ry * 1.1 * full} ${rx * 0.4} ${-ry * 0.7 * full}`} stroke="#6a5030" strokeWidth="3" fill="none" opacity=".7" strokeLinecap="round" />
+    <path d={`M${-rx * 0.8} ${-ry * 0.35} L${rx * 0.8} ${-ry * 0.25} M${-rx * 0.8} ${ry * 0.05} L${rx * 0.9} ${ry * 0.1}`} stroke="#8a6e46" strokeWidth="2" strokeDasharray="4 3" opacity=".6" />
+    <path d={`M${-rx * 0.85} ${-ry * 0.5} Q${-rx * 0.6} ${-ry * 0.95} ${-rx * 0.2} ${-ry * 1.1}`} stroke="#e6d4a4" strokeWidth="5" fill="none" opacity=".4" strokeLinecap="round" />
+    <path d={`M${-rx * 0.18} ${-ry * 1.58 * full} Q0 ${-ry * 1.38 * full} ${rx * 0.16} ${-ry * 1.58 * full}`} stroke="#3a2410" strokeWidth="6" fill="none" strokeLinecap="round" /><path d={`M${rx * 0.14} ${-ry * 1.62 * full} l${rx * 0.2} ${-ry * 0.25} M${-rx * 0.14} ${-ry * 1.62 * full} l${-rx * 0.18} ${-ry * 0.28}`} stroke="#3a2410" strokeWidth="4" strokeLinecap="round" />
+  </g>
+);
 const Root: React.FC<{f: number; flash?: number; fadeIn?: boolean; fadeOut?: boolean; frames: number; grade?: string; night?: boolean; children: React.ReactNode}> = ({f, flash = 0, fadeIn, fadeOut, frames, grade, night, children}) => (
   <AbsoluteFill style={{background: '#000', filter: grade}}>
     {children}
@@ -42,7 +51,7 @@ export const Ww2Crash: React.FC = () => {
   const pitch = f < HIT ? lerp(2, 7, t) : 7 + Math.min(1, Math.max(0, post - 30) / 60) * 16;   // flares, then the tail sinks first
   const fire = clamp(1 - Math.max(0, post - 30) / 40);
   return (
-    <Root f={f} frames={WW2_A} fadeIn grade="contrast(1.08) saturate(1.1)" flash={f >= HIT && f < HIT + 6 ? 0.28 * Math.exp(-(f - HIT) / 2) : 0}>
+    <Root f={f} frames={WW2_A} grade="contrast(1.08) saturate(1.1)" flash={f >= HIT && f < HIT + 6 ? 0.28 * Math.exp(-(f - HIT) / 2) : 0}>
       <Layer cam={cam} depth={0.02}><SeaSky f={f} /></Layer>
       <Layer cam={cam} depth={0.05} blur={0.8}><Dunes seed={2} base={640} amp={20} haze={0.7} /></Layer>
       <Layer cam={cam} depth={0.1}><SeaBand f={f} y0={640} y1={692} k={0.02} off={f * 0.6} /></Layer>
@@ -79,7 +88,7 @@ export const Ww2Hatch: React.FC = () => {
   };
   const rg = (i: number) => ((i * 9301 + 49297) % 233280) / 233280;
   return (
-    <Root f={f} frames={WW2_H} fadeIn grade="contrast(1.08) saturate(1.1)">
+    <Root f={f} frames={WW2_H} grade="contrast(1.08) saturate(1.1)">
       <Layer cam={cam} depth={0.02}><SeaSky f={f} /></Layer>
       <Layer cam={cam} depth={0.1}><SeaBand f={f} y0={640} y1={700} k={0.05} off={f} /></Layer>
       <Layer cam={cam} depth={0.3}><SeaBand f={f} y0={700} y1={800} k={0.3} off={f * 2} /></Layer>
@@ -150,7 +159,7 @@ export const Ww2Swim: React.FC = () => {
     {id: 'f3', o: italian('left'), x: 0, y: 874, s: 0.3, face: 'left', mode: 'run', vx: -6, stopAt: 140, after: 'idle', xf: come(1380, 0.5, 520, 100, 40), lo: true},
   ];
   return (
-    <Root f={f} frames={WW2_B} grade="contrast(1.08) saturate(1.05)" fadeOut>
+    <Root f={f} frames={WW2_B} grade="contrast(1.08) saturate(1.05)">
       <Layer cam={cam} depth={0.02}><SeaSky f={f} /></Layer>
       {/* the burning wreck far behind: black smoke still rising from the sea */}
       <Layer cam={cam} depth={0.1}>
@@ -198,7 +207,7 @@ export const Ww2Castle: React.FC = () => {
     {id: 'w2', o: {...italian('right'), gear: 'rifle'}, x: 0, y: 456, s: 0.12, face: 'right', mode: 'idle', xf: () => 780, lo: false},
   ];
   return (
-    <Root f={f} frames={WW2_K} night fadeIn fadeOut grade="contrast(1.12) saturate(.85)">
+    <Root f={f} frames={WW2_K} night grade="contrast(1.12) saturate(.85)">
       <Layer cam={cam} depth={0.02}><NightSky f={f} /></Layer>
       <Layer cam={cam} depth={0.3}>
         <Castle f={f} x={760} y={900} s={1.5} haze={0.5} />
@@ -236,26 +245,26 @@ export const Ww2Tunnel: React.FC = () => {
   const sackX = hx(f) + 250, atShaft = f >= arrive;
   const hoist = clamp((f - arrive) / 26);                       // the sack is clipped to the rope and hauled up
   return (
-    <Root f={f} frames={WW2_C} grade="contrast(1.06) saturate(.95) sepia(.1)" fadeIn fadeOut night>
+    <Root f={f} frames={WW2_C} grade="contrast(1.06) saturate(.95) sepia(.1)" night>
       <Layer cam={cam} depth={0.9}><TunnelBG f={f} scroll={f * 0.4} /></Layer>
       <Layer cam={cam} depth={1}>
         {/* pulley at the top of the shaft; the rope runs down to the sack, which stays on the floor until the hauler reaches it, then goes up */}
         <circle cx={110} cy={60} r={24} fill="#3a2a1a" stroke="#120a04" strokeWidth="4" /><circle cx={110} cy={60} r={7} fill="#8a6a3a" />
         <path d={`M112 84 V${atShaft ? 430 - 480 * ease(hoist) : 410}`} stroke="#8a6a3a" strokeWidth="5" />
-        {atShaft && <g transform={`translate(${110 + 10 * Math.sin(f * 0.2)} ${470 - 480 * ease(hoist)}) rotate(${6 * Math.sin(f * 0.3)})`}><ellipse cx={0} cy={0} rx={44} ry={56} fill="#a08a62" stroke="#2a1c10" strokeWidth="3" /><path d="M-18 -46 Q0 -64 18 -46" stroke="#2a1c10" strokeWidth="4" fill="none" /><path d="M-30 -10 L30 -4 M-28 14 L28 20" stroke="#6a5a3a" strokeWidth="3" opacity=".6" /></g>}
+        {atShaft && <g transform={`translate(${110 + 10 * Math.sin(f * 0.2)} ${520 - 480 * ease(hoist)}) rotate(${6 * Math.sin(f * 0.3)})`}><Sack rx={50} ry={34} full={1.1} /></g>}
         {/* the face being dug: solid earth that crumbles at the breakthrough */}
         <path d="M1700 470 L2300 470 L2300 1010 L1700 1010 Z" fill="#3a281a" />
         {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => <path key={i} d={`M${1700 + rg(i) * 200} ${500 + i * 62} l${60 + rg(i + 3) * 120} ${rg(i + 1) * 20 - 10}`} stroke="#6a5038" strokeWidth="5" opacity=".6" />)}
         {/* heap of loose soil between diggers and loader, with sacks stacked beside it */}
         <path d="M1040 1008 Q1090 930 1170 920 Q1250 934 1300 1008 Z" fill="#4a3624" stroke="#1a1008" strokeWidth="3" />
-        {[0, 1, 2].map((i) => <g key={i}><ellipse cx={780 + i * 46} cy={982 - (i % 2) * 22} rx={34} ry={26} fill="#a08a62" stroke="#2a1c10" strokeWidth="3" /><path d={`M${766 + i * 46} ${962 - (i % 2) * 22} q14 -14 28 0`} stroke="#2a1c10" strokeWidth="3" fill="none" /></g>)}
+        {[0, 1, 2].map((i) => <g key={i} transform={`translate(${780 + i * 54} ${1000 - (i % 2) * 24})`}><Sack rx={36} ry={24} /></g>)}
         {f >= BREAK && [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => { const a = f - BREAK, vx = (rg(i) - 0.2) * -9, vy = -(4 + rg(i + 5) * 10); return <rect key={'ch' + i} x={1700 + rg(i + 2) * 90 + vx * a} y={560 + rg(i + 1) * 360 + vy * a + 0.5 * 1.3 * a * a} width={30 + rg(i) * 40} height={22 + rg(i + 4) * 30} fill={i % 2 ? '#5a4128' : '#3a281a'} opacity={clamp(1.4 - a / 40)} transform={`rotate(${a * (rg(i) * 14 - 4)} ${1720} ${700})`} />; })}
         {/* the full sack trails behind the loaded man on a rope: it bounces, rocks, and kicks up a dust trail */}
         {!atShaft && (
           <g>
             <path d={`M${hx(f) + 70} 1000 Q${hx(f) + 160} ${1012 + sackBob} ${sackX - 56} ${992 + sackBob}`} stroke="#6a5030" strokeWidth="5" fill="none" />
             {Array.from({length: 10}, (_, i) => <ellipse key={i} cx={sackX + 70 + i * 34} cy={1004 - (i % 3) * 4} rx={26 + i * 4} ry={7 + i} fill="#a08868" opacity={0.42 * (1 - i / 10)} style={{filter: 'blur(6px)'}} />)}
-            <g transform={`translate(${sackX} ${976 + sackBob}) rotate(${sackRot})`}><ellipse rx={74} ry={40} fill="#a08a62" stroke="#2a1c10" strokeWidth="3" /><path d="M-40 -22 Q-10 -42 20 -26" stroke="#2a1c10" strokeWidth="4" fill="none" /><path d="M-46 4 L40 -6 M-40 20 L44 14" stroke="#6a5a3a" strokeWidth="3" opacity=".6" /></g>
+            <g transform={`translate(${sackX} ${1002 + sackBob}) rotate(${sackRot})`}><Sack rx={78} ry={46} /></g>
           </g>
         )}
         <Actors specs={diggers} f={f} lights={[{x: 1100, y: 600, k: 0.5}, {x: 1560, y: 600, k: 0.5}]} />
@@ -297,26 +306,26 @@ export const Ww2Night: React.FC = () => {
     return {dy: rise(ff, start), torso: 14 * k * (1 - clamp((ff - start - 28) / 8)), head: -6 + 12 * Math.sin(ff * 0.22 + sd) - 6 * k, uaN: -84 + 40 * k, faN: -6 - 26 * k, uaF: -66 + 30 * k, faF: -40, thN: -76 * kn, shN: 88 * kn, thF: 0, shF: 6, sling: false};
   };
   const runners: Spec[] = [
-    {id: 'hero', o: heroWW2('right'), x: 0, y: 962, s: 0.567, face: 'right', mode: 'run', fixed: false, xf: (ff) => HOLE + 60 + Tf(ff), stopAt: STOP, after: 'idle',
+    {id: 'hero', o: heroWW2('right'), x: 0, y: 970, s: 0.6, face: 'right', mode: 'run', fixed: false, xf: (ff) => HOLE + 150 + Tf(ff), stopAt: STOP, after: 'idle',
       pose: (ff, b) => (ff < GO - 6 ? ({...b, ...climb(ff, 10, 0)} as any) : ff >= 124 ? {...b, ...handsUpPose(ff / 8), mouth: 0.1} : {...b, sling: false, torso: (b.torso || 0) + 8})},
-    {id: 'o2', o: general2('right'), x: 0, y: 962, s: 0.567, face: 'right', mode: 'run', fixed: false, xf: (ff) => HOLE - 70 + Tf(ff), stopAt: STOP - 3, after: 'idle',
+    {id: 'o2', o: general2('right'), x: 0, y: 944, s: 0.52, face: 'right', mode: 'run', fixed: false, xf: (ff) => HOLE - 330 + Tf(ff), stopAt: STOP - 3, after: 'idle',
       pose: (ff, b) => (ff < GO - 10 ? ({...b, ...climb(ff, 2, 1.7)} as any) : ff >= 126 ? {...b, ...handsUpPose(ff / 8 + 1)} : {...b, sling: false, torso: (b.torso || 0) + 8})},
   ];
   const chasers: Spec[] = [
-    {id: 'ch0', o: {...italian('right'), build: 1.0}, x: -420, y: 968, s: 0.567, face: 'right', mode: 'run', vx: 12, stopAt: STOP + 14, after: 'aim', fireFrom: 120, period: 15, aim: () => [900, 250], pose: (ff: number, b: any) => ({...b, sling: false, mouth: ff > 70 && ff < 118 ? 0.6 : 0})},
-    {id: 'ch1', o: {...italian('right'), build: 1.12, stretch: 0.96, head: 'cap', hat: '#6a7a62', gear: 'none'}, x: -640, y: 950, s: 0.5, face: 'right', mode: 'run', vx: 11, stopAt: STOP + 22, after: 'idle', pose: (ff: number, b: any) => (ff >= STOP + 22 ? {...b, uaN: -92, faN: -12, uaF: 8, mouth: talk(ff, 100, 170), brow: -0.5} : {...b, mouth: ff > 60 ? 0.7 : 0, uaN: -92, faN: -14, sling: false})},
-    {id: 'ch2', o: {...italian('right'), build: 0.9, stretch: 1.05}, x: -820, y: 936, s: 0.44, face: 'right', mode: 'run', vx: 10, stopAt: STOP + 30, after: 'kneelAim', fireFrom: 124, period: 17, aim: () => [900, 250], pose: (_ff: number, b: any) => ({...b, sling: false})},
-    {id: 'ch3', o: {...italian('right'), build: 1.04}, x: -300, y: 904, s: 0.36, face: 'right', mode: 'run', vx: 9, stopAt: STOP + 10, after: 'aim', fireFrom: 128, period: 20, aim: () => [900, 250], pose: (_ff: number, b: any) => ({...b, sling: false})},
+    {id: 'ch0', o: {...italian('right'), build: 1.0}, x: -520, y: 976, s: 0.6, face: 'right', mode: 'run', vx: 12, stopAt: STOP + 14, after: 'aim', fireFrom: 120, period: 15, aim: () => [900, 250], pose: (ff: number, b: any) => ({...b, sling: false, mouth: ff > 70 && ff < 118 ? 0.6 : 0})},
+    {id: 'ch1', o: {...italian('right'), build: 1.12, stretch: 0.96, head: 'cap', hat: '#6a7a62', gear: 'none'}, x: -980, y: 930, s: 0.46, face: 'right', mode: 'run', vx: 11, stopAt: STOP + 22, after: 'idle', pose: (ff: number, b: any) => (ff >= STOP + 22 ? {...b, uaN: -92, faN: -12, uaF: 8, mouth: talk(ff, 100, 170), brow: -0.5} : {...b, mouth: ff > 60 ? 0.7 : 0, uaN: -92, faN: -14, sling: false})},
+    {id: 'ch2', o: {...italian('right'), build: 0.9, stretch: 1.05}, x: -1300, y: 912, s: 0.4, face: 'right', mode: 'run', vx: 10, stopAt: STOP + 30, after: 'kneelAim', fireFrom: 124, period: 17, aim: () => [900, 250], pose: (_ff: number, b: any) => ({...b, sling: false})},
+    {id: 'ch3', o: {...italian('right'), build: 1.04}, x: -240, y: 996, s: 0.62, face: 'right', mode: 'run', vx: 9, stopAt: STOP + 10, after: 'aim', fireFrom: 128, period: 20, aim: () => [900, 250], pose: (_ff: number, b: any) => ({...b, sling: false})},
   ];
   const blockers: Spec[] = [
-    {id: 'bl0', o: {...italian('left'), build: 1.08}, x: 2240, y: 972, s: 0.58, face: 'left', mode: 'aim', fireFrom: 118, period: 17, aim: () => [1000, 260]},
-    {id: 'bl1', o: {...italian('left'), build: 0.92, stretch: 1.04}, x: 2480, y: 940, s: 0.47, face: 'left', mode: 'kneelAim', fireFrom: 124, period: 19, aim: () => [1000, 260]},
-    {id: 'bl2', o: {...italian('left'), head: 'cap', hat: '#6a7a62', gear: 'none', build: 1.02}, x: 2370, y: 912, s: 0.4, face: 'left', mode: 'idle', pose: (ff: number, b: any) => ({...b, uaN: -96, faN: -10, uaF: 10, mouth: talk(ff, 100, 170, 2), brow: -0.5})},
-    {id: 'bl3', o: {...italian('left'), build: 0.96}, x: 2700, y: 902, s: 0.34, face: 'left', mode: 'run', vx: -7, stopAt: 140, after: 'aim', fireFrom: 150, period: 22, aim: () => [1000, 260]},
+    {id: 'bl0', o: {...italian('left'), build: 1.08}, x: 2360, y: 980, s: 0.6, face: 'left', mode: 'aim', fireFrom: 118, period: 17, aim: () => [1000, 260]},
+    {id: 'bl1', o: {...italian('left'), build: 0.92, stretch: 1.04}, x: 2820, y: 930, s: 0.44, face: 'left', mode: 'kneelAim', fireFrom: 124, period: 19, aim: () => [1000, 260]},
+    {id: 'bl2', o: {...italian('left'), head: 'cap', hat: '#6a7a62', gear: 'none', build: 1.02}, x: 3040, y: 906, s: 0.38, face: 'left', mode: 'idle', pose: (ff: number, b: any) => ({...b, uaN: -96, faN: -10, uaF: 10, mouth: talk(ff, 100, 170, 2), brow: -0.5})},
+    {id: 'bl3', o: {...italian('left'), build: 0.96}, x: 2560, y: 1000, s: 0.62, face: 'left', mode: 'run', vx: -7, stopAt: 140, after: 'aim', fireFrom: 150, period: 22, aim: () => [1000, 260]},
   ];
   const hx = 760;
   return (
-    <Root f={f} frames={WW2_D} fadeIn fadeOut night grade="contrast(1.1) saturate(.9) hue-rotate(-4deg)">
+    <Root f={f} frames={WW2_D} night grade="contrast(1.1) saturate(.9) hue-rotate(-4deg)">
       <Layer cam={camFar} depth={0.02}><NightSky f={f} /></Layer>
       <Layer cam={camFar} depth={0.1} blur={0.8}><Castle f={f} x={420} y={760} s={0.8} haze={0.62} /></Layer>
       <Layer cam={camFar} depth={0.1} blend="screen" opacity={0.85}>

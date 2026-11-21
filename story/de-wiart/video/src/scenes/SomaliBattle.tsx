@@ -14,7 +14,7 @@ const runner = (id: string, x: number, die: number | undefined, s = 0.3, y = 850
 /* shot 1: the column advances on the fort while dervishes pour out of the gate and are shot down */
 export const SomaliShot1: React.FC = () => (
   <ProfileBattle
-    kind="desert" frames={132} fadeIn
+    kind="desert" frames={132}
     T={(f) => f * 13}
     caption={{title: 'SOMALILAND', sub: '1914', from: 10, to: 100}}
     shake={[{t: 70, a: 7}, {t: 104, a: 9}]}
@@ -43,7 +43,7 @@ export const SomaliShot1: React.FC = () => (
 /* shot 3: after the shot — hero staggers with a hand to his face, an askari steadies him, dervishes retreat and fall */
 export const SomaliShot3: React.FC = () => (
   <ProfileBattle
-    kind="desert" frames={132} fadeOut
+    kind="desert" frames={132}
     T={() => 0}
     zoom={(f) => 1.02 + f * 0.0006}
     shake={[{t: 20, a: 5}]}

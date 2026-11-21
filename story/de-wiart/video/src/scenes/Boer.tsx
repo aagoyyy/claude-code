@@ -84,7 +84,7 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
   const smoke = clamp((f - (HIT - 7)) / 70);
 
   const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 104) / 14);
-  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (BOER_FRAMES - 10)) / 10));
+  const fade = 1;
 
   return (
     <AbsoluteFill style={{background: '#000'}}>

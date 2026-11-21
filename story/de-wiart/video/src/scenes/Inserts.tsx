@@ -9,7 +9,7 @@ const EUROPE = '300,-150 450,-240 620,-220 740,-130 700,-30 560,10 400,-10 290,-
 export const MAP_FRAMES = 60;
 export const MapTransition: React.FC<{from: [number, number, string]; to: [number, number, string]; y0: number; y1: number; sub: string}> = ({from, to, y0, y1, sub}) => {
   const f = useCurrentFrame();
-  const a = clamp(f / 8) * (1 - clamp((f - (MAP_FRAMES - 8)) / 8));
+  const a = 1;
   const p = ease(clamp((f - 8) / 34));
   const x = lerp(from[0], to[0], p), yy = lerp(from[1], to[1], p) - Math.sin(p * Math.PI) * 90;
   const cx = lerp(from[0], to[0], p) * 0.5 + 250, cy = lerp(from[1], to[1], p) * 0.5 + 200;
@@ -53,7 +53,7 @@ export const MEDAL_FRAMES = 84;
 export const MedalInsert: React.FC = () => {
   const f = useCurrentFrame();
   const sharp = easeOut(clamp(f / 30));
-  const a = clamp(f / 8) * (1 - clamp((f - (MEDAL_FRAMES - 8)) / 8));
+  const a = 1;
   const sway = 5 * Math.sin(f * 0.11) * (1 - clamp(f / 70) * 0.4);
   const glint = clamp((f - 26) / 28) * (1 - clamp((f - 54) / 6)) + 0.001;
   const rg = mulberry32(8);

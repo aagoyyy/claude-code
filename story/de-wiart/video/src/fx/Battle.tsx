@@ -82,8 +82,10 @@ export function actorAt(a: Spec, f: number, camT = 0, depth = 1, dT = 0): ActorS
         pose = {...deadPose(ff), fall: k, spin: -360 * k, dy: -arc, uaN: -150 * (1 - k), uaF: -140 * (1 - k)};
         xo = -dir * 11 * t2;
       } else {
-        const k = ease(clamp(tt / 8)), cr = clamp((tt - 8) / 70), w = (ff / 5) * Math.PI;
-        pose = {...deadPose(ff), fall: -k, uaN: 70 * Math.sin(w) * cr - 20, uaF: -70 * Math.sin(w) * cr - 10, faN: -30, faF: -30, thN: 24 * Math.sin(w + 1) * cr, thF: -24 * Math.sin(w + 1) * cr, shN: 30, shF: 30, head: 20};
+        const k = ease(clamp(tt / 8)), cr = clamp((tt - 8) / 70), w = (ff / 4.2) * Math.PI;
+        const sw = Math.sin(w), co = Math.cos(w);
+        // forearm crawl: body low and tilted (chest off the ground), head up, forearms pull alternately, knees drag
+        pose = {...deadPose(ff), fall: -0.8 * k, dy: -4 * Math.abs(sw) * cr, torso: 6 * sw * cr - 4, head: 34 * k, uaN: (-34 + 30 * sw) * cr - 10 * (1 - cr), faN: (-96 + 26 * co) * cr, uaF: (-34 - 30 * sw) * cr - 10 * (1 - cr), faF: (-96 - 26 * co) * cr, thN: (40 + 26 * co) * cr, shN: 70 * cr, thF: (40 - 26 * co) * cr, shF: 70 * cr, ftN: 40, ftF: 40};
         xo = dir * 1.1 * Math.max(0, tt - 8) * Math.max(0, 1 - tt / 90);
       }
     }

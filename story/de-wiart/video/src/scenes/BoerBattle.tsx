@@ -12,7 +12,7 @@ const enemies = (aimAt: (f: number) => [number, number], from = 6): Spec[] => [1
 /* shot 1: the British skirmish line charges the kopje under rifle fire and a shell burst */
 export const BoerShot1: React.FC = () => (
   <ProfileBattle
-    kind="savanna" frames={132} fadeIn
+    kind="savanna" frames={132}
     T={(f) => f * 14}
     caption={{title: 'AFRIKA SELATAN', sub: '1899 · Perang Boer', from: 10, to: 100}}
     shake={[{t: 92, a: 11}]}
@@ -47,7 +47,7 @@ export const BoerShot1: React.FC = () => (
 /* shot 3: aftermath, same battlefield — hero kneels clutching his belly while comrades return fire */
 export const BoerShot3: React.FC = () => (
   <ProfileBattle
-    kind="savanna" frames={132} fadeOut
+    kind="savanna" frames={132}
     T={() => 0}
     zoom={(f) => 1.02 + f * 0.0006}
     shake={[{t: 38, a: 8}]}

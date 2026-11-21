@@ -94,7 +94,7 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
   const muzzle = f >= HIT - 8 && f < HIT - 3 ? 1 - (f - (HIT - 8)) / 5 : 0;
   const dustT = clamp((f - (HIT + 2)) / 60);
   const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 60) / 12);
-  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (SOMALI_FRAMES - 12)) / 12));
+  const fade = 1;
 
   return (
     <AbsoluteFill style={{background: '#000'}}>

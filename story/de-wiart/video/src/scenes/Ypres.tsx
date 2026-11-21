@@ -121,7 +121,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
   const vcText = easeOut((f - (VC + 62)) / 14);
 
   const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 66) / 12);
-  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (YPRES_FRAMES - 14)) / 14));
+  const fade = 1;
   const flash = 0.7 * imp(f, HIT) * (f >= HIT && f < HIT + 12 ? 1 : 0);
 
   return (
