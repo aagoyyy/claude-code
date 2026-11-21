@@ -73,42 +73,79 @@ export const NightSky: React.FC<{f: number}> = ({f}) => {
   );
 };
 export const Castle: React.FC<{f: number; x: number; y: number; s: number; haze: number}> = ({f, x, y, s, haze}) => {
-  const c = mix('#0e1730', '#2a3a58', haze), lite = mix('#4a5c88', '#8aa0d0', haze), lit = '#ffb25a';
-  const crn = (x0: number, w: number, yy: number) => Array.from({length: Math.floor(w / 24)}, (_, i) => <g key={i}><rect x={x0 + i * 24 + 3} y={yy - 14} width={14} height={16} fill={c} /><rect x={x0 + i * 24 + 13} y={yy - 14} width={4} height={16} fill={lite} opacity=".7" /></g>);
-  const blk = (x0: number, y0: number, w: number, h: number) => (
+  const c = mix('#141e3a', '#2a3a58', haze), c2 = mix('#1c2850', '#3a4c74', haze), lite = mix('#6a7ca8', '#9ab0dc', haze), lit = '#ffb25a';
+  const rg = mulberry32(17);
+  const crn = (x0: number, w: number, yy: number) => Array.from({length: Math.floor(w / 24)}, (_, i) => <g key={i}><rect x={x0 + i * 24 + 3} y={yy - 14} width={14} height={16} fill={c} /><rect x={x0 + i * 24 + 13} y={yy - 14} width={4} height={16} fill={lite} opacity=".7" /><rect x={x0 + i * 24 + 3} y={yy - 14} width={14} height={3} fill={lite} opacity=".5" /></g>);
+  /** masonry block with courses, offset joints, weathering and moonlit right edge */
+  const blk = (x0: number, y0: number, w: number, h: number, k: number) => (
     <g>
       <rect x={x0} y={y0} width={w} height={h} fill={c} />
-      <rect x={x0 + w - 7} y={y0} width={7} height={h} fill={lite} opacity=".75" />
-      <rect x={x0} y={y0} width={w} height={5} fill={lite} opacity=".55" />
-      {Array.from({length: Math.floor(h / 26)}, (_, i) => <path key={i} d={`M${x0} ${y0 + 20 + i * 26} h${w}`} stroke="#050a18" strokeWidth="2" opacity=".5" />)}
+      {Array.from({length: Math.floor(h / 22)}, (_, r) => <g key={r}><path d={`M${x0} ${y0 + 12 + r * 22} h${w}`} stroke="#060b1a" strokeWidth="2" opacity=".55" />{Array.from({length: Math.floor(w / 34)}, (_, q) => <path key={q} d={`M${x0 + ((r % 2) * 17) + q * 34 + 6} ${y0 + r * 22} v12`} stroke="#060b1a" strokeWidth="1.6" opacity=".45" />)}</g>)}
+      {Array.from({length: 14}, (_, i) => <rect key={'b' + i} x={x0 + rg() * (w - 20)} y={y0 + rg() * (h - 16)} width={14 + rg() * 24} height={8 + rg() * 8} fill={rg() > 0.5 ? c2 : '#0a1226'} opacity=".5" />)}
+      <rect x={x0 + w * 0.55} y={y0} width={w * 0.45} height={h} fill="#050a18" opacity=".28" />
+      <rect x={x0 + w - 7} y={y0} width={7} height={h} fill={lite} opacity=".8" />
+      <rect x={x0} y={y0} width={w} height={5} fill={lite} opacity={0.5 + k * 0.2} />
     </g>
+  );
+  const torch = (tx: number, ty: number, ph: number) => (
+    <g transform={`translate(${tx} ${ty})`}><rect x={-3} y={0} width={6} height={26} fill="#3a2410" />
+      <circle cx={0} cy={-8} r={46} fill="#ffb25a" opacity={0.22 + 0.1 * Math.sin(f * 0.5 + ph)} style={{filter: 'blur(14px)'}} />
+      <path d={`M0 0 Q${-9 + 3 * Math.sin(f * 0.6 + ph)} -16 0 -28 Q${9 + 3 * Math.sin(f * 0.7 + ph)} -16 0 0 Z`} fill="#ffcf6a" /><path d="M0 0 Q-4 -10 0 -18 Q4 -10 0 0 Z" fill="#fff2b0" /></g>
   );
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d="M-420 0 Q-200 -70 0 -90 Q220 -70 500 0 Z" fill={mix('#0a1226', '#2a3a58', haze * 0.8)} />
-      <path d="M-420 0 Q-200 -70 0 -90 Q220 -70 500 0" fill="none" stroke={lite} strokeWidth="3" opacity=".5" />
-      {blk(-210, -300, 420, 230)}{crn(-210, 420, -300)}
-      {blk(-250, -420, 90, 350)}{crn(-250, 90, -420)}
-      {blk(160, -380, 96, 310)}{crn(160, 96, -380)}
-      {blk(-40, -470, 80, 170)}<path d="M-52 -470 L0 -540 L52 -470 Z" fill={c} /><path d="M0 -540 L52 -470" stroke={lite} strokeWidth="4" opacity=".7" />
-      <path d="M-70 -70 Q-70 -130 -30 -130 Q10 -130 10 -70 Z" fill="#05080f" />
+      {/* the rock the castle stands on: jagged face with strata, moonlit lip */}
+      <path d="M-640 60 L-520 0 L-470 -50 L-380 -34 L-300 -90 L-210 -70 L-120 -92 L120 -92 L220 -70 L320 -100 L420 -60 L520 -20 L600 30 L680 60 Z" fill={mix('#0c1428', '#2a3a58', haze * 0.8)} />
+      {Array.from({length: 7}, (_, i) => <path key={i} d={`M${-560 + i * 30} ${-50 + i * 14} Q0 ${-70 + i * 12} ${640 - i * 40} ${-20 + i * 10}`} stroke="#060b18" strokeWidth="3" fill="none" opacity=".45" />)}
+      <path d="M-520 0 L-470 -50 L-380 -34 L-300 -90 L-210 -70 L-120 -92 L120 -92 L220 -70 L320 -100 L420 -60 L520 -20" fill="none" stroke={lite} strokeWidth="3" opacity=".7" />
+      {blk(-210, -300, 420, 230, 0)}{crn(-210, 420, -300)}
+      {blk(-250, -420, 90, 350, 1)}{crn(-250, 90, -420)}
+      {blk(160, -380, 96, 310, 1)}{crn(160, 96, -380)}
+      {blk(-40, -470, 80, 170, 1)}<path d="M-52 -470 L0 -540 L52 -470 Z" fill={c} /><path d="M0 -540 L52 -470" stroke={lite} strokeWidth="4" opacity=".7" />
+      <path d="M0 -540 V-600" stroke="#050a18" strokeWidth="3" /><path d={`M2 -598 Q${26 + 6 * Math.sin(f * 0.2)} -590 ${44 + 8 * Math.sin(f * 0.2)} -594 L${44 + 8 * Math.sin(f * 0.2)} -574 Q${26} -578 2 -580 Z`} fill="#8a1c22" />
+      <path d="M-70 -70 Q-70 -140 -30 -140 Q10 -140 10 -70 Z" fill="#05080f" /><path d="M-62 -70 Q-62 -128 -30 -128" stroke="#2a3558" strokeWidth="3" fill="none" />
       {[[-220, -360], [-200, -250], [190, -330], [-20, -420], [60, -240], [-100, -230], [120, -250], [-20, -170]].map(([wx, wy], i) => (
         <g key={i}><circle cx={wx + 8} cy={wy + 13} r={30} fill={lit} opacity={0.18 + 0.14 * Math.sin(f * 0.1 + i * 2) ** 2} style={{filter: 'blur(8px)'}} /><rect x={wx} y={wy} width={16} height={26} rx={7} fill={lit} opacity={0.6 + 0.35 * Math.sin(f * 0.1 + i * 2) ** 2} /></g>
       ))}
+      {torch(-150, -300, 0)}{torch(60, -300, 2)}{torch(-210, -300, 4)}
     </g>
   );
+};
+export const sweepAngle = (f: number, phase: number, spread: number, aim?: {x: number; y: number; k: number}, x = 0, y = 0) => {
+  const nat = -1.05 + Math.sin(f * 0.035 + phase) * spread;
+  return aim ? nat + (Math.atan2(aim.y - y, aim.x - x) - nat) * aim.k : nat;
 };
 export const Sweep: React.FC<{f: number; x: number; y: number; phase?: number; spread?: number; aim?: {x: number; y: number; k: number}}> = ({f, x, y, phase = 0, spread = 0.5, aim}) => {
-  const nat = -1.05 + Math.sin(f * 0.035 + phase) * spread;
-  const a = aim ? nat + (Math.atan2(aim.y - y, aim.x - x) - nat) * aim.k : nat;
-  const L = 2600, w = 0.07;
+  const a = sweepAngle(f, phase, spread, aim, x, y);
+  const L = 2600, w = 0.07, rg = mulberry32(31 + Math.round(phase * 10));
+  const ux = Math.cos(a), uy = Math.sin(a);
   return (
     <g style={{mixBlendMode: 'screen' as any}}>
-      <defs><linearGradient id={`sw${phase}`} gradientUnits="userSpaceOnUse" x1={x} y1={y} x2={x + Math.cos(a) * L} y2={y + Math.sin(a) * L}><stop offset="0" stopColor="#f2f6ff" stopOpacity=".7" /><stop offset=".7" stopColor="#dce6ff" stopOpacity=".14" /><stop offset="1" stopColor="#dce6ff" stopOpacity="0" /></linearGradient><filter id="swb"><feGaussianBlur stdDeviation="9" /></filter></defs>
+      <defs>
+        <linearGradient id={`sw${phase}`} gradientUnits="userSpaceOnUse" x1={x} y1={y} x2={x + ux * L} y2={y + uy * L}><stop offset="0" stopColor="#f2f6ff" stopOpacity=".72" /><stop offset=".7" stopColor="#dce6ff" stopOpacity=".16" /><stop offset="1" stopColor="#dce6ff" stopOpacity="0" /></linearGradient>
+        <filter id="swb"><feGaussianBlur stdDeviation="9" /></filter>
+        <radialGradient id="swlamp"><stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#cfdcff" stopOpacity="0" /></radialGradient>
+      </defs>
       <polygon filter="url(#swb)" points={`${x},${y} ${x + Math.cos(a - w) * L},${y + Math.sin(a - w) * L} ${x + Math.cos(a + w) * L},${y + Math.sin(a + w) * L}`} fill={`url(#sw${phase})`} />
+      <polygon points={`${x},${y} ${x + Math.cos(a - w * 0.3) * L},${y + Math.sin(a - w * 0.3) * L} ${x + Math.cos(a + w * 0.3) * L},${y + Math.sin(a + w * 0.3) * L}`} fill={`url(#sw${phase})`} opacity=".5" />
+      {/* motes of dust and mist glittering inside the beam */}
+      {Array.from({length: 46}, (_, i) => { const d = (0.06 + rg() * 0.8) * L, off = (rg() - 0.5) * 2 * Math.tan(w) * d * 0.9, tw = 0.4 + 0.6 * Math.sin(f * 0.15 + i * 2) ** 2; return <circle key={i} cx={x + ux * d - uy * off} cy={y + uy * d + ux * off + Math.sin(f * 0.05 + i) * 6} r={1.4 + rg() * 3} fill="#fff" opacity={0.55 * tw * (1 - d / L)} />; })}
+      <circle cx={x} cy={y} r={34} fill="url(#swlamp)" />
     </g>
   );
 };
+/** pool of light where the beam meets the ground, plus low mist that catches the light */
+export const LightPool: React.FC<{f: number; x: number; y: number; k: number; w?: number}> = ({f, x, y, k, w = 640}) => (
+  <g style={{mixBlendMode: 'screen' as any}} opacity={k}>
+    <defs>
+      <radialGradient id="lpool"><stop offset="0" stopColor="#e6eeff" stopOpacity=".62" /><stop offset=".55" stopColor="#c8d8ff" stopOpacity=".3" /><stop offset="1" stopColor="#b0c4ff" stopOpacity="0" /></radialGradient>
+      <filter id="lmist"><feGaussianBlur stdDeviation="16" /></filter>
+    </defs>
+    <ellipse cx={x} cy={y} rx={w} ry={w * 0.19} fill="url(#lpool)" />
+    <ellipse cx={x} cy={y} rx={w * 0.55} ry={w * 0.1} fill="#f2f6ff" opacity=".2" />
+    {Array.from({length: 9}, (_, i) => { const dx = ((f * (0.4 + (i % 3) * 0.25) + i * 150) % (w * 2.4)) - w * 1.2; const lit = Math.max(0, 1 - Math.abs(dx) / w); return <ellipse key={i} cx={x + dx} cy={y - 24 - (i % 4) * 22} rx={150 + (i % 3) * 40} ry={20 + (i % 2) * 10} fill="#dce6ff" opacity={0.34 * lit} filter="url(#lmist)" />; })}
+  </g>
+);
 export const Cypress: React.FC<{x: number; y: number; s: number; haze: number; seed: number}> = ({x, y, s, haze, seed}) => {
   const c = mix('#07100e', '#2a3a48', haze), r = mulberry32(seed);
   return (

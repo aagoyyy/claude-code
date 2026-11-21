@@ -18,6 +18,7 @@ export type Spec = {
   fixed?: boolean;                 // does not scroll with the camera track (the hero)
   die?: 'back' | 'forward' | 'stumble' | 'crawl' | 'blast';   // how the actor goes down at dieAt
   xf?: (f: number) => number;      // custom x (e.g. a body being dragged)
+  vis?: (f: number) => number;     // opacity over time (a man turning round out of sight)
 };
 
 const hash = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return (h % 1000) / 1000; };
@@ -252,7 +253,7 @@ export const Actors: React.FC<{specs: Spec[]; f: number; effects?: boolean; camT
         });
       })}
       {st.map(({a, st: s}) => (
-        <Figure key={a.id} uid={`ac${a.id}`} x={s.x} y={a.y} s={a.s} o={{...a.o, face: a.face}} p={s.pose} light={a.light ?? 'warm'} lit={a.lit ?? 1} lo={a.lo} glow={a.lo ? undefined : glowFor(a, s)} />
+        <Figure key={a.id} uid={`ac${a.id}`} x={s.x} y={a.y} s={a.s} o={{...a.o, face: a.face}} p={s.pose} light={a.light ?? 'warm'} lit={a.lit ?? 1} lo={a.lo} alpha={a.vis ? a.vis(f) : 1} glow={a.lo ? undefined : glowFor(a, s)} />
       ))}
       {effects && st.map(({a, st: s}) => {
         const sparks = a.dieAt !== undefined && f >= a.dieAt && f - a.dieAt < 14 ? <HitSpark key={'hs' + a.id} x={s.x - (a.face === 'right' ? 1 : -1) * 20 * a.s} y={a.y - 720 * a.s} age={f - a.dieAt} r={Math.max(16, 80 * a.s)} /> : null;
