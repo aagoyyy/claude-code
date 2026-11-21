@@ -533,7 +533,7 @@ const S3_9: React.FC = () => (
       {[0.2, 0.4, 0.6, 0.8].map((k, i) => <ellipse key={i} cx={1200} cy={770} rx={540 * k} ry={160 * k} fill="none" stroke="#fff" strokeWidth={4} opacity={0.7 - i * 0.12} />)}
       <ellipse cx={1200} cy={770} rx={60} ry={18} fill="#fff" opacity=".5" />{Array.from({length: 16}, (_, i) => <circle key={i} cx={1200 + Math.cos(i) * (80 + (i % 5) * 20)} cy={740 - (i % 4) * 36} r={5 + (i % 3) * 3} fill="#e8f4ff" opacity=".8" />)}
       <g transform="translate(1200 420)"><ellipse rx={26} ry={18} fill="#5a5a5a" stroke="#2a2a2a" strokeWidth={3} /><ellipse cx={-6} cy={-5} rx={9} ry={5} fill="#fff" opacity=".35" /></g>
-      <g transform="translate(560 220) rotate(150) scale(1.74)"><HandCU kind="open" skin="#e0a880" sleeve="#e8e0d0" /></g>
+      <g transform="translate(700 330) rotate(-35) scale(1.5)"><HandCU kind="open" skin="#e0a880" sleeve="#e8e0d0" /></g>
       <g opacity=".4">{[0, 1, 2].map((i) => <path key={i} d={`M${1010 - i * 20} ${380 + i * 14} q80 20 150 40`} stroke="#fff" strokeWidth={5} fill="none" strokeLinecap="round" />)}</g>
     </Par>
     <Par d={1}><Motes n={50} seed={6} c="#fff0d0" o={0.4} /></Par>

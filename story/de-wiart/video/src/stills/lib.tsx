@@ -338,7 +338,7 @@ export const arms = {
 
 /* =============================== detailed close-up hand (back of the hand) =============================== */
 /** wrist at (0,0), fingers toward +y. kind: open | relaxed | point | grip | pinch. Sleeve runs up to y=-300. */
-export const HandCU: React.FC<{kind?: 'open' | 'relaxed' | 'point' | 'grip' | 'pinch'; skin?: string; sleeve?: string; cuff?: string; shirt?: string; id?: string}> = ({kind = 'relaxed', skin = '#e0a880', sleeve = '#3a4a3a', cuff, shirt = '#ece6d6', id = 'hc'}) => {
+export const HandCU: React.FC<{kind?: 'open' | 'relaxed' | 'point' | 'grip' | 'pinch'; skin?: string; sleeve?: string; cuff?: string; shirt?: string; id?: string; len?: number}> = ({kind = 'relaxed', skin = '#e0a880', sleeve = '#3a4a3a', cuff, shirt = '#ece6d6', id = 'hc', len = 1700}) => {
   const d = mix(skin, '#000000', 0.32), l = mix(skin, '#ffffff', 0.22), m = mix(skin, '#000000', 0.14), ln = mix(skin, '#000000', 0.55);
   const sd = mix(sleeve, '#000000', 0.4), sl = mix(sleeve, '#ffffff', 0.12);
   // finger: three tapered phalanges with joint creases, a nail on the back
@@ -373,10 +373,13 @@ export const HandCU: React.FC<{kind?: 'open' | 'relaxed' | 'point' | 'grip' | 'p
         <linearGradient id={`${id}S`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor={sl} /><stop offset=".55" stopColor={sleeve} /><stop offset="1" stopColor={sd} /></linearGradient>
       </defs>
       {/* sleeve: tube with folds, weave, stitched cuff, button, shirt cuff beneath */}
-      <path d="M-58 -304 L-48 0 L48 0 L58 -304 Z" fill={`url(#${id}S)`} stroke={mix(sleeve, '#000000', 0.6)} strokeWidth="3" />
-      <rect x={-58} y={-304} width={116} height={304} fill="url(#weaveS)" opacity=".7" />
-      {[[-34, -240, 4], [-6, -190, 5], [26, -130, 4], [-40, -90, 3], [14, -60, 3]].map(([fx, fy, w], i) => <path key={i} d={`M${fx} ${fy} q${18} ${26} ${4} ${70}`} stroke={sd} strokeWidth={w * 2.2} fill="none" opacity=".35" strokeLinecap="round" />)}
-      {[[-30, -250], [10, -200], [36, -150], [-14, -110]].map(([fx, fy], i) => <path key={i} d={`M${fx} ${fy} q-10 22 -2 52`} stroke="#fff" strokeWidth="5" fill="none" opacity=".1" strokeLinecap="round" />)}
+      <path d={`M-84 ${-len} L-48 0 L48 0 L84 ${-len} Z`} fill={`url(#${id}S)`} stroke={mix(sleeve, '#000000', 0.6)} strokeWidth="3" />
+      <clipPath id={`${id}C`}><path d={`M-84 ${-len} L-48 0 L48 0 L84 ${-len} Z`} /></clipPath>
+      <g clipPath={`url(#${id}C)`}>
+        <rect x={-90} y={-len} width={180} height={len} fill="url(#weaveS)" opacity=".7" />
+        {Array.from({length: Math.floor(len / 70)}, (_, i) => { const fy = -120 - i * 70, fx = ((i * 37) % 70) - 35; return <g key={i}><path d={`M${fx} ${fy} q${18} ${26} ${4} ${70}`} stroke={sd} strokeWidth={9} fill="none" opacity=".32" strokeLinecap="round" /><path d={`M${fx + 24} ${fy + 20} q-10 22 -2 52`} stroke="#fff" strokeWidth="5" fill="none" opacity=".1" strokeLinecap="round" /></g>; })}
+        <rect x={-90} y={-len} width={50} height={len} fill="#fff" opacity=".05" /><rect x={40} y={-len} width={50} height={len} fill="#000" opacity=".12" />
+      </g>
       <rect x={-52} y={-34} width={104} height={30} fill={shirt} stroke="#8a8676" strokeWidth="2.5" /><rect x={-52} y={-34} width={104} height={30} fill="url(#sideShade)" opacity=".7" />
       <path d="M-50 -88 L-46 -34 L46 -34 L50 -88 Z" fill={cuff ?? sleeve} stroke={mix(sleeve, '#000000', 0.6)} strokeWidth="2.5" /><path d="M-48 -84 H48" stroke="#d9ab78" strokeWidth="2" strokeDasharray="6 5" opacity=".7" /><path d="M-47 -40 H47" stroke={sd} strokeWidth="3" opacity=".6" />
       <circle cx={30} cy={-62} r={8} fill="#b0903a" stroke="#4a3a14" strokeWidth="2" /><circle cx={28} cy={-64} r={3} fill="#fff" opacity=".5" />

@@ -166,8 +166,8 @@ const S4_14: React.FC = () => (
       <path d="M720 490 q10 22 -2 40" stroke="#c4281c" strokeWidth={14} fill="none" opacity=".6" strokeLinecap="round" />
       <path d="M580 400 L860 440 M590 450 L860 500 M610 500 L840 540" stroke="#aaa392" strokeWidth={2} fill="none" />
       {/* the nurse's hands winding the roll */}
-      <g transform="translate(1180 330) rotate(150) scale(1.36)"><HandCU kind="relaxed" skin="#e8b48a" sleeve="#f2f0e8" /></g>
-      <g transform="translate(1260 860) rotate(30) scale(1.24)"><HandCU kind="open" skin="#e8b48a" sleeve="#f2f0e8" /></g>
+      <g transform="translate(1330 330) rotate(100) scale(1.25)"><HandCU kind="relaxed" skin="#e8b48a" sleeve="#f2f0e8" /></g>
+      <g transform="translate(1370 700) rotate(80) scale(1.2)"><HandCU kind="open" skin="#e8b48a" sleeve="#f2f0e8" /></g>
       <path d="M860 420 Q1000 400 1080 520" stroke="#ece8d8" strokeWidth={30} fill="none" strokeLinecap="round" />
     </Par>
   </Frame>
