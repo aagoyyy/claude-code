@@ -11,7 +11,7 @@ export const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 -
 export const easeOut = (t: number) => 1 - Math.pow(1 - clamp(t), 3);
 export const easeOutBack = (t: number) => { const c1 = 1.70158, c3 = c1 + 1, x = clamp(t) - 1; return 1 + c3 * x * x * x + c1 * x * x; };
 
-const hex = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const hex = (c: string) => { if (c.length === 4) c = '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3]; return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16)); };
 export const mix = (c1: string, c2: string, t: number) => {
   const a = hex(c1), b = hex(c2);
   return '#' + a.map((v, i) => Math.round(lerp(v, b[i], t)).toString(16).padStart(2, '0')).join('');
