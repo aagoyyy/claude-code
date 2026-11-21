@@ -394,7 +394,15 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
             <g transform="translate(0 204) rotate(-3)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g>
           )}
           {near && o.gear === 'spade' && (
-            <g transform="translate(0 214) rotate(-4)"><rect x={-6} y={-260} width={12} height={560} rx={4} fill="#7a5230" stroke={OUT} strokeWidth="2" /><rect x={-9} y={-270} width={18} height={22} rx={4} fill="#5a3a20" stroke={OUT} strokeWidth="2" /><path d="M-34 300 L34 300 L40 390 Q0 430 -40 390 Z" fill="#8a919c" stroke={OUT} strokeWidth="2.5" /><path d="M-22 306 L-26 380" stroke="#e6ebf2" strokeWidth="4" opacity=".6" /></g>
+            <g transform="translate(0 214) rotate(-4)">
+              <rect x={-7} y={-250} width={14} height={540} rx={4} fill="#7a5230" stroke={OUT} strokeWidth="2" />
+              <rect x={-34} y={-262} width={68} height={16} rx={6} fill="#5a3a20" stroke={OUT} strokeWidth="2" />
+              <path d="M-52 286 L52 286 L64 420 Q0 486 -64 420 Z" fill="#9aa2ae" stroke={OUT} strokeWidth="3" />
+              <path d="M-40 296 L-52 410 Q-30 440 -8 444" stroke="#eef2f8" strokeWidth="6" fill="none" opacity=".7" />
+              <path d="M-52 286 L52 286" stroke="#4a4f58" strokeWidth="8" />
+              <path d="M8 300 L18 420" stroke="#5a606a" strokeWidth="4" opacity=".6" />
+              <ellipse cx={0} cy={452} rx={46} ry={10} fill="#6a4a2c" opacity=".6" />
+            </g>
           )}
           {near && o.gear === 'spear' && (
             <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /><path d="M-1 -515 L-1 -425" stroke="#fff" strokeWidth="2" opacity=".6" /></g>
@@ -645,5 +653,5 @@ export const handsUpPose = (t: number): SidePose => ({uaN: -168, faN: -6, uaF: -
 /** digging while kneeling: spade driven forward and back */
 export const digPose = (f: number, seed = 0): SidePose => {
   const s = Math.sin(f * 0.3 + seed), k = (s + 1) / 2;
-  return {...kneelPose(f), torso: 6 + 10 * k, head: 14, uaN: -34 - 36 * k, faN: -50 + 24 * k, uaF: -30 - 30 * k, faF: -60 + 18 * k, grip: false};
+  return {...kneelPose(f), torso: 4 + 8 * k, head: 12, uaN: -48 - 44 * k, faN: -84 + 76 * k, uaF: -44 - 40 * k, faF: -80 + 70 * k, grip: false};
 };

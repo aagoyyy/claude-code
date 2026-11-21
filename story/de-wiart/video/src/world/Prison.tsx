@@ -39,7 +39,9 @@ export const TunnelBG: React.FC<{f: number; scroll?: number}> = ({f, scroll = 0}
       {/* hanging lantern with flicker */}
       <path d={`M${LANT.x} 496 V${LANT.y - 18}`} stroke="#2a1a0c" strokeWidth="4" />
       <g transform={`translate(${LANT.x} ${LANT.y})`}><rect x={-16} y={-18} width={32} height={42} rx={5} fill="#3a2a1a" stroke="#120a04" strokeWidth="3" /><rect x={-10} y={-10} width={20} height={28} fill="#ffd27a" opacity={flick} /><path d="M-16 -18 L0 -34 L16 -18 Z" fill="#2a1a0c" /></g>
-      <circle cx={LANT.x} cy={LANT.y} r={760} fill="url(#lamp)" style={{mixBlendMode: 'screen' as any}} />
+      <circle cx={LANT.x} cy={LANT.y} r={900} fill="url(#lamp)" style={{mixBlendMode: 'screen' as any}} />
+      <path d="M1560 496 V560" stroke="#2a1a0c" strokeWidth="4" /><g transform="translate(1560 574)"><rect x={-14} y={-16} width={28} height={36} rx={5} fill="#3a2a1a" stroke="#120a04" strokeWidth="3" /><rect x={-8} y={-9} width={16} height={24} fill="#ffd27a" opacity={flick} /></g>
+      <circle cx={1560} cy={574} r={620} fill="url(#lamp)" style={{mixBlendMode: 'screen' as any}} />
     </>
   );
 };
@@ -50,7 +52,7 @@ export const TunnelDark: React.FC<{f: number}> = ({f}) => {
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0}}>
       <defs><radialGradient id="tdark" cx={LANT.x / W} cy={LANT.y / H} r={0.62 * fl}><stop offset=".25" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#030201" stopOpacity=".9" /></radialGradient></defs>
-      <rect width={W} height={H} fill="url(#tdark)" />
+      <rect width={W} height={H} fill="url(#tdark)" opacity={0.7} />
     </svg>
   );
 };
@@ -71,21 +73,34 @@ export const NightSky: React.FC<{f: number}> = ({f}) => {
   );
 };
 export const Castle: React.FC<{f: number; x: number; y: number; s: number; haze: number}> = ({f, x, y, s, haze}) => {
-  const c = mix('#0a1020', '#2a3a58', haze), lit = '#ffb25a';
-  const crn = (x0: number, w: number, yy: number) => Array.from({length: Math.floor(w / 24)}, (_, i) => <rect key={i} x={x0 + i * 24 + 3} y={yy - 14} width={14} height={16} fill={c} />);
+  const c = mix('#0e1730', '#2a3a58', haze), lite = mix('#4a5c88', '#8aa0d0', haze), lit = '#ffb25a';
+  const crn = (x0: number, w: number, yy: number) => Array.from({length: Math.floor(w / 24)}, (_, i) => <g key={i}><rect x={x0 + i * 24 + 3} y={yy - 14} width={14} height={16} fill={c} /><rect x={x0 + i * 24 + 13} y={yy - 14} width={4} height={16} fill={lite} opacity=".7" /></g>);
+  const blk = (x0: number, y0: number, w: number, h: number) => (
+    <g>
+      <rect x={x0} y={y0} width={w} height={h} fill={c} />
+      <rect x={x0 + w - 7} y={y0} width={7} height={h} fill={lite} opacity=".75" />
+      <rect x={x0} y={y0} width={w} height={5} fill={lite} opacity=".55" />
+      {Array.from({length: Math.floor(h / 26)}, (_, i) => <path key={i} d={`M${x0} ${y0 + 20 + i * 26} h${w}`} stroke="#050a18" strokeWidth="2" opacity=".5" />)}
+    </g>
+  );
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d="M-400 0 Q-200 -60 0 -80 Q220 -60 480 0 Z" fill={c} />
-      <rect x={-210} y={-300} width={420} height={230} fill={c} />{crn(-210, 420, -300)}
-      <rect x={-250} y={-420} width={90} height={350} fill={c} />{crn(-250, 90, -420)}
-      <rect x={160} y={-380} width={96} height={310} fill={c} />{crn(160, 96, -380)}
-      <rect x={-40} y={-470} width={80} height={170} fill={c} /><path d="M-52 -470 L0 -540 L52 -470 Z" fill={c} />
-      {[[-220, -360], [-200, -250], [190, -330], [-20, -420], [60, -240], [-100, -230], [120, -250]].map(([wx, wy], i) => <rect key={i} x={wx} y={wy} width={16} height={26} rx={7} fill={lit} opacity={0.5 + 0.4 * Math.sin(f * 0.1 + i * 2) ** 2} />)}
+      <path d="M-420 0 Q-200 -70 0 -90 Q220 -70 500 0 Z" fill={mix('#0a1226', '#2a3a58', haze * 0.8)} />
+      <path d="M-420 0 Q-200 -70 0 -90 Q220 -70 500 0" fill="none" stroke={lite} strokeWidth="3" opacity=".5" />
+      {blk(-210, -300, 420, 230)}{crn(-210, 420, -300)}
+      {blk(-250, -420, 90, 350)}{crn(-250, 90, -420)}
+      {blk(160, -380, 96, 310)}{crn(160, 96, -380)}
+      {blk(-40, -470, 80, 170)}<path d="M-52 -470 L0 -540 L52 -470 Z" fill={c} /><path d="M0 -540 L52 -470" stroke={lite} strokeWidth="4" opacity=".7" />
+      <path d="M-70 -70 Q-70 -130 -30 -130 Q10 -130 10 -70 Z" fill="#05080f" />
+      {[[-220, -360], [-200, -250], [190, -330], [-20, -420], [60, -240], [-100, -230], [120, -250], [-20, -170]].map(([wx, wy], i) => (
+        <g key={i}><circle cx={wx + 8} cy={wy + 13} r={30} fill={lit} opacity={0.18 + 0.14 * Math.sin(f * 0.1 + i * 2) ** 2} style={{filter: 'blur(8px)'}} /><rect x={wx} y={wy} width={16} height={26} rx={7} fill={lit} opacity={0.6 + 0.35 * Math.sin(f * 0.1 + i * 2) ** 2} /></g>
+      ))}
     </g>
   );
 };
-export const Sweep: React.FC<{f: number; x: number; y: number; phase?: number; spread?: number}> = ({f, x, y, phase = 0, spread = 0.5}) => {
-  const a = -1.05 + Math.sin(f * 0.035 + phase) * spread;
+export const Sweep: React.FC<{f: number; x: number; y: number; phase?: number; spread?: number; aim?: {x: number; y: number; k: number}}> = ({f, x, y, phase = 0, spread = 0.5, aim}) => {
+  const nat = -1.05 + Math.sin(f * 0.035 + phase) * spread;
+  const a = aim ? nat + (Math.atan2(aim.y - y, aim.x - x) - nat) * aim.k : nat;
   const L = 2600, w = 0.07;
   return (
     <g style={{mixBlendMode: 'screen' as any}}>

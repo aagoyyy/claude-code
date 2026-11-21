@@ -43,60 +43,90 @@ export const SeaBand: React.FC<{f: number; y0: number; y1: number; k: number; sp
   );
 };
 
-/** Vickers Wellington (side view, facing +x): geodetic fuselage, nacelle with spinning prop, fin, roundel; flame + smoke when `fire` > 0 */
+/** Vickers Wellington, 3/4 view (fuselage in profile, near wing sweeping toward the viewer, far wing behind), facing +x */
 export const Wellington: React.FC<{f: number; fire?: number}> = ({f, fire = 0}) => (
   <g>
     <defs>
-      <linearGradient id="wBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#8e9684" /><stop offset=".5" stopColor="#6a7262" /><stop offset="1" stopColor="#3e4638" /></linearGradient>
-      <clipPath id="wClip"><path d="M-700 0 Q-720 -70 -560 -90 L420 -110 Q640 -110 720 -20 Q690 70 520 90 L-520 70 Q-690 60 -700 0 Z" /></clipPath>
+      <linearGradient id="wBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#9aa28c" /><stop offset=".5" stopColor="#6e7666" /><stop offset="1" stopColor="#3e4638" /></linearGradient>
+      <linearGradient id="wWing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6a7262" /><stop offset="1" stopColor="#434b3d" /></linearGradient>
+      <clipPath id="wClip"><path d="M-760 14 Q-760 -26 -620 -64 L300 -112 Q520 -118 640 -70 Q700 -40 690 8 Q650 70 470 96 L-540 82 Q-740 70 -760 14 Z" /></clipPath>
       <radialGradient id="wFire" cx=".3" cy=".5"><stop offset="0" stopColor="#fff2b0" /><stop offset=".35" stopColor="#ffb02a" /><stop offset=".75" stopColor="#d8431a" /><stop offset="1" stopColor="#6a1a08" stopOpacity="0" /></radialGradient>
     </defs>
-    {/* tail fin + tailplane */}
-    <path d="M-600 -84 L-740 -330 L-520 -300 L-410 -100 Z" fill="#6a7262" stroke="#1f241a" strokeWidth="4" />
-    <path d="M-740 -330 L-700 -296 L-540 -286 L-520 -300 Z" fill="#8e9684" opacity=".6" />
-    <path d="M-640 -10 L-840 -26 L-840 4 L-640 24 Z" fill="#4e564a" stroke="#1f241a" strokeWidth="3" />
-    {/* wing (edge-on) + nacelle */}
-    <path d="M-120 36 L360 40 L380 76 L-120 70 Z" fill="#555d4c" stroke="#1f241a" strokeWidth="4" />
-    <ellipse cx={90} cy={92} rx={150} ry={54} fill="#6a7262" stroke="#1f241a" strokeWidth="4" />
-    <ellipse cx={90} cy={92} rx={150} ry={54} fill="url(#wBody)" opacity=".6" />
-    {/* fuselage */}
-    <path d="M-700 0 Q-720 -70 -560 -90 L420 -110 Q640 -110 720 -20 Q690 70 520 90 L-520 70 Q-690 60 -700 0 Z" fill="url(#wBody)" stroke="#1f241a" strokeWidth="5" />
+    {/* far wing, far engine and far tailplane (behind the fuselage) */}
+    <path d="M60 -90 L360 -100 L260 -330 L10 -300 Z" fill="#555d4c" stroke="#1f241a" strokeWidth="4" opacity=".92" />
+    <ellipse cx={150} cy={-250} rx={78} ry={30} fill="#4a5242" stroke="#1f241a" strokeWidth="3" />
+    <ellipse cx={226} cy={-250} rx={9} ry={92} fill="#222" opacity=".42" style={{filter: 'blur(4px)'}} />
+    <path d="M-640 -40 L-560 -170 L-760 -190 L-780 -70 Z" fill="#4e564a" stroke="#1f241a" strokeWidth="3" />
+    {/* tail fin */}
+    <path d="M-560 -60 L-690 -330 L-470 -310 L-370 -92 Z" fill="#6e7666" stroke="#1f241a" strokeWidth="4" />
+    <path d="M-690 -330 L-650 -296 L-520 -288 L-470 -310 Z" fill="#9aa28c" opacity=".55" />
+    {/* near tailplane */}
+    <path d="M-640 24 L-420 36 L-520 160 L-780 130 Z" fill="url(#wWing)" stroke="#1f241a" strokeWidth="3" />
+    {/* fuselage: round nose turret, geodetic lattice, tapering tail */}
+    <path d="M-760 14 Q-760 -26 -620 -64 L300 -112 Q520 -118 640 -70 Q700 -40 690 8 Q650 70 470 96 L-540 82 Q-740 70 -760 14 Z" fill="url(#wBody)" stroke="#1f241a" strokeWidth="5" />
     <g clipPath="url(#wClip)" stroke="#2a3024" strokeWidth="2" opacity=".5">
-      {Array.from({length: 40}, (_, i) => <path key={i} d={`M${-720 + i * 38} -120 L${-640 + i * 38} 100 M${-640 + i * 38} -120 L${-720 + i * 38} 100`} />)}
+      {Array.from({length: 40}, (_, i) => <path key={i} d={`M${-780 + i * 38} -130 L${-700 + i * 38} 110 M${-700 + i * 38} -130 L${-780 + i * 38} 110`} />)}
     </g>
-    <path d="M-560 -86 L400 -104" stroke="#d8dfcc" strokeWidth="5" opacity=".35" />
-    {/* cockpit glazing, front gun turret, roundel, code letters */}
-    <path d="M360 -108 Q520 -190 640 -90 L560 -70 Q470 -128 380 -100 Z" fill="#a8c8d8" stroke="#1f241a" strokeWidth="4" opacity=".85" />
-    <path d="M400 -112 Q480 -160 560 -120" stroke="#fff" strokeWidth="5" opacity=".5" fill="none" />
-    <circle cx={-220} cy={-6} r={74} fill="#1c3d8a" stroke="#1f241a" strokeWidth="3" /><circle cx={-220} cy={-6} r={56} fill="#f4f0e6" /><circle cx={-220} cy={-6} r={40} fill="#b3262a" /><circle cx={-220} cy={-6} r={18} fill="#f4f0e6" />
-    <text x={-470} y={22} fontFamily="'Helvetica Neue', Arial" fontWeight={800} fontSize={86} fill="#d8d4c4" opacity=".85" letterSpacing={10}>WS</text>
-    <path d="M-700 0 Q-780 -6 -820 -30" stroke="#1f241a" strokeWidth="6" fill="none" />
-    {/* propeller disc (blurred) on the nacelle nose */}
-    <ellipse cx={248} cy={92} rx={16} ry={150} fill="#222" opacity={0.5} style={{filter: 'blur(5px)'}} />
-    {[0, 1, 2].map((i) => { const a = (f * 1.6 + i * 2.09) % 6.283; return <path key={i} d={`M248 92 L${248 + Math.sin(a) * 6} ${92 - Math.cos(a) * 150}`} stroke="#1a1a1a" strokeWidth="14" strokeLinecap="round" opacity=".6" />; })}
-    {/* burning engine */}
+    <path d="M-600 -52 L300 -98" stroke="#e0e6d4" strokeWidth="5" opacity=".35" />
+    <path d="M-700 46 Q-100 80 470 76" stroke="#000" strokeWidth="14" fill="none" opacity=".22" />
+    {/* near wing sweeping toward the viewer with engine + prop disc */}
+    <path d="M40 50 L410 62 L250 420 L-120 380 Z" fill="url(#wWing)" stroke="#1f241a" strokeWidth="5" />
+    <path d="M40 50 L410 62 L394 96 L50 84 Z" fill="#8a9280" opacity=".5" />
+    <path d="M-20 160 L330 172 M-60 270 L290 282" stroke="#2a3024" strokeWidth="3" opacity=".5" />
+    <ellipse cx={170} cy={246} rx={120} ry={48} fill="#6e7666" stroke="#1f241a" strokeWidth="4" />
+    <ellipse cx={170} cy={246} rx={120} ry={48} fill="url(#wBody)" opacity=".55" />
+    <ellipse cx={278} cy={246} rx={15} ry={130} fill="#222" opacity={0.5} style={{filter: 'blur(5px)'}} />
+    {[0, 1, 2].map((i) => { const a = (f * 1.6 + i * 2.09) % 6.283; return <path key={i} d={`M278 246 L${278 + Math.sin(a) * 5} ${246 - Math.cos(a) * 130}`} stroke="#1a1a1a" strokeWidth="13" strokeLinecap="round" opacity=".6" />; })}
+    {/* glazed nose, roundel, code letters */}
+    <path d="M330 -112 Q520 -200 650 -80 L560 -64 Q480 -126 350 -96 Z" fill="#a8c8d8" stroke="#1f241a" strokeWidth="4" opacity=".88" />
+    <path d="M380 -118 Q470 -160 560 -112" stroke="#fff" strokeWidth="5" opacity=".5" fill="none" />
+    <circle cx={-250} cy={-10} r={74} fill="#1c3d8a" stroke="#1f241a" strokeWidth="3" /><circle cx={-250} cy={-10} r={56} fill="#f4f0e6" /><circle cx={-250} cy={-10} r={40} fill="#b3262a" /><circle cx={-250} cy={-10} r={18} fill="#f4f0e6" />
+    <text x={-520} y={20} fontFamily="'Helvetica Neue', Arial" fontWeight={800} fontSize={86} fill="#d8d4c4" opacity=".85" letterSpacing={10}>WS</text>
+    {/* burning engine on the near wing: fire, then black smoke streaming back */}
     {fire > 0 && (
       <g opacity={clamp(fire)}>
-        {Array.from({length: 10}, (_, i) => { const k = ((f * 0.22 + i * 0.1) % 1); return <ellipse key={'sm' + i} cx={30 - k * 760 - i * 20} cy={92 - k * 60 + Math.sin(f * 0.3 + i) * 12} rx={46 + k * 120} ry={32 + k * 80} fill="#161210" opacity={0.7 * (1 - k)} style={{filter: 'blur(14px)'}} />; })}
-        {[0, 1, 2, 3, 4].map((i) => <path key={'fl' + i} d={`M${230 - i * 18} ${92 + (i % 2) * 14} Q${40 - 40 * Math.sin(f * 0.6 + i)} ${52 - i * 12} ${-170 - i * 38} ${92 + Math.sin(f * 0.8 + i) * 22} Q${40} ${128 + i * 8} ${230 - i * 18} ${92 + (i % 2) * 14} Z`} fill="url(#wFire)" opacity=".85" />)}
+        {Array.from({length: 10}, (_, i) => { const k = ((f * 0.22 + i * 0.1) % 1); return <ellipse key={'sm' + i} cx={90 - k * 760 - i * 20} cy={246 - k * 120 + Math.sin(f * 0.3 + i) * 12} rx={46 + k * 120} ry={32 + k * 80} fill="#161210" opacity={0.7 * (1 - k)} style={{filter: 'blur(14px)'}} />; })}
+        {[0, 1, 2, 3, 4].map((i) => <path key={'fl' + i} d={`M${240 - i * 18} ${246 + (i % 2) * 14} Q${60 - 40 * Math.sin(f * 0.6 + i)} ${206 - i * 12} ${-110 - i * 38} ${246 + Math.sin(f * 0.8 + i) * 22} Q${60} ${284 + i * 8} ${240 - i * 18} ${246 + (i % 2) * 14} Z`} fill="url(#wFire)" opacity=".85" />)}
       </g>
     )}
   </g>
 );
 
-/** water column + spray + rings at an impact point */
-export const Splash: React.FC<{x: number; y: number; age: number; r?: number}> = ({x, y, age, r = 140}) => {
-  if (age < 0 || age > 90) return null;
+/** a ditching / impact in water: ragged foam crown, fine mist, droplets with trails, bow wave and a long foam wake; no clean column */
+export const Splash: React.FC<{x: number; y: number; age: number; r?: number; dir?: number}> = ({x, y, age, r = 140, dir = 1}) => {
+  if (age < 0 || age > 110) return null;
   const rg = mulberry32(11);
-  const up = easeOut(age / 14), k = clamp(age / 70);
+  const up = easeOut(age / 12), k = clamp(age / 90);
   return (
     <g>
-      {age < 50 && <path d={`M${x - r * 0.9} ${y} Q${x - r * 0.5} ${y - r * 4 * up} ${x} ${y - r * 5 * up} Q${x + r * 0.5} ${y - r * 4 * up} ${x + r * 0.9} ${y} Z`} fill="#e6f4fa" opacity={0.85 * (1 - clamp(age / 50))} style={{filter: 'blur(5px)'}} />}
-      {Array.from({length: 36}, (_, i) => { const vx = (rg() - 0.5) * 60, vy = -(14 + rg() * 30), t = age * 0.55; return <circle key={i} cx={x + vx * t * 0.8} cy={y + vy * t + 0.5 * 1.4 * t * t} r={Math.max(1.5, r * 0.04 * (1 - k))} fill="#f2fafc" opacity={clamp(1.4 - age / 50)} />; })}
-      {[0, 1, 2].map((i) => <ellipse key={i} cx={x} cy={y + 6} rx={r * (0.5 + (age - i * 6) * 0.07)} ry={r * (0.08 + (age - i * 6) * 0.012)} fill="none" stroke="#e6f4fa" strokeWidth={4} opacity={clamp(1 - (age - i * 6) / 60) * (age > i * 6 ? 1 : 0)} />)}
-      {age < 30 && <ellipse cx={x} cy={y - r * 1.5 * up} rx={r * 0.9} ry={r * 1.6} fill="#fff" opacity={0.35 * (1 - age / 30)} style={{filter: 'blur(20px)'}} />}
+      {/* long foam wake left behind on the surface */}
+      {age > 2 && Array.from({length: 22}, (_, i) => <ellipse key={'w' + i} cx={x - dir * (i * r * 0.55 + 20)} cy={y + 8 + (i % 3) * 3} rx={r * (0.5 + (i % 4) * 0.12)} ry={r * 0.05} fill="#e8f4f8" opacity={clamp(0.7 - i * 0.03 - age / 150) * clamp((age - i * 0.5) / 6)} style={{filter: 'blur(3px)'}} />)}
+      {/* crown of ragged foam: many overlapping blobs that rise and collapse */}
+      {Array.from({length: 26}, (_, i) => {
+        const a = (i / 26) * Math.PI - Math.PI * 0.05, rr = r * (0.4 + rg() * 0.9), h = r * (0.6 + rg() * 2.1) * up * (1 - clamp((age - 8 - rg() * 12) / 44));
+        return <circle key={'f' + i} cx={x + Math.cos(a) * rr * 1.3 * (0.6 + up * 0.5)} cy={y - Math.max(0, Math.sin(a) * h)} r={r * (0.1 + rg() * 0.18) * (1 + up * 0.6)} fill="#f2fafc" opacity={0.82 * (1 - clamp((age - 10) / 50))} style={{filter: 'blur(2px)'}} />;
+      })}
+      {/* mist */}
+      {age < 60 && <ellipse cx={x} cy={y - r * 1.2 * up} rx={r * 1.8} ry={r * 1.1} fill="#fff" opacity={0.32 * (1 - age / 60)} style={{filter: 'blur(22px)'}} />}
+      {/* droplets with short trails */}
+      {Array.from({length: 46}, (_, i) => {
+        const vx = (rg() - 0.5) * 70, vy = -(14 + rg() * 34), t = age * 0.55, px = x + vx * t * 0.9, py = y + vy * t + 0.5 * 1.5 * t * t, ox = x + vx * (t - 1) * 0.9, oy = y + vy * (t - 1) + 0.5 * 1.5 * (t - 1) ** 2;
+        return py > y + 4 ? null : <g key={'d' + i} opacity={clamp(1.4 - age / 46)}><line x1={ox} y1={oy} x2={px} y2={py} stroke="#e2f2f8" strokeWidth={2.2} strokeLinecap="round" opacity=".6" /><circle cx={px} cy={py} r={Math.max(1.4, r * 0.035 * (1 - k))} fill="#f6fcff" /></g>;
+      })}
+      {[0, 1, 2, 3].map((i) => <ellipse key={'r' + i} cx={x} cy={y + 6} rx={r * (0.5 + (age - i * 7) * 0.08)} ry={r * (0.08 + (age - i * 7) * 0.014)} fill="none" stroke="#e6f4fa" strokeWidth={3.5} opacity={clamp(1 - (age - i * 7) / 70) * (age > i * 7 ? 1 : 0)} />)}
     </g>
   );
 };
+
+/** swimmer: ripple rings at the body, foam trail behind, spray where each arm enters and where the feet kick */
+export const SwimFx: React.FC<{x: number; y: number; f: number; dir?: number; s?: number}> = ({x, y, f, dir = 1, s = 1}) => (
+  <g>
+    {Array.from({length: 14}, (_, i) => <ellipse key={'t' + i} cx={x - dir * (60 + i * 34) * s} cy={y + 8 + (i % 2) * 4} rx={(26 + i * 6) * s} ry={4 * s} fill="#eaf6fa" opacity={clamp(0.65 - i * 0.045)} style={{filter: 'blur(2px)'}} />)}
+    {[0, 1, 2].map((i) => { const p = ((f * 0.05 + i / 3) % 1); return <ellipse key={'r' + i} cx={x} cy={y + 8} rx={(110 + p * 200) * s} ry={(12 + p * 22) * s} fill="none" stroke="#dff0f6" strokeWidth={3 * s} opacity={0.6 * (1 - p)} />; })}
+    {/* arm entry spray (alternates) and flutter-kick splashes */}
+    {[0, 1].map((i) => { const ph = ((f * 20 + i * 180) % 360) / 360; const on = ph > 0.45 && ph < 0.6; return on ? <g key={'a' + i} opacity={1 - Math.abs(ph - 0.52) * 10}>{Array.from({length: 7}, (_, j) => <circle key={j} cx={x + dir * (150 + j * 6) * s + (j - 3) * 8} cy={y - (10 + (j % 3) * 14) * s} r={3.2 * s} fill="#f4fbff" />)}</g> : null; })}
+    {Array.from({length: 9}, (_, i) => { const t = (f * 0.25 + i * 0.37) % 1; return <circle key={'k' + i} cx={x - dir * (250 + i * 8) * s + (i - 4) * 6} cy={y - t * 40 * s} r={(3 + (i % 3)) * s} fill="#f4fbff" opacity={0.8 * (1 - t)} />; })}
+  </g>
+);
 export const lerpPt = (a: [number, number], b: [number, number], t: number): [number, number] => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
 void H;
