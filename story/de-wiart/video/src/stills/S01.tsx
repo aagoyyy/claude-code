@@ -8,6 +8,7 @@ import {AnimalArt} from '../rig/Animals';
 import {idlePose, runPose, walkPose} from '../rig/Side';
 import {H, mix, mulberry32, W} from '../world/util';
 import {liveFront, Par, Birds, Clouds, civ, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, kid, man, Motes, Rays, SkyRect, Sil, Stars, Title, Tree} from './lib';
+import {Actor, A} from './act';
 import {heroOld} from '../scenes/HeroSide';
 import {heroYoung} from '../scenes/BoerA';
 
@@ -63,7 +64,7 @@ const wfgFore = (
 const S0_1: React.FC = () => (
   <Frame night grade="contrast(1.12) saturate(.75)">
     {warfield()}
-    <Fig id="h1" x={900} y={968} s={0.6} o={heroOld('right', {head: 'cap'})} p={walkPose(1.2, 0.9)} light="night" lit={0.4} />
+    <Actor go="walk" id="h1" x={900} y={968} s={0.6} o={heroOld('right', {head: 'cap'})}  light="night" lit={0.4} />
     <Fog id="wf3" y={880} h={200} c="#8f94a2" o={0.38} />
     {wfgFore}
   </Frame>
@@ -80,7 +81,7 @@ const S0_2: React.FC = () => {
       {Array.from({length: 9}, (_, i) => <g key={i} transform={`translate(${200 + q() * 1500} ${860 + q() * 180}) rotate(${q() * 180})`}><rect width={22} height={7} rx={2} fill="#b08a40" /><rect x={20} width={6} height={7} fill="#6a5020" /></g>)}
       <path d="M100 1010 q80 -30 160 0 t160 0 t160 0" stroke="#1a1c24" strokeWidth={4} fill="none" />
       {Array.from({length: 26}, (_, i) => <circle key={i} cx={620 + q() * 800} cy={760 + q() * 220} r={2 + q() * 5} fill="#7a6650" opacity={0.5 + q() * 0.4} />)}
-      <Fig id="b1" x={900} y={1000} s={2.5} o={heroOld('right', {head: 'cap'})} p={walkPose(1.9, 1.0)} light="night" lit={0.55} />
+      <Actor id="b1" x={900} y={1000} s={2.5} o={heroOld('right', {head: 'cap'})} base={walkPose(1.9, 1.0)} light="night" lit={0.55} />
       <Fog id="bf" y={600} h={260} c="#8a8f9c" o={0.25} />
       <g filter="url(#blL)"><ellipse cx={120} cy={1060} rx={200} ry={60} fill="#050608" /><ellipse cx={1850} cy={1040} rx={160} ry={50} fill="#050608" /></g>
       <Motes n={36} seed={2} y0={300} y1={900} c="#ffcf9a" o={0.4} r={2.4} />
@@ -133,7 +134,7 @@ const S0_5: React.FC = () => (
         {Array.from({length: 14}, (_, i) => <rect key={i} x={900 + ((i * 53) % 320)} y={850 + ((i * 29) % 40)} width={12 + (i % 4) * 8} height={5} fill="#0e1018" transform={`rotate(${i * 23} ${900 + ((i * 53) % 320)} 860)`} />)}
       </>,
     )}
-    <Fig id="h5" x={1020} y={992} s={0.52} o={heroOld('right', {head: 'cap'})} p={walkPose(0.5, 0.8)} light="night" lit={0.4} />
+    <Actor go="walk" id="h5" x={1020} y={992} s={0.52} o={heroOld('right', {head: 'cap'})}  light="night" lit={0.4} />
     <Fog id="wf4" y={880} h={180} c="#8f94a2" o={0.32} />
     {wfgFore}
   </Frame>
@@ -197,8 +198,8 @@ const S1_1: React.FC = () => {
       <rect y={850} width={W} height={H - 850} fill="#241c28" />
       <CobbleP y0={850} base="#6a5858" seed={3} wet />
       {[300, 880, 1480].map((x, i) => lampPost(x, 1000, 300, i))}
-      <Fig id="s11" x={1000} y={1070} s={0.27} o={man('right', '#3a2a30', '#2a1a20', {head: 'flatcap'})} p={walkPose(1.5, 0.8)} lit={0.7} lo />
-      <Fig id="s11b" x={1200} y={1050} s={0.24} o={man('left', '#5a3a50', '#2a2030', {head: 'flatcap'})} p={walkPose(0.4, 0.8)} lit={0.7} lo />
+      <Actor go="walk" id="s11" x={1000} y={1070} s={0.27} o={man('right', '#3a2a30', '#2a1a20', {head: 'flatcap'})}  lit={0.7} lo />
+      <Actor go="walk" id="s11b" x={1200} y={1050} s={0.24} o={man('left', '#5a3a50', '#2a2030', {head: 'flatcap'})}  lit={0.7} lo />
       <g filter="url(#blL)"><polygon points="0,1080 0,900 180,940 260,1080" fill="#0c080e" /><polygon points="1920,1080 1920,880 1740,940 1660,1080" fill="#0c080e" /></g>
       <Motes n={50} seed={1} y0={300} y1={900} o={0.4} />
     </Frame>
@@ -226,11 +227,11 @@ const S1_2: React.FC = () => (
       <path d="M20 -210 Q175 -250 330 -210" fill="#1a1012" /><rect x={0} y={-60} width={350} height={20} fill="#1a1012" />
       <rect x={335} y={-232} width={14} height={34} fill="#ffe0a0" />{wheel(90, 66)}{wheel(280, 66)}
     </g>
-    <Fig id="drv" x={1180} y={760} s={0.3} o={man('left', '#15121a', '#15121a', {head: 'flatcap'})} p={idlePose(0.4)} lo />
+    <Actor id="drv" x={1180} y={760} s={0.3} o={man('left', '#15121a', '#15121a', {head: 'flatcap'})} base={idlePose(0.4)} lo />
     <Fig id="hz" x={900} y={940} s={0.46} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'horse', coat: '#5a3a22', mane: '#1e140c', face: 'left', tack: true}} p={{phase: 0.4}} />} />
     <g filter="url(#blL)" opacity=".4">{[0, 1].map((i) => <ellipse key={i} cx={760 - i * 40} cy={820 - i * 20} rx={40 + i * 20} ry={16} fill="#fff" />)}</g>
-    <Fig id="s12" x={300} y={980} s={0.45} o={man('right', '#4a3a50', '#2a2030', {head: 'flatcap'})} p={walkPose(2.2, 0.9)} />
-    <Fig id="s12b" x={1760} y={1000} s={0.48} o={man('left', '#6a3a3a', '#2a2030', {outfit: 'skirt', head: 'scarf', hairStyle: 'long'})} p={walkPose(0.8, 0.9)} />
+    <Actor go="walk" id="s12" x={300} y={980} s={0.45} o={man('right', '#4a3a50', '#2a2030', {head: 'flatcap'})}  />
+    <Actor go="walk" id="s12b" x={1760} y={1000} s={0.48} o={man('left', '#6a3a3a', '#2a2030', {outfit: 'skirt', head: 'scarf', hairStyle: 'long'})}  />
     <Fog id="b2f" y={640} h={240} c="#ffd8b0" o={0.22} />
     <Birds n={5} seed={9} x0={200} x1={1700} y0={110} y1={260} />
     <g filter="url(#blL)"><circle cx={140} cy={1030} r={110} fill="#0c080e" /><rect x={1800} y={940} width={150} height={160} fill="#0c080e" /></g>
@@ -261,7 +262,7 @@ const S1_3: React.FC = () => {
       <rect x={60} y={740} width={420} height={30} fill="#5a3a24" /><rect x={90} y={770} width={20} height={180} fill="#4a2e1a" /><rect x={430} y={770} width={20} height={180} fill="#4a2e1a" />
       <g><rect x={200} y={690} width={14} height={50} fill="#e8dcb8" /><ellipse cx={207} cy={684} rx={7} ry={10} fill="#ffb050" /><Glow id="cg" x={207} y={684} r={200} c="#ffb050" o={0.45} /></g>
       <rect x={300} y={716} width={90} height={24} fill="#6a3a2a" /><rect x={310} y={700} width={70} height={16} fill="#2a4a6a" />
-      <Fig id="c3k" x={640} y={1640} s={1.9} o={kid('right')} p={idlePose(0.4)} light="indoor" lit={0.8} />
+      <Actor id="c3k" x={640} y={1640} s={1.9} o={kid('right')} base={idlePose(0.4)} light="indoor" lit={0.8} />
       <Glow id="c3g" x={1300} y={500} r={700} c="#ffbf8a" o={0.25} />
       <Rays id="c3r" x={1350} y={300} ang={2.2} spread={0.7} len={1100} o={0.1} />
       <Motes n={50} seed={9} x0={500} x1={1500} y0={200} y1={900} o={0.45} />
@@ -309,7 +310,7 @@ const S1_4: React.FC = () => (
     {palm(120, 930, 380, 1)}{palm(1830, 930, 440, 1)}{palm(1000, 910, 270, 0.9)}
     <rect y={900} width={W} height={H - 900} fill="#d4b280" /><Dirt o={0.6} light={0.4}><rect y={900} width={W} height={H - 900} fill="#d4b280" /></Dirt><rect y={900} width={W} height={H - 900} fill="url(#aoV)" />
     {Array.from({length: 14}, (_, i) => <ellipse key={i} cx={200 + i * 130} cy={960 + (i % 3) * 30} rx={20} ry={5} fill="#8a6a40" opacity=".4" />)}
-    <Fig id="k4a" x={700} y={1030} s={0.42} o={man('right', '#e8dcc0', '#cdbd98', {head: 'turban'})} p={walkPose(1.1, 0.8)} lo />
+    <Actor go="walk" id="k4a" x={700} y={1030} s={0.42} o={man('right', '#e8dcc0', '#cdbd98', {head: 'turban'})}  lo />
     <Fig id="k4b" x={1300} y={1050} s={0.48} o={{pal: khaki, head: 'none', build: 0.9, face: 'left'}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'left'}} p={{phase: 0}} />} />
     <Rays id="k4r" x={1450} y={300} ang={1.9} spread={1.2} len={1000} o={0.12} />
     <g filter="url(#blL)"><polygon points="0,0 0,260 300,0" fill="#6a2a1a" opacity=".85" /></g>
@@ -339,11 +340,11 @@ const S1_5: React.FC = () => (
     <rect y={800} width={W} height={H - 800} fill="#d8b684" /><Dirt o={0.6} light={0.4}><rect y={800} width={W} height={H - 800} fill="#d8b684" /></Dirt><rect y={800} width={W} height={H - 800} fill="url(#aoV)" />
     {Array.from({length: 16}, (_, i) => <ellipse key={i} cx={100 + i * 120} cy={900 + (i % 4) * 40} rx={22} ry={5} fill="#7a5a30" opacity=".35" />)}
     <Fig id="cm" x={1000} y={840} s={0.38} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#a8784a', mane: '#6a4a2a', face: 'right'}} p={{phase: 0}} />} lo />
-    {[620, 760, 1060].map((x, i) => <Fig key={i} id={`kb${i}`} x={x} y={850} s={0.3} o={man(i % 2 ? 'left' : 'right', ['#e8dcc0', '#b86a4a', '#8a6a4a'][i], '#6a5a3a', {head: i === 1 ? 'scarf' : 'turban'})} p={idlePose(i)} lit={0.8} lo />)}
-    <Fig id="k5a" x={380} y={890} s={0.46} o={man('right', '#e8dcc0', '#cdbd98', {head: 'turban', beard: true})} p={idlePose(0.2)} />
-    <Fig id="k5b" x={1400} y={890} s={0.46} o={man('left', '#8a6a4a', '#5a4a3a', {head: 'turban'})} p={idlePose(1.2)} />
-    <Fig id="k5c" x={1750} y={910} s={0.5} o={man('left', '#b84a3a', '#6a3a2c', {head: 'scarf', outfit: 'skirt', hairStyle: 'long'})} p={idlePose(2.2)} />
-    <Fig id="k5k" x={900} y={1000} s={0.64} o={kid('right', '#c85a3a')} p={runPose(2.3)} />
+    {[620, 760, 1060].map((x, i) => <Actor key={i} id={`kb${i}`} x={x} y={850} s={0.3} o={man(i % 2 ? 'left' : 'right', ['#e8dcc0', '#b86a4a', '#8a6a4a'][i], '#6a5a3a', {head: i === 1 ? 'scarf' : 'turban'})} base={idlePose(i)} lit={0.8} lo />)}
+    <Actor id="k5a" x={380} y={890} s={0.46} o={man('right', '#e8dcc0', '#cdbd98', {head: 'turban', beard: true})} base={idlePose(0.2)} />
+    <Actor id="k5b" x={1400} y={890} s={0.46} o={man('left', '#8a6a4a', '#5a4a3a', {head: 'turban'})} base={idlePose(1.2)} />
+    <Actor id="k5c" x={1750} y={910} s={0.5} o={man('left', '#b84a3a', '#6a3a2c', {head: 'scarf', outfit: 'skirt', hairStyle: 'long'})} base={idlePose(2.2)} />
+    <Actor go="run" id="k5k" x={900} y={1000} s={0.64} o={kid('right', '#c85a3a')}  />
     <g opacity=".45">{[0, 1, 2, 3].map((i) => <line key={i} x1={640 - i * 50} y1={950 + i * 12} x2={520 - i * 70} y2={950 + i * 12} stroke="#fff0d0" strokeWidth={5} strokeLinecap="round" />)}</g>
     <Rays id="k5r" x={1100} y={0} ang={1.75} spread={0.9} len={1100} o={0.14} />
     <g filter="url(#blL)"><ellipse cx={90} cy={1040} rx={170} ry={90} fill="#3a2410" /><ellipse cx={1850} cy={1050} rx={150} ry={70} fill="#3a2410" /></g>
@@ -362,7 +363,7 @@ const S1_6: React.FC = () => (
     {Array.from({length: 9}, (_, i) => <path key={i} d={`M0 ${900 + i * 22} Q480 ${890 + i * 22 - 10} 960 ${900 + i * 22} T1920 ${900 + i * 22}`} stroke="#8a6a40" strokeOpacity=".28" strokeWidth={3} fill="none" />)}
     <rect y={880} width={W} height={H - 880} fill="url(#aoV)" />
     <Birds n={4} seed={11} x0={600} x1={1700} y0={200} y1={420} c="#3a2a1c" s={1.2} />
-    <Fig id="k6k" x={560} y={1520} s={1.8} o={kid('right', '#c85a3a')} p={idlePose(0.9)} />
+    <Actor id="k6k" x={560} y={1520} s={1.8} o={kid('right', '#c85a3a')} base={idlePose(0.9)} />
     <Rays id="k6r" x={1500} y={420} ang={2.4} spread={1.4} len={1200} o={0.1} />
     <Motes n={60} seed={5} y0={300} y1={900} c="#fff0d0" o={0.5} />
   </Frame>
@@ -388,10 +389,10 @@ const S1_7: React.FC = () => (
     <polygon points="900,840 1020,840 1220,1080 700,1080" fill="#b8a888" /><polygon points="900,840 1020,840 1220,1080 700,1080" fill="url(#aoV)" />
     <Tree x={220} y={880} h={360} seed={3} /><Tree x={1700} y={890} h={400} seed={8} />
     {[0, 1, 2].map((i) => <rect key={i} x={560 + i * 380} y={862} width={140} height={34} rx={14} fill="#3a5a30" />)}
-    <Fig id="s7a" x={560} y={1010} s={0.38} o={kid('right', '#2a3a5a')} p={walkPose(0.7, 0.8)} lo />
-    <Fig id="s7b" x={690} y={1020} s={0.38} o={kid('right', '#2a3a5a')} p={walkPose(1.9, 0.8)} lo />
-    <Fig id="s7c" x={1260} y={1020} s={0.4} o={kid('left', '#2a3a5a')} p={walkPose(2.9, 0.8)} lo />
-    <Fig id="s7t" x={1100} y={1000} s={0.46} o={man('left', '#15121a', '#15121a', {pal: civ('#15121a', '#15121a', '#c9c9c4'), beard: true})} p={walkPose(1.3, 0.8)} lo />
+    <Actor go="walk" id="s7a" x={560} y={1010} s={0.38} o={kid('right', '#2a3a5a')}  lo />
+    <Actor go="walk" id="s7b" x={690} y={1020} s={0.38} o={kid('right', '#2a3a5a')}  lo />
+    <Actor go="walk" id="s7c" x={1260} y={1020} s={0.4} o={kid('left', '#2a3a5a')}  lo />
+    <Actor go="walk" id="s7t" x={1100} y={1000} s={0.46} o={man('left', '#15121a', '#15121a', {pal: civ('#15121a', '#15121a', '#c9c9c4'), beard: true})}  lo />
     <Birds n={6} seed={4} x0={300} x1={1600} y0={120} y1={300} c="#3a3a48" />
     <Fog id="s7f" y={790} h={150} c="#e8ecf0" o={0.3} />
     <Rays id="s7r" x={100} y={0} ang={0.9} spread={0.5} len={1300} o={0.1} />
@@ -414,8 +415,8 @@ const S1_8: React.FC = () => {
       <path d="M0 720 L1920 700" stroke="#f4efe0" strokeWidth={6} opacity=".85" /><path d="M600 640 L420 1080" stroke="#f4efe0" strokeWidth={6} opacity=".7" />
       {Array.from({length: 18}, (_, i) => <ellipse key={i} cx={q() * W} cy={760 + q() * 280} rx={26 + q() * 40} ry={6 + q() * 8} fill="#4a3a28" opacity={0.5} />)}
       <g stroke="#f4efe0" strokeWidth={10}><line x1={1530} y1={650} x2={1530} y2={420} /><line x1={1630} y1={650} x2={1630} y2={420} /><line x1={1530} y1={560} x2={1630} y2={560} strokeWidth={8} /></g>
-      {[330, 520, 720].map((x, i) => <Fig key={i} id={`r8o${i}`} x={x} y={890 + i * 4} s={0.44} o={man('right', '#fff', '#fff', {pal: civ(['#1a3a8a', '#8a1a2a', '#1a3a8a'][i], '#e8e0d0', '#5a3a22'), build: 1.05})} p={runPose(0.5 + i * 1.9)} />)}
-      <Fig id="r8h" x={1000} y={960} s={0.58} o={young('right')} p={runPose(2.7)} />
+      {[330, 520, 720].map((x, i) => <Actor go="run" key={i} id={`r8o${i}`} x={x} y={890 + i * 4} s={0.44} o={man('right', '#fff', '#fff', {pal: civ(['#1a3a8a', '#8a1a2a', '#1a3a8a'][i], '#e8e0d0', '#5a3a22'), build: 1.05})}  />)}
+      <Actor go="run" id="r8h" x={1000} y={960} s={0.58} o={young('right')}  />
       <g transform="translate(1150 710) rotate(-20)"><ellipse rx={34} ry={21} fill="#8a4a2a" /><ellipse rx={34} ry={21} fill="none" stroke="#2a1a10" strokeWidth={3} /><line x1={-15} y1={0} x2={15} y2={0} stroke="#e8dcc0" strokeWidth={3} /></g>
       <g opacity=".4">{[0, 1, 2, 3].map((i) => <line key={i} x1={720 - i * 60} y1={830 + i * 26} x2={540 - i * 90} y2={830 + i * 26} stroke="#fff" strokeWidth={5} strokeLinecap="round" />)}</g>
       <g>{Array.from({length: 14}, (_, i) => <circle key={i} cx={760 + q() * 260} cy={930 + q() * 90} r={2 + q() * 5} fill="#6a4a2a" />)}</g>
@@ -433,7 +434,7 @@ const S1_9: React.FC = () => {
       <rect y={620} width={W} height={H - 620} fill="#4e7a3e" /><rect y={620} width={W} height={H - 620} fill="url(#lawn9)" />
       <defs><Grad id="lawn9" stops={[[0, '#fff', 0.1], [1, '#000', 0.6]]} /></defs>
       <Dirt o={0.5} light={0.3}><rect y={620} width={W} height={H - 620} fill="#4e7a3e" /></Dirt>
-      <Fig id="r9" x={560} y={1500} s={1.6} o={young('right')} p={{...walkPose(0.2, 1), thN: 38, shN: 12, ftN: -10, thF: -14, shF: 16}} />
+      <Actor id="r9" x={560} y={1500} s={1.6} o={young('right')} base={{...walkPose(0.2, 1), thN: 38, shN: 12, ftN: -10, thF: -14, shF: 16}} />
       <g transform="translate(1180 570) rotate(-30)"><ellipse rx={150} ry={92} fill="#8a4a2a" /><ellipse rx={150} ry={92} fill="url(#ballsh)" /><ellipse rx={150} ry={92} fill="none" stroke="#2a1a10" strokeWidth={8} /><line x1={-66} y1={0} x2={66} y2={0} stroke="#e8dcc0" strokeWidth={9} />{[-40, -14, 14, 40].map((x) => <line key={x} x1={x} y1={-16} x2={x} y2={16} stroke="#e8dcc0" strokeWidth={6} />)}<path d="M-120 -30 Q0 -60 120 -30" stroke="#fff" strokeOpacity=".25" strokeWidth={6} fill="none" /></g>
       <defs><radialGradient id="ballsh" cx=".3" cy=".3" r=".8"><stop offset="0" stopColor="#fff" stopOpacity=".28" /><stop offset="1" stopColor="#000" stopOpacity=".5" /></radialGradient></defs>
       {[0, 1, 2, 3, 4, 5].map((i) => <line key={i} x1={1020 - i * 40} y1={610 + i * 36} x2={740 - i * 90} y2={660 + i * 42} stroke="#fff" strokeWidth={6} opacity=".3" strokeLinecap="round" />)}
@@ -461,17 +462,17 @@ const S1_10: React.FC = () => {
       <g><rect x={700} y={330} width={420} height={250} fill="#1c2a24" stroke="#5a3a24" strokeWidth={14} /><g stroke="#e8e8e0" strokeWidth={3} fill="none" opacity=".85"><circle cx={800} cy={450} r={48} /><circle cx={800} cy={450} r={16} /><path d="M860 400 L1020 400 M860 440 L1000 440 M860 480 L1040 480 M860 520 L980 520" /><path d="M740 380 L780 520" /></g></g>
       <rect y={580} width={W} height={H - 580} fill="#5a3a24" /><rect y={580} width={W} height={H - 580} fill="url(#woodP)" opacity=".6" />{Array.from({length: 8}, (_, i) => <line key={i} x1={0} y1={600 + i * 60} x2={W} y2={600 + i * 60} stroke="#000" strokeOpacity=".2" strokeWidth={2} />)}<rect y={580} width={W} height={H - 580} fill="url(#aoV)" />
       <Dirt o={0.5} light={0.2}><rect width={W} height={H} fill="#000" /></Dirt>
-      <Fig id="l10" x={430} y={880} s={0.52} o={man('right', '#15121a', '#15121a', {pal: civ('#15121a', '#15121a', '#c9c9c4'), beard: true, head: 'none'})} p={idlePose(0.3)} />
+      <Actor id="l10" x={430} y={880} s={0.52} o={man('right', '#15121a', '#15121a', {pal: civ('#15121a', '#15121a', '#c9c9c4'), beard: true, head: 'none'})} base={idlePose(0.3)} />
       <rect x={540} y={690} width={120} height={190} fill="#3a2414" /><rect x={520} y={680} width={160} height={22} fill="#4a2e1a" /><rect x={560} y={660} width={70} height={22} fill="#e8dcb8" />
       {[0, 1, 2].map((r) => [0, 1, 2, 3].map((c) => {
         const x = 900 + c * 250 - r * 60, y = 800 + r * 110, top = ['#3a3a4a', '#2a3a3a', '#4a3a3a'][(r + c) % 3];
         return <g key={`${r}${c}`}>
-          <Fig id={`st${r}${c}`} x={x} y={y - 18} s={0.35 + r * 0.04} o={man('left', top, '#2a2a30', {pal: civ(top, '#2a2a30', ['#4a3020', '#2a1a10', '#8a6a3a', '#1a1a1a'][(r * 2 + c) % 4])})} p={idlePose(r + c)} lo />
+          <Actor id={`st${r}${c}`} x={x} y={y - 18} s={0.35 + r * 0.04} o={man('left', top, '#2a2a30', {pal: civ(top, '#2a2a30', ['#4a3020', '#2a1a10', '#8a6a3a', '#1a1a1a'][(r * 2 + c) % 4])})} base={idlePose(r + c)} lo />
           <rect x={x - 100} y={y - 50} width={200} height={26} fill="#6a4228" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="#4a2e1a" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="url(#woodP)" opacity=".4" />
           <rect x={x - 60} y={y - 58} width={46} height={10} fill="#e8dcb8" /><circle cx={x + 40} cy={y - 56} r={6} fill="#1a1410" />
         </g>;
       }))}
-      <Fig id="a10" x={1750} y={820} s={0.48} o={young('left')} p={{...idlePose(0.5), uaN: -64, faN: -128, head: 8, torso: 5}} />
+      <Actor id="a10" x={1750} y={820} s={0.48} o={young('left')} base={{...idlePose(0.5), uaN: -64, faN: -128, head: 8, torso: 5}} />
       <rect x={1640} y={640} width={210} height={26} fill="#6a4228" /><rect x={1640} y={666} width={210} height={170} fill="#4a2e1a" />
       <Motes n={90} seed={3} y0={80} y1={700} c="#fff6d8" o={0.55} r={3} />
     </Frame>
@@ -496,7 +497,7 @@ const S1_11: React.FC = () => (
     <g transform="translate(1040 900) rotate(-3)"><polygon points="0,0 260,-10 270,70 6,86" fill="#e8dcb8" /><path d="M20 20 H240 M24 42 H244 M28 64 H250" stroke="#6a5a40" strokeWidth={3} opacity=".6" /></g>
     <g transform="translate(1400 884)"><rect x={0} y={0} width={60} height={50} rx={6} fill="#1a1a2a" /><rect x={20} y={-16} width={20} height={18} fill="#1a1a2a" /><path d="M30 -10 q60 -120 130 -150" stroke="#e8dcb8" strokeWidth={5} fill="none" /></g>
     <g transform="translate(1180 930)"><polygon points="0,0 240,-8 250,60 8,70" fill="#6a3a2a" /><polygon points="10,-8 120,-14 124,52 14,60" fill="#e8dcb8" /><polygon points="128,-14 236,-20 244,46 132,52" fill="#d8ccA8" /></g>
-    <Fig id="a11" x={600} y={2460} s={1.7} o={young('right')} p={{...idlePose(0.7), head: 12, torso: 6, uaN: -50, faN: -110}} light="indoor" lit={0.9} />
+    <Actor id="a11" x={600} y={2460} s={1.7} o={young('right')} base={{...idlePose(0.7), head: 12, torso: 6, uaN: -50, faN: -110}} light="indoor" lit={0.9} />
     <Glow id="a11g" x={1370} y={420} r={700} c="#fff2d0" o={0.25} />
     <Motes n={70} seed={5} x0={400} x1={1700} y0={100} y1={900} o={0.55} r={3} />
   </Frame>

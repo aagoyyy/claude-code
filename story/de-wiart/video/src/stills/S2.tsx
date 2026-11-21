@@ -7,6 +7,7 @@ import {H, mix, mulberry32, W} from '../world/util';
 import {Embers, Dust, Smoke, Ripples, Flash, Splash} from './fx';
 import {clock} from '../rig/clock';
 import {liveFront, HandCU, arms, BackFig, Birds, Cast, civ, Clouds, CobbleP, Dirt, Facade, Fig, Fog, Frame, Glow, Grad, khaki, Mat, Motes, Par, Rays, SkyRect, Sil, sc, Title, Tree, face} from './lib';
+import {Actor, A} from './act';
 import {gent, worker, lady, boy, young, P, scholar} from './S1';
 import {tommy, boer, horseOfficer} from '../scenes/BoerA';
 import {officer} from '../scenes/SomaliA';
@@ -139,12 +140,12 @@ const S2_1: React.FC = () => (
     </Par>
     <Par d={1}>
       {/* queue: a short bowler-hat man, a lad, then tall Adrian, boater in hand */}
-      <Fig id="q1" x={300} y={990} s={0.5} o={recruit('right', '#5a4a3a', 'bowler')} p={P(idlePose(0.3), arms.crossed, face.bored)} />
-      <Fig id="q2" x={560} y={1000} s={0.51} o={recruit('right', '#4a5a6a')} p={P(idlePose(1.3), arms.explain, face.talk(2), face.smile)} />
-      <Fig id="q3" x={800} y={1010} s={0.52} o={{...adrianY('right', {head: 'none'}), stretch: 1.06}} p={P(idlePose(2.1), {uaN: -34, faN: -90, handN: 'relaxed'}, {smile: 0.7, wide: 0.3, brow: 0.4, head: -3})} />
+      <Actor id="q1" x={300} y={990} s={0.5} o={recruit('right', '#5a4a3a', 'bowler')} base={P(idlePose(0.3), arms.crossed, face.bored)} />
+      <Actor id="q2" x={560} y={1000} s={0.51} o={recruit('right', '#4a5a6a')} base={P(idlePose(1.3), arms.explain, face.talk(2), face.smile)} />
+      <Actor id="q3" x={800} y={1010} s={0.52} o={{...adrianY('right', {head: 'none'}), stretch: 1.06}} base={P(idlePose(2.1), {uaN: -34, faN: -90, handN: 'relaxed'}, {smile: 0.7, wide: 0.3, brow: 0.4, head: -3})} />
       {desk(1130, 800, 600, 220)}
-      <Fig id="cl" x={1400} y={820} s={0.52} o={gent('left', '#3a3a44', 'bowler')} p={P(sitPose(0.5), arms.write, {squint: 0.6, brow: -0.5, head: 14})} />
-      <Fig id="sg" x={1760} y={1020} s={0.55} o={sergeant('left')} p={P(idlePose(1.8), arms.hips, face.bored, {head: -2})} />
+      <Actor id="cl" x={1400} y={820} s={0.52} o={gent('left', '#3a3a44', 'bowler')} base={P(sitPose(0.5), arms.write, {squint: 0.6, brow: -0.5, head: 14})} />
+      <Actor id="sg" x={1760} y={1020} s={0.55} o={sergeant('left')} base={P(idlePose(1.8), arms.hips, face.bored, {head: -2})} />
       <g transform="translate(1180 770)"><rect width={150} height={26} fill="#e8dcb8" stroke="#2a1a10" strokeWidth={3} /><polygon points="10,0 150,-8 150,18 10,26" fill="#d8ccA8" /><path d="M20 10 H130" stroke="#6a4a2a" strokeWidth={2} /></g>
       <g transform="translate(1560 774)"><rect width={34} height={22} fill="#1a1410" /><rect x={14} y={-40} width={6} height={44} fill="#e8dcb8" transform="rotate(14 17 -18)" /></g>
     </Par>
@@ -157,8 +158,8 @@ const S2_2: React.FC = () => (
   <Frame grade="contrast(1.1) saturate(.95)">
     <Par d={0.1}><defs><radialGradient id="o22" cx=".5" cy=".42" r=".8"><stop offset="0" stopColor="#8a6a46" /><stop offset=".6" stopColor="#3a2a1c" /><stop offset="1" stopColor="#120c08" /></radialGradient></defs><rect width={W} height={H} fill="url(#o22)" /><Rays id="o22r" x={200} y={0} ang={1.2} spread={0.6} len={1300} o={0.14} /></Par>
     <Par d={1.1}>
-      <Fig id="a22" x={560} y={2500} s={1.75} o={adrianY('right', {head: 'boater', hat: '#e8dcb8'})} p={P(idlePose(0.5), {smile: 0.9, wide: 0.35, brow: 0.6, head: 2, blink: 1})} light="indoor" lit={0.9} />
-      <Fig id="c22" x={1380} y={2480} s={1.7} o={gent('left', '#3a3a44', 'bowler')} p={P(idlePose(1.5), {squint: 0.65, brow: 0.9, head: -4, mouth: 0})} light="indoor" lit={0.8} />
+      <Actor id="a22" x={560} y={2500} s={1.75} o={adrianY('right', {head: 'boater', hat: '#e8dcb8'})} base={P(idlePose(0.5), {smile: 0.9, wide: 0.35, brow: 0.6, head: 2, blink: 1})} light="indoor" lit={0.9} />
+      <Actor id="c22" x={1380} y={2480} s={1.7} o={gent('left', '#3a3a44', 'bowler')} base={P(idlePose(1.5), {squint: 0.65, brow: 0.9, head: -4, mouth: 0})} light="indoor" lit={0.8} />
       <g fill="#bfe0ff" opacity=".85"><path d="M760 350 q-10 26 0 40 q12 -14 0 -40 Z" /><path d="M740 420 q-8 20 0 32 q10 -10 0 -32 Z" /></g>
     </Par>
     <Par d={1.2}>
@@ -213,9 +214,9 @@ const S2_4: React.FC = () => (
       {[100, 420, 740, 1060, 1380, 1700].map((x, i) => <Cast key={i} x={x} y={796} w={260} h={190} o={0.26} />)}
     </Par>
     <Par d={1}>
-      {[0, 1, 2].map((i) => <Fig key={i} id={`r${i}`} x={300 + i * 250} y={1000 + i * 8} s={0.55} o={trooper('right', i === 1 ? '#c89870' : '#e0a880')} p={P(walkPose(i * 0.4 + 0.2, 1), face.smile)} />)}
-      <Fig id="adr" x={1060} y={1030} s={0.57} o={{...adrianY('right', {head: 'slouch', hat: '#8a7448', gear: 'rifle'}), outfit: 'trousers'}} p={P(walkPose(3.4, 1), {uaN: 24, uaF: -26, head: 12, torso: 5, wide: 0.5, mouth: 0.25, brow: 0.5})} />
-      <Fig id="ser" x={1560} y={1010} s={0.58} o={sergeant('left')} p={P(idlePose(0.9), arms.point, face.angry, face.talk(4), {torso: -4})} />
+      {[0, 1, 2].map((i) => <Actor go="walk" key={i} id={`r${i}`} x={300 + i * 250} y={1000 + i * 8} s={0.55} o={trooper('right', i === 1 ? '#c89870' : '#e0a880')} base={P({}, face.smile)} />)}
+      <Actor go="walk" id="adr" x={1060} y={1030} s={0.57} o={{...adrianY('right', {head: 'slouch', hat: '#8a7448', gear: 'rifle'}), outfit: 'trousers'}} base={P({}, {uaN: 24, uaF: -26, head: 12, torso: 5, wide: 0.5, mouth: 0.25, brow: 0.5})} />
+      <Actor id="ser" x={1560} y={1010} s={0.58} o={sergeant('left')} base={P(idlePose(0.9), arms.point, face.angry, face.talk(4), {torso: -4})} />
       <g fill="#e6c88a" opacity=".5" filter="url(#blS)">{[0, 1, 2, 3].map((i) => <ellipse key={i} cx={260 + i * 60} cy={1040} rx={50} ry={14} />)}</g>
     </Par>
     <Par d={1}><Rays id="b24r" x={300} y={640} ang={0.35} spread={1.1} len={1500} o={0.1} /><Motes n={60} seed={5} y0={500} y1={1000} c="#ffe0a0" o={0.5} /></Par>
@@ -236,7 +237,7 @@ const S2_6: React.FC = () => (
     <Par d={0.5}><Ocean y={600} seed={4} /></Par>
     <Par d={1}>
       <Ship x={1020} y={760} s={1.05} />
-      {Array.from({length: 18}, (_, i) => <Fig key={i} id={`d${i}`} x={640 + i * 40} y={656 - (i % 2) * 6} s={0.1} o={trooper('right')} p={idlePose(i)} lo />)}
+      {Array.from({length: 18}, (_, i) => <Actor key={i} id={`d${i}`} x={640 + i * 40} y={656 - (i % 2) * 6} s={0.1} o={trooper('right')} base={idlePose(i)} lo />)}
       <path d="M0 800 Q480 780 960 800 T1920 800" stroke="#fff" strokeWidth={5} fill="none" opacity=".4" />
     </Par>
     <Par d={1.3}><Ocean y={900} c1="#1a4a6a" c2="#06182a" seed={8} /></Par>
@@ -256,7 +257,7 @@ const S2_11: React.FC = () => (
     <Par d={0.03}>{savannaBG('b211')}</Par>
     <Par d={0.3} blur={8}><Sil seed={31} base={720} amp={50} fill="#7a5a6a" o={0.7} /><rect y={720} width={W} height={H - 720} fill="#a8783a" /></Par>
     <Par d={1.1}>
-      <Fig id="b211" x={1250} y={2240} s={1.55} o={{...boer('left'), head: 'slouch'}} p={P(aimPose(0.2), {squint: 0.85, brow: -0.5, mouth: 0.12})} lit={0.9} />
+      <Actor id="b211" x={1250} y={2240} s={1.55} o={{...boer('left'), head: 'slouch'}} base={P(aimPose(0.2), {squint: 0.85, brow: -0.5, mouth: 0.12})} lit={0.9} />
       <g><ellipse cx={380} cy={400} rx={140} ry={50} fill="#fff4c0" opacity=".9" /><ellipse cx={380} cy={400} rx={70} ry={26} fill="#fff" /><Glow id="mz" x={380} y={400} r={260} c="#ffb040" o={0.6} /></g>
     </Par>
     <Par d={1}><Motes n={50} seed={8} c="#ffe0a0" o={0.5} /></Par>
@@ -283,7 +284,7 @@ const S2_16: React.FC = () => (
     <Par d={0.5}><Ocean y={620} c1="#4a8aa8" c2="#1a4a6a" seed={5} /></Par>
     <Par d={1}>
       <Ship x={1060} y={780} s={1.0} hospital smoke={false} />
-      {[-300, -200, -110, 10, 130, 230].map((x, i) => <Fig key={i} id={`h${i}`} x={1060 + x} y={716} s={0.14} o={i % 2 ? nurse('right') : patient('left')} p={idlePose(i)} lo />)}
+      {[-300, -200, -110, 10, 130, 230].map((x, i) => <Actor key={i} id={`h${i}`} x={1060 + x} y={716} s={0.14} o={i % 2 ? nurse('right') : patient('left')} base={idlePose(i)} lo />)}
     </Par>
     <Par d={1}><Birds n={7} seed={5} x0={400} x1={1700} y0={120} y1={380} c="#3a3a48" /></Par>
   </Frame>
@@ -294,8 +295,8 @@ const S2_17: React.FC = () => (
   <Frame grade="contrast(1.08) saturate(.9) hue-rotate(6deg)">
     <Par d={0.1}><defs><radialGradient id="h217" cx=".5" cy=".4" r=".8"><stop offset="0" stopColor="#c8c4b0" /><stop offset=".6" stopColor="#6a6a5a" /><stop offset="1" stopColor="#1a1a14" /></radialGradient></defs><rect width={W} height={H} fill="url(#h217)" /><Rays id="h217r" x={1500} y={0} ang={2.0} spread={0.6} len={1300} o={0.14} /></Par>
     <Par d={1.1}>
-      <Fig id="dc" x={520} y={2470} s={1.72} o={doctor('right')} p={P(idlePose(0.4), {squint: 0.45, brow: -0.35, head: 8, mouth: 0.05}, arms.press)} light="indoor" lit={0.8} />
-      <Fig id="pt" x={1400} y={2480} s={1.72} o={patient('left')} p={P(idlePose(1.0), face.angry, {grimace: 1, mouth: 0.3, head: 3})} light="indoor" lit={0.85} />
+      <Actor id="dc" x={520} y={2470} s={1.72} o={doctor('right')} base={P(idlePose(0.4), {squint: 0.45, brow: -0.35, head: 8, mouth: 0.05}, arms.press)} light="indoor" lit={0.8} />
+      <Actor id="pt" x={1400} y={2480} s={1.72} o={patient('left')} base={P(idlePose(1.0), face.angry, {grimace: 1, mouth: 0.3, head: 3})} light="indoor" lit={0.85} />
     </Par>
     <Par d={1.2}><polygon points="0,950 1920,900 1920,1080 0,1080" fill="#d8d4c4" /><polygon points="0,950 1920,900 1920,912 0,962" fill="#9a9686" /></Par>
   </Frame>
@@ -312,8 +313,8 @@ const S2_18: React.FC = () => (
     <Par d={1}>
       <rect y={880} width={W} height={200} fill="#8a6a44" /><rect y={880} width={W} height={200} fill="url(#woodP)" opacity=".6" /><Mat kind="wood" o={0.5} light={0.25}><rect y={880} width={W} height={200} fill="#8a6a44" /></Mat><rect y={880} width={W} height={10} fill="#3a2a1c" />
       <rect x={220} y={940} width={1100} height={26} fill="#6a5a3a" />
-      <Fig id="lay" x={760} y={942} s={0.62} o={patient('right')} p={P(idlePose(0.4), {fall: -0.99, head: 18}, face.wonder)} />
-      <Fig id="nur" x={1250} y={1010} s={0.58} o={nurse('left')} p={P(idlePose(1.1), arms.offer, face.smile, {head: -3})} />
+      <Actor id="lay" x={760} y={942} s={0.62} o={patient('right')} base={P(idlePose(0.4), {fall: -0.99, head: 18}, face.wonder)} />
+      <Actor id="nur" x={1250} y={1010} s={0.58} o={nurse('left')} base={P(idlePose(1.1), arms.offer, face.smile, {head: -3})} />
       <rect x={300} y={840} width={800} height={46} fill="#e8e4d8" stroke="#8a8676" strokeWidth={3} opacity={0} />
     </Par>
     <Par d={1}><Rays id="s218r" x={300} y={160} ang={0.9} spread={1.2} len={1500} o={0.08} /></Par>
@@ -325,8 +326,8 @@ const S2_19: React.FC = () => (
   <Frame grade="contrast(1.08) saturate(1.0) hue-rotate(4deg)">
     <Par d={0.1}><defs><radialGradient id="t219" cx=".5" cy=".4" r=".85"><stop offset="0" stopColor="#d8b888" /><stop offset=".6" stopColor="#6a5238" /><stop offset="1" stopColor="#1a120c" /></radialGradient></defs><rect width={W} height={H} fill="url(#t219)" /><Rays id="t219r" x={200} y={0} ang={1.15} spread={0.6} len={1300} o={0.14} /></Par>
     <Par d={1.1}>
-      <Fig id="of" x={520} y={2480} s={1.72} o={khakiOfficer('right')} p={P(idlePose(0.3), face.smile, {head: 2, brow: 0.2})} light="warm" lit={0.9} />
-      <Fig id="ad" x={1400} y={2490} s={1.72} o={{...patient('left'), head: 'slouch', hat: '#8a7448', bandages: true}} p={P(idlePose(1.0), {uaN: -146, faN: -134, handN: 'open', head: 2, torso: -2}, face.smile)} light="warm" lit={0.9} />
+      <Actor id="of" x={520} y={2480} s={1.72} o={khakiOfficer('right')} base={P(idlePose(0.3), face.smile, {head: 2, brow: 0.2})} light="warm" lit={0.9} />
+      <Actor id="ad" x={1400} y={2490} s={1.72} o={{...patient('left'), head: 'slouch', hat: '#8a7448', bandages: true}} base={P(idlePose(1.0), {uaN: -146, faN: -134, handN: 'open', head: 2, torso: -2}, face.smile)} light="warm" lit={0.9} />
     </Par>
     <Par d={1}><Motes n={60} seed={4} c="#ffe0a0" o={0.5} r={3} /></Par>
   </Frame>
@@ -345,9 +346,9 @@ const S2_20: React.FC = () => (
     </Par>
     <Par d={0.9}><rect y={820} width={W} height={H - 820} fill="#c89a5a" /><Mat kind="sand" o={0.55} light={0.4}><rect y={820} width={W} height={H - 820} fill="#c89a5a" /></Mat><rect y={820} width={W} height={H - 820} fill="url(#aoV)" /><Cast x={260} y={826} w={1400} h={300} o={0.24} /></Par>
     <Par d={1}>
-      <Fig id="of2" x={560} y={980} s={0.56} o={khakiOfficer('right')} p={P(idlePose(0.6), arms.point, face.talk(2))} />
-      <Fig id="ad2" x={1220} y={1000} s={0.57} o={{...adrianY('left', {head: 'slouch', hat: '#8a7448', gear: 'none'}), outfit: 'trousers'}} p={P(idlePose(1.4), {uaN: -146, faN: -134, handN: 'open'}, face.smile, {head: -2})} />
-      <Fig id="tr" x={1700} y={1050} s={0.52} o={trooper('left')} p={P(walkPose(1.2, 0.8), face.smile)} />
+      <Actor id="of2" x={560} y={980} s={0.56} o={khakiOfficer('right')} base={P(idlePose(0.6), arms.point, face.talk(2))} />
+      <Actor id="ad2" x={1220} y={1000} s={0.57} o={{...adrianY('left', {head: 'slouch', hat: '#8a7448', gear: 'none'}), outfit: 'trousers'}} base={P(idlePose(1.4), {uaN: -146, faN: -134, handN: 'open'}, face.smile, {head: -2})} />
+      <Actor go="walk" id="tr" x={1700} y={1050} s={0.52} o={trooper('left')} base={P({}, face.smile)} />
     </Par>
     <Par d={1}><Rays id="t220r" x={300} y={640} ang={0.35} spread={1.0} len={1500} o={0.1} /><Motes n={60} seed={5} y0={500} y1={1000} c="#ffe0a0" o={0.5} /></Par>
   </Frame>
@@ -373,9 +374,9 @@ const S3_1: React.FC = () => {
       <Par d={0.9}><rect y={860} width={W} height={H - 860} fill="#a8a090" /><CobbleP y0={860} base="#9a9484" seed={3} /><Cast x={440} y={866} w={1040} h={420} o={0.26} />{[-1, 0, 1].map((i) => <polygon key={i} points={`${760 + i * 100},880 ${1160 + i * 100},880 ${1300 + i * 120},1080 ${620 + i * 80},1080`} fill="#8a1a2a" opacity={i === 0 ? 0.9 : 0} />)}</Par>
       <Par d={1}>
         {/* bride and groom on the steps, guests flinging petals */}
-        <Fig id="br" x={1020} y={1040} s={0.55} o={{...lady('left', '#f4efe6'), head: 'scarf', hat: '#ffffff'}} p={P(idlePose(0.4), arms.offer, face.smile)} />
-        <Fig id="gr" x={800} y={1040} s={0.56} o={{...gent('right', '#2a2a34'), mustache: true}} p={P(idlePose(1.4), arms.offer, face.smile, {head: 3})} />
-        {[360, 520, 1320, 1500, 1700].map((x, i) => <Fig key={i} id={`gs${i}`} x={x} y={1000 + (i % 2) * 20} s={0.5} o={i % 2 ? lady(i < 3 ? 'right' : 'left', ['#2a6a8a', '#8a4a6a', '#6a8a4a'][i % 3]) : gent(i < 3 ? 'right' : 'left', '#3a3a44', i === 2 ? 'bowler' : 'top')} p={P(idlePose(i * 1.3), arms.wave, face.laugh)} />)}
+        <Actor id="br" x={1020} y={1040} s={0.55} o={{...lady('left', '#f4efe6'), head: 'scarf', hat: '#ffffff'}} base={P(idlePose(0.4), arms.offer, face.smile)} />
+        <Actor id="gr" x={800} y={1040} s={0.56} o={{...gent('right', '#2a2a34'), mustache: true}} base={P(idlePose(1.4), arms.offer, face.smile, {head: 3})} />
+        {[360, 520, 1320, 1500, 1700].map((x, i) => <Actor key={i} id={`gs${i}`} x={x} y={1000 + (i % 2) * 20} s={0.5} o={i % 2 ? lady(i < 3 ? 'right' : 'left', ['#2a6a8a', '#8a4a6a', '#6a8a4a'][i % 3]) : gent(i < 3 ? 'right' : 'left', '#3a3a44', i === 2 ? 'bowler' : 'top')} base={P(idlePose(i * 1.3), arms.wave, face.laugh)} />)}
         {Array.from({length: 70}, (_, i) => <ellipse key={i} cx={420 + q() * 1100} cy={500 + q() * 560} rx={7} ry={4} fill={['#ffffff', '#ffd0d8', '#ffe8a0'][i % 3]} transform={`rotate(${q() * 180} ${420 + q() * 1100} ${500 + q() * 560})`} opacity={0.9} />)}
       </Par>
       <Par d={1}><Rays id="w31r" x={300} y={300} ang={0.65} spread={0.8} len={1500} o={0.09} /></Par>
@@ -407,9 +408,9 @@ const S3_3: React.FC = () => {
       <Par d={0.45}><rect x={0} y={0} width={W} height={760} fill="#e8dcc0" opacity=".55" /><Mat kind="stone" o={0.4} light={0.25}><rect width={W} height={760} fill="#e8dcc0" /></Mat>{[0, 1, 2, 3, 4].map((i) => <rect key={i} x={i * 420 + 60} y={40} width={90} height={720} fill="#d0c4a8" />)}<path d="M0 0 Q480 120 960 0 T1920 0" fill="#c8b898" /></Par>
       <Par d={0.9}><rect y={760} width={W} height={320} fill="#b8b0a0" /><Mat kind="stone" o={0.5} light={0.3}><rect y={760} width={W} height={320} fill="#b8b0a0" /></Mat>{[0, 1, 2].map((i) => <rect key={i} x={0} y={820 + i * 90} width={W} height={24} fill="#9a9484" />)}</Par>
       <Par d={1}>
-        {[260, 460, 1500, 1720].map((x, i) => <Fig key={i} id={`gu${i}`} x={x} y={880} s={0.5} o={i % 2 ? lady(i < 2 ? 'right' : 'left', ['#2a6a8a', '#8a4a6a'][i % 2]) : gent(i < 2 ? 'right' : 'left', '#3a3a44', 'top')} p={P(idlePose(i), arms.wave, face.laugh)} />)}
-        <Fig id="gr3" x={820} y={1040} s={0.8} o={{...gent('right', '#2a2a34'), mustache: true}} p={P(idlePose(0.4), arms.offer, face.smile, {head: 3})} />
-        <Fig id="br3" x={1160} y={1050} s={0.78} o={{...lady('left', '#f4efe6'), hat: '#ffffff'}} p={P(idlePose(1.2), arms.offer, face.smile, {head: -3})} />
+        {[260, 460, 1500, 1720].map((x, i) => <Actor key={i} id={`gu${i}`} x={x} y={880} s={0.5} o={i % 2 ? lady(i < 2 ? 'right' : 'left', ['#2a6a8a', '#8a4a6a'][i % 2]) : gent(i < 2 ? 'right' : 'left', '#3a3a44', 'top')} base={P(idlePose(i), arms.wave, face.laugh)} />)}
+        <Actor id="gr3" x={820} y={1040} s={0.8} o={{...gent('right', '#2a2a34'), mustache: true}} base={P(idlePose(0.4), arms.offer, face.smile, {head: 3})} />
+        <Actor id="br3" x={1160} y={1050} s={0.78} o={{...lady('left', '#f4efe6'), hat: '#ffffff'}} base={P(idlePose(1.2), arms.offer, face.smile, {head: -3})} />
         {Array.from({length: 90}, (_, i) => <ellipse key={i} cx={q() * W} cy={q() * H} rx={8} ry={4.5} fill={['#fff', '#ffd0d8', '#ffe8a0'][i % 3]} transform={`rotate(${q() * 180} ${q() * W} ${q() * H})`} opacity={0.85} />)}
       </Par>
       <Par d={1}><Rays id="w33r" x={200} y={0} ang={1.15} spread={0.9} len={1500} o={0.1} /></Par>
@@ -430,7 +431,7 @@ const Rider: React.FC<{id: string; x: number; y: number; s: number; face: 'left'
   return (
     <g>
       <Fig id={`${id}h`} x={x} y={y} s={s} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'horse', coat, mane: '#1e140c', face: f, tack: true}} p={{phase: x / 120, stride: 1.1, speed}} />} />
-      <Fig id={`${id}r`} x={x + (f === 'right' ? -10 : 10) * s} y={y - sh} s={s} o={{...o, face: f}} p={{...ridePose(0.4), ...p}} />
+      <Actor id={`${id}r`} x={x + (f === 'right' ? -10 : 10) * s} y={y - sh} s={s} o={{...o, face: f}} base={{...ridePose(0.4), ...p}} />
     </g>
   );
 };
@@ -530,7 +531,7 @@ const S3_8: React.FC = () => (
     <Par d={1}>
       <g transform="translate(1250 1000)"><rect x={-140} y={-110} width={280} height={14} fill="#6a4a2a" /><rect x={-120} y={-96} width={14} height={96} fill="#5a3a1a" /><rect x={106} y={-96} width={14} height={96} fill="#5a3a1a" /><ellipse cx={-30} cy={-130} rx={34} ry={20} fill="#f4efe6" stroke="#a8a090" strokeWidth={3} /><rect x={20} y={-160} width={56} height={44} fill="#e8e0c8" stroke="#8a7a5a" strokeWidth={3} /><rect x={74} y={-148} width={20} height={20} rx={9} fill="none" stroke="#8a7a5a" strokeWidth={4} /></g>
       <g><rect x={640} y={830} width={190} height={22} fill="#8a6a42" stroke="#2a1a10" strokeWidth={3} /><rect x={640} y={600} width={26} height={250} fill="#8a6a42" stroke="#2a1a10" strokeWidth={3} />{Array.from({length: 6}, (_, i) => <line key={i} x1={640} y1={620 + i * 38} x2={666} y2={620 + i * 38} stroke="#2a1a10" strokeWidth={2} />)}<rect x={646} y={852} width={14} height={158} fill="#6a4a2a" /><rect x={806} y={852} width={14} height={158} fill="#6a4a2a" /></g>
-      <Fig id="v38" x={760} y={1010} s={0.6} o={{...young('right'), hero: true, head: 'none', outfit: 'blazer', pal: {...young('right').pal, top: '#e8e0d0', bottom: '#d8d0b8'}}} p={P(sitPose(0.7), arms.crossed, face.bored, {torso: 4, head: 8, handN: 'relaxed'})} />
+      <Actor id="v38" x={760} y={1010} s={0.6} o={{...young('right'), hero: true, head: 'none', outfit: 'blazer', pal: {...young('right').pal, top: '#e8e0d0', bottom: '#d8d0b8'}}} base={P(sitPose(0.7), arms.crossed, face.bored, {torso: 4, head: 8, handN: 'relaxed'})} />
       <g transform="translate(1520 1040)"><ellipse rx={90} ry={26} fill="#000" opacity=".3" filter="url(#blM)" /><path d="M-60 -30 Q-70 -70 -30 -76 Q40 -90 70 -50 Q80 -20 40 -12 L-40 -12 Z" fill="#8a6a42" stroke="#2a1a10" strokeWidth={4} /><path d="M60 -56 q40 -6 50 20 q-10 18 -44 14 Z" fill="#8a6a42" stroke="#2a1a10" strokeWidth={4} /><path d="M-60 -50 q-40 -10 -50 14" stroke="#8a6a42" strokeWidth={10} fill="none" strokeLinecap="round" /></g>
     </Par>
     <Par d={1.8} blur={10}><polygon points="0,0 0,300 220,0" fill="#4a6a3a" opacity=".85" /></Par>

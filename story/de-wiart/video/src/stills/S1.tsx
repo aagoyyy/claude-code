@@ -1,4 +1,5 @@
 import React from 'react';
+import {clock} from '../rig/clock';
 import {Character} from '../rig/Character';
 import {HandArt, idlePose, runPose, sitPose, SideOpts, walkPose} from '../rig/Side';
 import {AnimalArt} from '../rig/Animals';
@@ -102,11 +103,11 @@ const S1_2: React.FC = () => (
         {wheel(90, 70)}{wheel(290, 70)}
       </g>
       <Fig id="hz" x={930} y={950} s={0.52} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'horse', coat: '#5a3a22', mane: '#1e140c', face: 'left', tack: true}} p={{phase: 0.4, head: 6, speed: 0}} />} />
-      <Fig id="drv" x={1640} y={1010} s={0.5} o={worker('left', '#3a3028')} p={P(idlePose(0.4), arms.hips, face.angry, face.talk(5))} />
+      <Actor id="drv" x={1640} y={1010} s={0.5} o={worker('left', '#3a3028')} base={P(idlePose(0.4), arms.hips, face.angry, face.talk(5))} />
       {/* the quarrel on the pavement: gentleman pointing at the driver, a lady holding her ears */}
-      <Fig id="g2" x={620} y={990} s={0.5} o={gent('right', '#3a2a2a', 'bowler')} p={P(idlePose(0.7), arms.point, face.angry, face.talk(2), {torso: -3})} />
-      <Fig id="l2" x={380} y={1000} s={0.49} o={lady('right', '#3a5a6a')} p={P(idlePose(1.4), arms.chin, face.surprise)} />
-      <Fig id="b2c" x={1780} y={1010} s={0.46} o={boy('left', '#6a3a3a')} p={P(idlePose(2.2), arms.explain, face.wonder)} />
+      <Actor id="g2" x={620} y={990} s={0.5} o={gent('right', '#3a2a2a', 'bowler')} base={P(idlePose(0.7), arms.point, face.angry, face.talk(2), {torso: -3})} />
+      <Actor id="l2" x={380} y={1000} s={0.49} o={lady('right', '#3a5a6a')} base={P(idlePose(1.4), arms.chin, face.surprise)} />
+      <Actor id="b2c" x={1780} y={1010} s={0.46} o={boy('left', '#6a3a3a')} base={P(idlePose(2.2), arms.explain, face.wonder)} />
     </Par>
     <Par d={1}><Motes n={40} seed={4} y0={300} y1={900} o={0.35} /></Par>
     <Par d={0.2}><Fog id="b2f" y={640} h={240} c="#ffd8b0" o={0.2} /></Par>
@@ -149,7 +150,7 @@ const S1_3: React.FC = () => {
       </Par>
       <Par d={1.05}>
         {/* the boy: hand flat on the glass, eyes wide, a small smile; his breath fogs the pane */}
-        <Fig id="c3k" x={640} y={1640} s={1.9} o={{...boy('right', '#6a7a9a', '#5a3a22'), head: 'none'}} p={P(idlePose(0.4), arms.press, face.wonder, {head: -2})} light="indoor" lit={0.8} />
+        <Actor id="c3k" x={640} y={1640} s={1.9} o={{...boy('right', '#6a7a9a', '#5a3a22'), head: 'none'}} base={P(idlePose(0.4), arms.press, face.wonder, {head: -2})} light="indoor" lit={0.8} />
         <ellipse cx={1080} cy={520} rx={110} ry={80} fill="#fff" opacity=".1" filter="url(#blL)" />
       </Par>
       <Par d={1}><Glow id="c3g" x={1300} y={500} r={700} c="#ffbf8a" o={0.25} /><Rays id="c3r" x={1350} y={300} ang={2.2} spread={0.7} len={1100} o={0.08} /><Motes n={50} seed={9} x0={500} x1={1500} y0={200} y1={900} o={0.45} /></Par>
@@ -209,9 +210,9 @@ const S1_4: React.FC = () => (
     <Par d={1}>
       {/* camel far back, scaled to its ground line */}
       <Fig id="k4b" x={1380} y={925} s={0.3} o={{pal: khaki, head: 'none', face: 'left'}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#b88a58', mane: '#6a4a2a', face: 'left'}} p={{phase: 0, speed: 4}} />} lo />
-      <Fig id="k4m" x={760} y={1030} s={0.5} o={effendi('right')} p={P(idlePose(0.5), arms.offer, face.talk(2), face.smile)} />
-      <Fig id="k4t" x={1040} y={1040} s={0.5} o={P(young('left'), {outfit: 'frock', head: 'boater', hat: '#e8dcc0'})} p={P(idlePose(1.6), arms.crossed, face.bored, {head: 2})} />
-      <Fig id="k4k" x={420} y={1000} s={0.3} o={boy('right', '#e8dcc0')} p={P(runPose(0.4), {smile: 1})} lit={0.8} lo />
+      <Actor id="k4m" x={760} y={1030} s={0.5} o={effendi('right')} base={P(idlePose(0.5), arms.offer, face.talk(2), face.smile)} />
+      <Actor id="k4t" x={1040} y={1040} s={0.5} o={P(young('left'), {outfit: 'frock', head: 'boater', hat: '#e8dcc0'})} base={P(idlePose(1.6), arms.crossed, face.bored, {head: 2})} />
+      <Actor go="run" id="k4k" x={420} y={1000} s={0.3} o={boy('right', '#e8dcc0')} base={P({}, {smile: 1})} lit={0.8} lo />
     </Par>
     <Par d={1}><Rays id="k4r" x={330} y={300} ang={0.8} spread={1.0} len={1300} o={0.1} /><Motes n={50} seed={6} y0={500} y1={1000} c="#fff0d0" o={0.5} /></Par>
   </Frame>
@@ -247,17 +248,17 @@ const S1_5: React.FC = () => (
     </Par>
     <Par d={1}>
       <Fig id="cm" x={1000} y={846} s={0.3} o={{pal: khaki}} p={{}} art={<AnimalArt o={{kind: 'camel', coat: '#a8784a', mane: '#6a4a2a', face: 'right'}} p={{phase: 0, speed: 0}} />} lo />
-      {[600, 740, 1080].map((x, i) => <Fig key={i} id={`kb${i}`} x={x} y={856} s={0.3} o={i === 1 ? lady('left', '#b86a4a') : fellah(i % 2 ? 'left' : 'right')} p={P(idlePose(i), i === 1 ? arms.offer : arms.crossed)} lit={0.8} lo />)}
+      {[600, 740, 1080].map((x, i) => <Actor key={i} id={`kb${i}`} x={x} y={856} s={0.3} o={i === 1 ? lady('left', '#b86a4a') : fellah(i % 2 ? 'left' : 'right')} base={P(idlePose(i), i === 1 ? arms.offer : arms.crossed)} lit={0.8} lo />)}
       {/* left stall: vendor holds up a fruit, a customer points at it, both smiling */}
-      <Fig id="v1" x={330} y={900} s={0.5} o={effendi('right', '#d8c8a0')} p={P(idlePose(0.2), arms.offer, face.talk(3), face.smile)} />
-      <Fig id="c1" x={560} y={910} s={0.5} o={lady('left', '#2a6a8a')} p={P(idlePose(1.0), arms.point, face.smile, {head: 4})} />
+      <Actor id="v1" x={330} y={900} s={0.5} o={effendi('right', '#d8c8a0')} base={P(idlePose(0.2), arms.offer, face.talk(3), face.smile)} />
+      <Actor id="c1" x={560} y={910} s={0.5} o={lady('left', '#2a6a8a')} base={P(idlePose(1.0), arms.point, face.smile, {head: 4})} />
       {/* right stall: two men haggle — open hands against folded arms */}
-      <Fig id="h1" x={1420} y={900} s={0.5} o={fellah('left', '#7a5a3a')} p={P(idlePose(0.9), arms.explain, face.angry, face.talk(7))} />
-      <Fig id="h2" x={1190} y={906} s={0.5} o={effendi('right', '#b8c8d8')} p={P(idlePose(2.0), arms.crossed, face.bored, {head: -2})} />
+      <Actor id="h1" x={1420} y={900} s={0.5} o={fellah('left', '#7a5a3a')} base={P(idlePose(0.9), arms.explain, face.angry, face.talk(7))} />
+      <Actor id="h2" x={1190} y={906} s={0.5} o={effendi('right', '#b8c8d8')} base={P(idlePose(2.0), arms.crossed, face.bored, {head: -2})} />
       {/* the thief: a boy racing off with an orange; the fruit-seller chases, shouting and pointing */}
-      <Fig id="k5k" x={940} y={1010} s={0.6} o={boy('right', '#c85a3a', '#2a1a10')} p={P(runPose(2.3), face.laugh, {head: -8})} />
-      <g transform="translate(1010 760)"><circle r={14} fill="#e8802a" /><circle r={14} fill="none" stroke="#a85a1a" strokeWidth={2} /><ellipse cx={-4} cy={-5} rx={4} ry={3} fill="#fff" opacity=".4" /></g>
-      <Fig id="ch" x={1750} y={1030} s={0.55} o={fellah('left', '#6a4a2a')} p={P(runPose(0.5), arms.point, face.angry, face.talk(9))} />
+      <Actor go="run" pace={1.1} id="k5k" x={940} y={1010} s={0.6} o={boy('right', '#c85a3a', '#2a1a10')} base={P({}, face.laugh, {head: -8})} />
+      <g transform={`translate(${940 + 1150 * 0.6 * 1.1 * (clock.t - (clock.dur || 5) / 2) + 62} ${772 + 6 * Math.sin(clock.t * 22)})`}><circle r={14} fill="#e8802a" /><circle r={14} fill="none" stroke="#a85a1a" strokeWidth={2} /><ellipse cx={-4} cy={-5} rx={4} ry={3} fill="#fff" opacity=".4" /></g>
+      <Actor go="run" id="ch" x={560} y={1030} s={0.55} o={fellah('right', '#6a4a2a')} base={P({}, arms.point, face.angry, face.talk(9))} />
       <g opacity=".4">{[0, 1, 2, 3].map((i) => <line key={i} x1={760 - i * 50} y1={970 + i * 12} x2={640 - i * 70} y2={970 + i * 12} stroke="#fff0d0" strokeWidth={5} strokeLinecap="round" />)}</g>
     </Par>
     <Par d={1}><Rays id="k5r" x={300} y={0} ang={1.1} spread={0.7} len={1300} o={0.14} /><Motes n={80} seed={3} y0={300} y1={1000} c="#fff0d0" o={0.5} /></Par>
@@ -285,7 +286,7 @@ const S1_6: React.FC = () => (
       <polygon points="560,990 1900,940 2000,1010 700,1060" fill="#3a2410" opacity=".25" filter="url(#blM)" />
     </Par>
     <Par d={1}><Birds n={4} seed={11} x0={600} x1={1700} y0={200} y1={420} c="#3a2a1c" s={1.2} /></Par>
-    <Par d={1.1}><Fig id="k6k" x={560} y={1520} s={1.8} o={boy('right', '#c85a3a', '#5a3a22')} p={P(idlePose(0.9), face.wonder, {handN: 'relaxed', head: -6, uaN: 6})} /></Par>
+    <Par d={1.1}><Actor id="k6k" x={560} y={1520} s={1.8} o={boy('right', '#c85a3a', '#5a3a22')} base={P(idlePose(0.9), face.wonder, {handN: 'relaxed', head: -6, uaN: 6})} /></Par>
     <Par d={1}><Rays id="k6r" x={260} y={440} ang={0.35} spread={1.2} len={1500} o={0.1} /><Motes n={60} seed={5} y0={300} y1={900} c="#fff0d0" o={0.5} /></Par>
   </Frame>
 );
@@ -317,11 +318,11 @@ const S1_7: React.FC = () => (
     </Par>
     <Par d={1}>
       {/* two boys laughing together, one rolling a hoop, a master with a book */}
-      <Fig id="s7a" x={520} y={1010} s={0.5} o={boy('right', '#2a3a5a')} p={P(idlePose(0.7), arms.explain, face.laugh, face.talk(4))} />
-      <Fig id="s7b" x={720} y={1020} s={0.5} o={boy('left', '#3a2a5a', '#2a1a10')} p={P(idlePose(1.9), arms.hips, face.laugh)} />
-      <Fig id="s7c" x={1300} y={1030} s={0.5} o={boy('left', '#2a3a5a', '#8a6a3a')} p={P(runPose(2.9), face.smile)} />
+      <Actor id="s7a" x={520} y={1010} s={0.5} o={boy('right', '#2a3a5a')} base={P(idlePose(0.7), arms.explain, face.laugh, face.talk(4))} />
+      <Actor id="s7b" x={720} y={1020} s={0.5} o={boy('left', '#3a2a5a', '#2a1a10')} base={P(idlePose(1.9), arms.hips, face.laugh)} />
+      <Actor go="run" id="s7c" x={1300} y={1030} s={0.5} o={boy('left', '#2a3a5a', '#8a6a3a')} base={P({}, face.smile)} />
       <g><ellipse cx={1180} cy={1010} rx={50} ry={50} fill="none" stroke="#6a4a2a" strokeWidth={6} /></g>
-      <Fig id="s7t" x={1110} y={1000} s={0.5} o={scholar('left', '#c9c9c4', {head: 'mortar', hat: '#15121a', beard: true})} p={P(walkPose(1.3, 0.7), {uaN: -48, faN: -94, handN: 'relaxed'}, face.smile)} />
+      <Actor go="walk" id="s7t" x={1110} y={1000} s={0.5} o={scholar('left', '#c9c9c4', {head: 'mortar', hat: '#15121a', beard: true})} base={P({}, {uaN: -48, faN: -94, handN: 'relaxed'}, face.smile)} />
     </Par>
     <Par d={0.1}><Birds n={6} seed={4} x0={300} x1={1600} y0={120} y1={300} c="#3a3a48" /></Par>
     <Par d={0.25}><Fog id="s7f" y={790} h={150} c="#e8ecf0" o={0.3} /></Par>
@@ -348,8 +349,8 @@ const S1_8: React.FC = () => {
         {Array.from({length: 18}, (_, i) => <ellipse key={i} cx={q() * W} cy={760 + q() * 280} rx={26 + q() * 40} ry={6 + q() * 8} fill="#4a3a28" opacity={0.5} />)}
       </Par>
       <Par d={1}>
-        {[260, 460, 660].map((x, i) => <Fig key={i} id={`r8o${i}`} x={x} y={890 + i * 6} s={0.46} o={{pal: civ(['#1a3a8a', '#8a1a2a', '#1a3a8a'][i], '#e8e0d0', ['#5a3a22', '#2a1a10', '#8a6a3a'][i]), head: 'none', build: 1.05, face: 'right', outfit: 'blazer'}} p={P(runPose(0.5 + i * 1.9), face.angry, face.talk(i * 2), i === 1 ? arms.point : {})} />)}
-        <Fig id="r8h" x={1040} y={965} s={0.6} o={athlete('right')} p={P(runPose(2.7), face.angry, {mouth: 0.35, squint: 0.5, brow: -0.7, uaN: -42, faN: -105, handN: 'fist'})} />
+        {[260, 460, 660].map((x, i) => <Actor go="run" key={i} id={`r8o${i}`} x={x} y={890 + i * 6} s={0.46} o={{pal: civ(['#1a3a8a', '#8a1a2a', '#1a3a8a'][i], '#e8e0d0', ['#5a3a22', '#2a1a10', '#8a6a3a'][i]), head: 'none', build: 1.05, face: 'right', outfit: 'blazer'}} base={P({}, face.angry, face.talk(i * 2), i === 1 ? arms.point : {})} />)}
+        <Actor go="run" pace={1.12} id="r8h" x={1040} y={965} s={0.6} o={athlete('right')} base={P({}, face.angry, {mouth: 0.35, squint: 0.5, brow: -0.7, uaN: -42, faN: -105, handN: 'fist'})} />
         <g transform="translate(1160 720) rotate(-20)"><ellipse rx={36} ry={22} fill="#8a4a2a" /><ellipse rx={36} ry={22} fill="none" stroke="#2a1a10" strokeWidth={3} /><line x1={-16} y1={0} x2={16} y2={0} stroke="#e8dcc0" strokeWidth={3} /></g>
         <g opacity=".4">{[0, 1, 2, 3].map((i) => <line key={i} x1={720 - i * 60} y1={830 + i * 26} x2={540 - i * 90} y2={830 + i * 26} stroke="#fff" strokeWidth={5} strokeLinecap="round" />)}</g>
         {Array.from({length: 14}, (_, i) => <circle key={i} cx={760 + q() * 260} cy={930 + q() * 90} r={2 + q() * 5} fill="#6a4a2a" />)}
@@ -371,7 +372,7 @@ const S1_9: React.FC = () => {
         <Mat kind="grass" o={0.55} light={0.3}><rect y={620} width={W} height={H - 620} fill="#4e8a3e" /></Mat><rect y={620} width={W} height={H - 620} fill="url(#aoV)" />
       </Par>
       <Par d={1.1}>
-        <Fig id="r9" x={560} y={1500} s={1.6} o={athlete('right')} p={P({...walkPose(0.2, 1), thN: 38, shN: 12, ftN: -10, thF: -14, shF: 16}, face.angry, {mouth: 0.3})} />
+        <Actor id="r9" x={560} y={1500} s={1.6} o={athlete('right')} base={P({...walkPose(0.2, 1), thN: 38, shN: 12, ftN: -10, thF: -14, shF: 16}, face.angry, {mouth: 0.3})} />
         <g transform="translate(1180 570) rotate(-30)"><ellipse rx={150} ry={92} fill="#8a4a2a" /><ellipse rx={150} ry={92} fill="url(#ballsh)" /><ellipse rx={150} ry={92} fill="none" stroke="#2a1a10" strokeWidth={8} /><line x1={-66} y1={0} x2={66} y2={0} stroke="#e8dcc0" strokeWidth={9} />{[-40, -14, 14, 40].map((x) => <line key={x} x1={x} y1={-16} x2={x} y2={16} stroke="#e8dcc0" strokeWidth={6} />)}<path d="M-120 -30 Q0 -60 120 -30" stroke="#fff" strokeOpacity=".25" strokeWidth={6} fill="none" /></g>
         <defs><radialGradient id="ballsh" cx=".3" cy=".3" r=".8"><stop offset="0" stopColor="#fff" stopOpacity=".28" /><stop offset="1" stopColor="#000" stopOpacity=".5" /></radialGradient></defs>
         {[0, 1, 2, 3, 4, 5].map((i) => <line key={i} x1={1020 - i * 40} y1={610 + i * 36} x2={740 - i * 90} y2={660 + i * 42} stroke="#fff" strokeWidth={6} opacity=".3" strokeLinecap="round" />)}
@@ -408,7 +409,7 @@ const S1_10: React.FC = () => {
       </Par>
       <Par d={1}>
         {/* the lecturer at the board, pointer raised, mid-sentence */}
-        <Fig id="l10" x={450} y={880} s={0.55} o={scholar('right', '#c9c9c4', {beard: true})} p={P(idlePose(0.3), arms.point, face.talk(1), {uaN: -102, faN: -8})} />
+        <Actor id="l10" x={450} y={880} s={0.55} o={scholar('right', '#c9c9c4', {beard: true})} base={P(idlePose(0.3), arms.point, face.talk(1), {uaN: -102, faN: -8})} />
         <rect x={540} y={690} width={120} height={190} fill="#3a2414" /><rect x={520} y={680} width={160} height={22} fill="#4a2e1a" /><rect x={560} y={660} width={70} height={22} fill="#e8dcb8" />
         {/* students, front row first: writing, whispering pair, a hand up */}
         {[
@@ -426,13 +427,13 @@ const S1_10: React.FC = () => {
         ].map(({r, c, hair, act}, i) => {
           const x = 900 + c * 250 - r * 60 + (i % 2) * 14, y = 800 + r * 110;
           return <g key={i}>
-            <Fig id={`st${i}`} x={x} y={y - 18} s={0.38 + r * 0.045} o={scholar('left', hair, {build: 0.95})} p={P(sitPose(i * 1.3), act)} lo />
+            <Actor id={`st${i}`} x={x} y={y - 18} s={0.38 + r * 0.045} o={scholar('left', hair, {build: 0.95})} base={P(sitPose(i * 1.3), act)} lo />
             <rect x={x - 100} y={y - 50} width={200} height={26} fill="#6a4228" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="#4a2e1a" /><rect x={x - 100} y={y - 24} width={200} height={90} fill="url(#woodP)" opacity=".4" />
             <rect x={x - 60} y={y - 58} width={46} height={10} fill="#e8dcb8" /><circle cx={x + 40} cy={y - 56} r={6} fill="#1a1410" />
           </g>;
         })}
         {/* Adrian at the back: a huge yawn, arms stretched up */}
-        <Fig id="a10" x={1760} y={830} s={0.52} o={P(young('left'), {outfit: 'gown', pal: {...young('left').pal, top: '#15121a', bottom: '#15121a'}})} p={P(sitPose(0.5), arms.stretch, face.yawn)} />
+        <Actor id="a10" x={1760} y={830} s={0.52} o={P(young('left'), {outfit: 'gown', pal: {...young('left').pal, top: '#15121a', bottom: '#15121a'}})} base={P(sitPose(0.5), arms.stretch, face.yawn)} />
         <rect x={1630} y={650} width={230} height={26} fill="#6a4228" /><rect x={1630} y={676} width={230} height={170} fill="#4a2e1a" />
       </Par>
       <Par d={1}><Motes n={90} seed={3} y0={80} y1={700} c="#fff6d8" o={0.55} r={3} /></Par>
@@ -463,7 +464,7 @@ const S1_11: React.FC = () => (
       <g transform="translate(1400 884)"><rect x={0} y={0} width={60} height={50} rx={6} fill="#1a1a2a" /><rect x={20} y={-16} width={20} height={18} fill="#1a1a2a" /><path d="M30 -10 q60 -120 130 -150" stroke="#e8dcb8" strokeWidth={5} fill="none" /></g>
       <g transform="translate(1180 930)"><polygon points="0,0 240,-8 250,60 8,70" fill="#6a3a2a" /><polygon points="10,-8 120,-14 124,52 14,60" fill="#e8dcb8" /><polygon points="128,-14 236,-20 244,46 132,52" fill="#d8ccA8" /></g>
     </Par>
-    <Par d={1.1}><Fig id="a11" x={600} y={1910} s={1.7} o={P(young('right'), {outfit: 'gown'})} p={P(sitPose(0.7), arms.chin, face.yawn, {head: -6, torso: 6})} light="indoor" lit={0.9} /></Par>
+    <Par d={1.1}><Actor id="a11" x={600} y={1910} s={1.7} o={P(young('right'), {outfit: 'gown'})} base={P(sitPose(0.7), arms.chin, face.yawn, {head: -6, torso: 6})} light="indoor" lit={0.9} /></Par>
     <Par d={1}><Glow id="a11g" x={1370} y={420} r={700} c="#fff2d0" o={0.25} /><Motes n={70} seed={5} x0={400} x1={1700} y0={100} y1={900} o={0.55} r={3} /></Par>
   </Frame>
 );

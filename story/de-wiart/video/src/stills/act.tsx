@@ -8,12 +8,12 @@ export type Path = [number, number, number][];                    // [t seconds,
 export type ActFn = (u: number, t: number) => Partial<SidePose>;  // u 0..1 over the act, t seconds since act start
 export type Act = {t0: number; t1: number; fn: ActFn; ease?: number; face?: 'left' | 'right'};
 const sm = (u: number) => u * u * (3 - 2 * u);
-const posAt = (path: Path, t: number): [number, number] => {
+const posAt = (path: Path, t: number, linear = false): [number, number] => {
   if (t <= path[0][0]) return [path[0][1], path[0][2]];
-  for (let i = 1; i < path.length; i++) if (t <= path[i][0]) { const [t0, x0, y0] = path[i - 1], [t1, x1, y1] = path[i]; const u = sm((t - t0) / Math.max(1e-6, t1 - t0)); return [x0 + (x1 - x0) * u, y0 + (y1 - y0) * u]; }
+  for (let i = 1; i < path.length; i++) if (t <= path[i][0]) { const [t0, x0, y0] = path[i - 1], [t1, x1, y1] = path[i]; const r = (t - t0) / Math.max(1e-6, t1 - t0), u = linear ? r : sm(r); return [x0 + (x1 - x0) * u, y0 + (y1 - y0) * u]; }
   const l = path[path.length - 1]; return [l[1], l[2]];
 };
-const distAt = (path: Path, t: number) => { let d = 0, prev = posAt(path, 0); const n = Math.max(2, Math.ceil(t * 40)); for (let i = 1; i <= n; i++) { const p = posAt(path, (t * i) / n); d += Math.hypot(p[0] - prev[0], p[1] - prev[1]); prev = p; } return d; };
+const distAt = (path: Path, t: number, lin = false) => { let d = 0, prev = posAt(path, 0, lin); const n = Math.max(2, Math.ceil(t * 40)); for (let i = 1; i <= n; i++) { const p = posAt(path, (t * i) / n, lin); d += Math.hypot(p[0] - prev[0], p[1] - prev[1]); prev = p; } return d; };
 const blend = (a: SidePose, b: Partial<SidePose>, k: number): SidePose => {
   const out: any = {...a};
   for (const key of Object.keys(b) as (keyof SidePose)[]) {
@@ -24,12 +24,37 @@ const blend = (a: SidePose, b: Partial<SidePose>, k: number): SidePose => {
   return out;
 };
 
-export const Actor: React.FC<{id: string; x: number; y: number; s?: number; o: SideOpts; path?: Path; acts?: Act[]; base?: SidePose; light?: any; lit?: number; lo?: boolean; sit?: boolean; seed?: number}> = ({id, x, y, s = 0.55, o, path, acts = [], base, light = 'warm', lit = 1, lo, seed = 0}) => {
+
+const LEG = new Set(['thN', 'shN', 'ftN', 'thF', 'shF', 'ftF', 'phase', 'vx', 'dx', 'dy', 'blink']);
+const hs = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h; };
+/** procedural life for a standing/seated figure with a static pose: gestures while talking, shifting, nodding. */
+const life = (id: string, p: any): any => {
+  const t = clock.t, h = hs(id), ph = (h % 628) / 100, r = 0.8 + ((h >> 5) % 50) / 100;
+  const out = {...p};
+  const talking = (p.mouth ?? 0) > 0.12;
+  const arm = p.uaN !== undefined && p.handN !== 'grip';
+  const sit = p.thN !== undefined && p.thN < -40;
+  const amp = p.handN === 'point' ? 1.6 : p.brow < -0.5 ? 1.4 : talking || p.mouth > 0.12 ? 1 : 0.35;
+  if (arm) {
+    const beat = Math.sin(t * 2.1 * r + ph) * 0.6 + Math.sin(t * 4.3 * r + ph * 2) * 0.4;
+    out.uaN = p.uaN + 15 * amp * beat;
+    out.faN = (p.faN ?? -30) + 22 * amp * Math.sin(t * 3.1 * r + ph);
+    if (p.uaF !== undefined) { out.uaF = p.uaF + 8 * amp * Math.sin(t * 1.7 * r + ph + 1); out.faF = (p.faF ?? -30) + 10 * amp * Math.sin(t * 2.3 * r + ph); }
+  }
+  out.head = (p.head ?? 0) + (talking ? 3.5 : 1.6) * Math.sin(t * 1.6 * r + ph) + (talking ? 2 * Math.sin(t * 4.1 + ph) : 0);
+  out.torso = (p.torso ?? 0) + (sit ? 0.8 : 1.4) * Math.sin(t * 0.9 * r + ph);
+  if (talking) out.mouth = 0.12 + 0.55 * Math.abs(Math.sin(t * 8.2 * r + ph)) * (0.5 + 0.5 * Math.abs(Math.sin(t * 1.1 + ph)));
+  return out;
+};
+
+export const Actor: React.FC<{id: string; x: number; y: number; s?: number; o: SideOpts; path?: Path; acts?: Act[]; base?: any; light?: any; lit?: number; lo?: boolean; sit?: boolean; seed?: number; go?: 'walk' | 'run'; pace?: number}> = ({id, x, y, s = 0.55, o, path, acts = [], base, light = 'warm', lit = 1, lo, seed = 0, go, pace = 1}) => {
   const t = clock.t;
-  const [px, py] = path ? posAt(path, t) : [x, y];
-  const [qx] = path ? posAt(path, t + 0.06) : [x];
-  const [rx] = path ? posAt(path, Math.max(0, t - 0.06)) : [x];
-  const vx = path && t > 0 ? (qx - rx) / 0.12 : 0, vy = 0;
+  let linear = false;
+  if (go && !path) { const dir = (o.face || 'right') === 'right' ? 1 : -1, v = (go === 'run' ? 1150 : 500) * s * pace, T = clock.dur || 5, D = v * T; path = [[0, x - dir * D / 2, y], [T, x + dir * D / 2, y]]; linear = true; }
+  const [px, py] = path ? posAt(path, t, linear) : [x, y];
+  const [qx] = path ? posAt(path, t + 0.06, linear) : [x];
+  const [rx] = path ? posAt(path, Math.max(0, t - 0.06), linear) : [x];
+  const vx = path ? (qx - rx) / (0.06 + Math.min(0.06, t)) : 0, vy = 0;
   const speed = Math.abs(vx);
   const walkV = 560 * s;                                   // px/s of an ordinary walk at this scale
   let face = o.face || 'right';
@@ -37,17 +62,20 @@ export const Actor: React.FC<{id: string; x: number; y: number; s?: number; o: S
   let pose: SidePose;
   const saved = clock.t;
   if (speed > 12) {
-    const run = speed > walkV * 1.5, dist = distAt(path!, t), cyc = (run ? 1720 : 1180) * s;
+    const run = speed > walkV * 1.5, dist = distAt(path!, t, linear), cyc = (run ? 1720 : 1180) * s;
     clock.t = 0; pose = run ? runPose((dist / cyc) * Math.PI * 2) : walkPose((dist / cyc) * Math.PI * 2, 0.95); clock.t = saved;
     delete (pose as any).vx; (pose as any).blink = blinkNow(seed);
-  } else pose = {...idlePose(seed + 0.3 * (id.length % 7)), ...(base || {})};
+    if (base) for (const k of Object.keys(base)) if (!LEG.has(k) && base[k] !== undefined) (pose as any)[k] = base[k];
+  } else {
+    pose = {...idlePose(seed + 0.3 * (id.length % 7)), ...(base || {})};
+    if (base && !acts.length) pose = life(id, pose);
+  }
   for (const a of acts) {
     if (t < a.t0 || t > a.t1) continue;
     const e = a.ease ?? 0.3, k = Math.min(sm(Math.min(1, (t - a.t0) / e)), sm(Math.min(1, (a.t1 - t) / e)));
     pose = blend(pose, a.fn((t - a.t0) / Math.max(1e-6, a.t1 - a.t0), t - a.t0), k);
     if (a.face) face = a.face;
   }
-  if (!path || speed <= 12) pose = {...pose, ...(base && !acts.length ? base : {})};
   void vy;
   return <Fig id={id} x={px} y={py} s={s} o={{...o, face}} p={pose} light={light} lit={lit} lo={lo} />;
 };

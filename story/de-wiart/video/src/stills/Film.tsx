@@ -16,7 +16,7 @@ export const shotStart = (id: string) => starts[SHOTS.findIndex((s) => s.id === 
 const hash = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h; };
 
 const ShotView: React.FC<{id: string; local: number; len: number; op: number}> = ({id, local, len, op}) => {
-  clock.t = Math.max(0.0001, local / FILM_FPS);
+  clock.t = Math.max(0.0001, local / FILM_FPS); clock.dur = len / FILM_FPS;
   const C = REG[id];
   const p = Math.min(1, local / Math.max(1, len));
   const e = p * p * (3 - 2 * p);
