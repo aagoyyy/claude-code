@@ -98,6 +98,7 @@ export const Boer: React.FC = () => {
       {/* character plane */}
       <Character
         pose={pose}
+        variant={{young: true}}
         cam={cam}
         depth={1}
         under={

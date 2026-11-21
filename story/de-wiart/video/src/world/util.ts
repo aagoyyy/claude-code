@@ -17,10 +17,10 @@ export const mix = (c1: string, c2: string, t: number) => {
   return '#' + a.map((v, i) => Math.round(lerp(v, b[i], t)).toString(16).padStart(2, '0')).join('');
 };
 
-export type Cam = { x: number; y: number; zoom: number };
+export type Cam = { x: number; y: number; zoom: number; px?: number; py?: number };
 /** parallax: each layer moves/zooms by its depth factor (far ~0, character plane = 1, foreground > 1) */
 export const camT = (cam: Cam, depth: number) =>
-  `translate(960 640) scale(${(1 + (cam.zoom - 1) * depth).toFixed(5)}) translate(-960 -640) translate(${(-cam.x * depth).toFixed(2)} ${(-cam.y * depth).toFixed(2)})`;
+  `translate(${cam.px ?? 960} ${cam.py ?? 640}) scale(${(1 + (cam.zoom - 1) * depth).toFixed(5)}) translate(${-(cam.px ?? 960)} ${-(cam.py ?? 640)}) translate(${(-cam.x * depth).toFixed(2)} ${(-cam.y * depth).toFixed(2)})`;
 
 export function ridge(seed: number, base: number, amp: number, freq = [0.0035, 0.009, 0.021], x0 = -600, x1 = 2520, step = 12) {
   const r = mulberry32(seed), ph = freq.map(() => r() * 6.283);
@@ -32,3 +32,9 @@ export function ridge(seed: number, base: number, amp: number, freq = [0.0035, 0
   }
   return { top, fill: top + `L${x1} 1500 L${x0} 1500 Z` };
 }
+
+/** where a point of a layer ends up on screen (mirror of camT) */
+export const camXY = (cam: Cam, depth: number, x: number, y: number): [number, number] => {
+  const px = cam.px ?? 960, py = cam.py ?? 640, z = 1 + (cam.zoom - 1) * depth;
+  return [px + (x - cam.x * depth - px) * z, py + (y - cam.y * depth - py) * z];
+};

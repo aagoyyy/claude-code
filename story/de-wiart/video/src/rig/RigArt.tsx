@@ -64,10 +64,12 @@ export const RigDefs: React.FC = () => (
       <path d="M384 1676 Q430 1668 476 1676" stroke="#2a170c" strokeWidth="2" fill="none" strokeDasharray="5 4" opacity=".7"/>
       <ellipse cx="420" cy="1664" rx="26" ry="9" fill="url(#shine)" opacity=".7"/>
     </g>
-  </defs>
+  <linearGradient id="hairY" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6a4a30" /><stop offset="1" stopColor="#2e1d12" /></linearGradient></defs>
 );
 
-export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
+export type RigVariant = {young?: boolean; patch?: boolean; scars?: boolean; stump?: boolean; bandages?: boolean};
+
+export const RigBody: React.FC<{T: RigTransforms; V: RigVariant}> = ({T, V}) => (
   <g id="j-root" transform={T.root}>
 
       
@@ -125,7 +127,7 @@ export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
           </g>
           <path d="M413 1455 L490 1455 L486 1610 L412 1610 Z" className="seam"/>
           <g id="j-footL" transform={T.footL}><use href="#boot"/></g>
-          <g id="bandageAnkle">
+          <g id="bandageAnkle" display={V.bandages ? 'inline' : 'none'}>
             <rect x="408" y="1590" width="86" height="34" rx="4" fill="url(#gauze)" stroke="#7d7767" strokeWidth="2"/>
             <path d="M408 1600 H494 M408 1608 H494 M408 1616 H494" stroke="#aaa392" strokeWidth="1.8"/>
             <rect x="408" y="1590" width="86" height="34" rx="4" fill="url(#cyl)" opacity=".5"/>
@@ -143,7 +145,7 @@ export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
           <path d="M350 1040 Q372 1200 396 1330" stroke="#fff" strokeWidth="5" fill="none" opacity=".22" filter="url(#blur3)"/>
         </g>
         <path d="M355 1030 L394 1340 M520 1030 L502 1340" className="seam"/>
-        <g id="bandageThigh">
+        <g id="bandageThigh" display={V.bandages ? 'inline' : 'none'}>
           <rect x="376" y="1245" width="142" height="86" rx="5" fill="url(#gauze)" stroke="#7d7767" strokeWidth="2"/>
           <path d="M376 1262 Q447 1270 518 1262 M376 1280 Q447 1288 518 1280 M376 1298 Q447 1306 518 1298 M376 1316 Q447 1324 518 1316" stroke="#aaa392" strokeWidth="2" fill="none"/>
           <rect x="376" y="1245" width="142" height="86" rx="5" fill="url(#cyl)" opacity=".5"/>
@@ -213,7 +215,13 @@ export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
             <path d="M644 886 L650 1042 M702 886 L712 1030" className="seam"/>
             <path d="M646 1026 L716 1014 L718 1034 L648 1046 Z" fill="#8c8656" stroke="#3c391f" strokeWidth="2.5"/>
             <path d="M652 1036 L714 1024" className="stitch" strokeWidth="1.4"/>
-            <g id="bandageHand">
+            <g id="handR" display={V.stump ? 'none' : 'inline'}>
+              <path d="M713 1050 Q723 1100 705 1140 Q673 1154 649 1132 Q635 1090 649 1056 Z" fill="url(#skin)" stroke="#6b3f24" strokeWidth="3"/>
+              <path d="M697 1068 V1114 M682 1064 V1118 M667 1066 V1116" stroke="#9c6b46" strokeWidth="3" strokeLinecap="round" fill="none"/>
+              <ellipse cx="656" cy="1098" rx="9" ry="22" fill="#d9a37b" stroke="#6b3f24" strokeWidth="2.5" transform="rotate(-8 656 1098)"/>
+              <path d="M691 1140 Q679 1146 663 1140" stroke="#fff" strokeWidth="3" fill="none" opacity=".25"/>
+            </g>
+            <g id="bandageHand" display={V.stump ? 'inline' : 'none'}>
               <path d="M646 1038 L718 1024 Q742 1062 738 1106 Q694 1136 660 1116 Q650 1074 646 1038 Z" fill="url(#gauze)" stroke="#7d7767" strokeWidth="2.5"/>
               <path d="M650 1056 Q694 1066 732 1040 M652 1074 Q696 1086 736 1060 M656 1092 Q700 1104 738 1080 M662 1108 Q704 1120 738 1100" stroke="#aaa392" strokeWidth="2" fill="none"/>
               <path d="M646 1038 L718 1024 Q742 1062 738 1106 Q694 1136 660 1116 Q650 1074 646 1038 Z" fill="url(#cyl)" opacity=".55"/>
@@ -269,11 +277,11 @@ export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
             <path d="M462 578 Q474 586 489 578" stroke="#a8714b" strokeWidth="2.2" fill="none" opacity=".6"/>
             <path d="M470 606 Q460 626 462 644 M534 606 Q546 624 544 642" stroke="#a8714b" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity=".55"/>
           </g>
-          <path d="M424 556 Q416 468 468 442 Q520 426 562 456 Q588 486 576 556 Q568 506 542 490 Q500 472 462 492 Q436 512 424 556 Z" fill="url(#hair)" stroke="#7a7a76" strokeWidth="2.5"/>
-          <path d="M440 470 Q470 450 510 448 M452 486 Q490 466 536 474 M432 520 Q440 494 458 484 M566 520 Q564 500 552 488" stroke="#8f8f8b" strokeWidth="2" fill="none" opacity=".7" strokeLinecap="round"/>
+          <path d="M424 556 Q416 468 468 442 Q520 426 562 456 Q588 486 576 556 Q568 506 542 490 Q500 472 462 492 Q436 512 424 556 Z" fill={V.young ? 'url(#hairY)' : 'url(#hair)'} stroke="#7a7a76" strokeWidth="2.5"/>
+          <path d="M440 470 Q470 450 510 448 M452 486 Q490 466 536 474 M432 520 Q440 494 458 484 M566 520 Q564 500 552 488" stroke={V.young ? '#6a4e38' : '#8f8f8b'} strokeWidth="2" fill="none" opacity=".7" strokeLinecap="round"/>
           <path d="M448 466 Q500 440 556 472" stroke="#fff" strokeWidth="4" fill="none" opacity=".6" strokeLinecap="round"/>
-          <path d="M424 556 Q426 580 432 592 Q430 560 436 540 Z M576 556 Q574 580 568 592 Q570 560 564 540 Z" fill="#cfcfcb" stroke="#7a7a76" strokeWidth="1.5"/>
-          <path d="M456 550 Q474 538 490 548" stroke="#a5a5a1" strokeWidth="6" fill="none" strokeLinecap="round"/>
+          <path d="M424 556 Q426 580 432 592 Q430 560 436 540 Z M576 556 Q574 580 568 592 Q570 560 564 540 Z" fill={V.young ? '#4d3a2a' : '#cfcfcb'} stroke="#7a7a76" strokeWidth="1.5"/>
+          <path d="M456 550 Q474 538 490 548" stroke={V.young ? '#4a3526' : '#a5a5a1'} strokeWidth="6" fill="none" strokeLinecap="round"/>
           <g transform={T.blink}><ellipse cx="474" cy="565" rx="12" ry="7.5" fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5"/><circle cx="476" cy="565" r="6" fill="#4a86b8"/><circle cx="476" cy="565" r="2.8" fill="#0f1822"/><circle cx="478" cy="562.5" r="1.6" fill="#fff"/></g>
           <path d="M460 563 Q474 553 489 562" stroke="#4a2a18" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
           <path d="M502 566 Q494 592 498 604 Q512 610 520 600" stroke="#9c6544" strokeWidth="3" fill="none" strokeLinecap="round"/>
@@ -281,18 +289,19 @@ export const RigBody: React.FC<{T: RigTransforms}> = ({T}) => (
           <path d="M498 606 Q504 610 510 608" stroke="#6b3f24" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
           <path d="M486 650 Q500 658 514 650" stroke="#a85c46" strokeWidth="4" fill="none" strokeLinecap="round"/>
           <path d="M490 664 Q500 668 510 664" stroke="#9c6544" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity=".7"/>
-          <path d="M452 628 Q468 600 500 612 Q532 600 550 628 Q540 646 520 634 Q500 642 480 634 Q460 646 452 628 Z" fill="#a4a4a0" stroke="#5f5f5c" strokeWidth="2.5"/>
-          <path d="M468 618 q10 8 22 4 M512 620 q10 4 22 -4 M462 628 q8 6 16 4 M522 630 q8 2 18 -4" stroke="#6f6f6c" strokeWidth="2" fill="none" strokeLinecap="round"/>
-          <path d="M462 614 Q484 606 500 614" stroke="#f0f0ec" strokeWidth="3" fill="none" opacity=".6" strokeLinecap="round"/>
-          <path d="M424 512 Q468 522 506 546" stroke="#151515" strokeWidth="7" fill="none" strokeLinecap="round"/>
+          <path d="M452 628 Q468 600 500 612 Q532 600 550 628 Q540 646 520 634 Q500 642 480 634 Q460 646 452 628 Z" fill={V.young ? '#5a4333' : '#a4a4a0'} stroke="#5f5f5c" strokeWidth="2.5"/>
+          <path d="M468 618 q10 8 22 4 M512 620 q10 4 22 -4 M462 628 q8 6 16 4 M522 630 q8 2 18 -4" stroke={V.young ? '#3a291c' : '#6f6f6c'} strokeWidth="2" fill="none" strokeLinecap="round"/>
+          <path d="M462 614 Q484 606 500 614" stroke={V.young ? '#8a6a4c' : '#f0f0ec'} strokeWidth="3" fill="none" opacity=".6" strokeLinecap="round"/>
+          <g id="eyeR" display={V.patch ? 'none' : 'inline'}><path d="M544 550 Q526 538 510 548" stroke={V.young ? '#4a3526' : '#a5a5a1'} strokeWidth="6" fill="none" strokeLinecap="round"/><ellipse cx="526" cy="565" rx="12" ry="7.5" fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5"/><circle cx="524" cy="565" r="6" fill="#4a86b8"/><circle cx="524" cy="565" r="2.8" fill="#0f1822"/><circle cx="526" cy="562.5" r="1.6" fill="#fff"/><path d="M540 563 Q526 553 511 562" stroke="#4a2a18" strokeWidth="2.5" fill="none" strokeLinecap="round"/></g>
+          <g id="eyepatch" display={V.patch ? 'inline' : 'none'}><path d="M424 512 Q468 522 506 546" stroke="#151515" strokeWidth="7" fill="none" strokeLinecap="round"/>
           <path d="M424 510 Q468 520 506 544" stroke="#4a4a4a" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity=".7"/>
           <path d="M550 554 Q570 554 584 560" stroke="#151515" strokeWidth="7" fill="none" strokeLinecap="round"/>
           <ellipse cx="530" cy="566" rx="29" ry="25" fill="#000" opacity=".35"/>
           <ellipse cx="528" cy="564" rx="28" ry="24" fill="#161616" stroke="#000" strokeWidth="2"/>
           <ellipse cx="528" cy="564" rx="23" ry="19" fill="none" stroke="#3a3a3a" strokeWidth="1.5" strokeDasharray="3 3"/>
-          <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/>
-          <path d="M564 560 Q574 582 566 604" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/>
-          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/>
+          <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/></g>
+          <g id="scars" display={V.scars ? 'inline' : 'none'}><path d="M564 560 Q574 582 566 604" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/>
+          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/></g>
         </g>
 
         

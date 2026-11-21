@@ -1,5 +1,5 @@
 import React from 'react';
-import {RigBody, RigDefs} from './RigArt';
+import {RigBody, RigDefs, RigVariant} from './RigArt';
 import {Pose, transforms} from './pose';
 import {Cam, camT} from '../world/util';
 
@@ -10,6 +10,7 @@ const PLACE = `translate(${CH.fx} ${CH.fy}) scale(${CH.s}) translate(${-CH.rx} $
 
 type Props = {
   pose: Pose;
+  variant?: RigVariant;
   cam: Cam;
   depth?: number;
   /** warm key (sun) strength 0..1 */
@@ -18,7 +19,7 @@ type Props = {
   under?: React.ReactNode;    // drawn below the character (dust, grass)
 };
 
-export const Character: React.FC<Props> = ({pose, cam, depth = 1, key = 1, children, under}) => {
+export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, key = 1, children, under}) => {
   const T = transforms(pose);
   return (
     <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', left: 0, top: 0, overflow: 'visible'}}>
@@ -26,7 +27,7 @@ export const Character: React.FC<Props> = ({pose, cam, depth = 1, key = 1, child
 .seam{fill:none;stroke:#3c391f;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}`}</style>
       <RigDefs />
       <defs>
-        <g id="charArt"><RigBody T={T} /></g>
+        <g id="charArt"><RigBody T={T} V={variant} /></g>
 
         {/* rim light on silhouette edges that face the sun (left/top) + scene colour grade */}
         <filter id="rimFx" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
@@ -73,7 +74,7 @@ export const Character: React.FC<Props> = ({pose, cam, depth = 1, key = 1, child
           <stop offset="0" stopColor="#a9b8ff" stopOpacity=".2" /><stop offset="1" stopColor="#a9b8ff" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="hazeG" gradientUnits="userSpaceOnUse" x1="0" y1="430" x2="0" y2="1712">
-          <stop offset="0" stopColor="#ffcf98" stopOpacity=".05" /><stop offset="1" stopColor="#ffcf98" stopOpacity=".12" />
+          <stop offset="0" stopColor="#ffcf98" stopOpacity=".03" /><stop offset="1" stopColor="#ffcf98" stopOpacity=".12" />
         </linearGradient>
       </defs>
 
@@ -86,7 +87,7 @@ export const Character: React.FC<Props> = ({pose, cam, depth = 1, key = 1, child
             <g transform="matrix(1 0 -0.9 -0.12 1530 1904)" filter="url(#shadowFx)"><use href="#charArt" /></g>
           </g>
           {/* warm halo behind the silhouette (backlight) */}
-          <g opacity={0.3 * key} transform="translate(-14 -4)"><g filter="url(#haloFx)"><use href="#charArt" /></g></g>
+          <g opacity={0.16 * key} transform="translate(-14 -4)"><g filter="url(#haloFx)"><use href="#charArt" /></g></g>
           <g filter="url(#rimFx)"><use href="#charArt" /></g>
           <g mask="url(#charMask)">
             <rect x="200" y="300" width="800" height="1500" fill="url(#keyG)" />

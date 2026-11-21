@@ -119,15 +119,16 @@ export const Rock: React.FC<{x: number; y: number; w: number; h: number; seed: n
 
 /* ---------- ground plane with grass texture ---------- */
 export const gcol = (y: number) => mix('#e9b070', '#744a2a', clamp((y - 690) / 400));
-export const Plains: React.FC<{seed: number; y0: number; y1: number; count: number; haze0: number; haze1: number; fade?: number; sunPatch?: boolean}> = ({seed, y0, y1, count, haze0, haze1, fade = 0, sunPatch}) => {
-  const far = gcol(y0), near = gcol(y1);
+export const Plains: React.FC<{seed: number; y0: number; y1: number; count: number; haze0: number; haze1: number; fade?: number; sunPatch?: boolean; colorAt?: (y: number) => string; haze?: string}> = ({seed, y0, y1, count, haze0, haze1, fade = 0, sunPatch, colorAt, haze}) => {
+  const cAt = colorAt || gcol; const HZ = haze || HAZE;
+  const far = cAt(y0), near = cAt(y1);
   const strokes = useMemo(() => {
     const r = mulberry32(seed);
     return Array.from({length: count}, () => {
       const t = Math.pow(r(), 1.6);
       const y = y0 + t * (y1 - y0);
       const k = (y - y0) / (y1 - y0);
-      return {x: r() * (W + 1000) - 500, y, l: 6 + k * 48 * (0.4 + r()), c: mix(mix('#8a6a3a', '#e8c070', r()), HAZE, lerpHaze(haze0, haze1, k)), o: 0.35 + r() * 0.4, w: 1 + k * 2.2};
+      return {x: r() * (W + 1000) - 500, y, l: 6 + k * 48 * (0.4 + r()), c: mix(mix(mix(cAt(y), '#000000', 0.25), mix(cAt(y), '#ffffff', 0.25), r()), HZ, lerpHaze(haze0, haze1, k)), o: 0.35 + r() * 0.4, w: 1 + k * 2.2};
     });
   }, [seed, y0, y1, count, haze0, haze1]);
   return (

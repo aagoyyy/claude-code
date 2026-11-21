@@ -9,6 +9,18 @@ body = src[src.index('<g id="j-root">'):src.index('</g><!-- /root -->') + len('<
 def jsx(s):
     s = re.sub(r'<!--.*?-->', '', s, flags=re.S)
     s = s.replace('class="blink"', 'transform={T.blink}')
+    # story variants (V): young hair/mustache, eyepatch vs open eye, scars, hand vs bandaged stump, leg bandages
+    Y = lambda a, b: "{V.young ? '%s' : '%s'}" % (a, b)
+    s = s.replace('<g id="eyepatch">', '<g id="eyepatch" display={V.patch ? \'inline\' : \'none\'}>')
+    s = s.replace('<g id="eyeR" display="none">', '<g id="eyeR" display={V.patch ? \'none\' : \'inline\'}>')
+    s = s.replace('<g id="scars">', '<g id="scars" display={V.scars ? \'inline\' : \'none\'}>')
+    s = s.replace('<g id="handR" display="none">', '<g id="handR" display={V.stump ? \'none\' : \'inline\'}>')
+    s = s.replace('<g id="bandageHand">', '<g id="bandageHand" display={V.stump ? \'inline\' : \'none\'}>')
+    s = s.replace('<g id="bandageThigh">', '<g id="bandageThigh" display={V.bandages ? \'inline\' : \'none\'}>')
+    s = s.replace('<g id="bandageAnkle">', '<g id="bandageAnkle" display={V.bandages ? \'inline\' : \'none\'}>')
+    s = s.replace('fill="url(#hair)"', 'fill=' + Y('url(#hairY)', 'url(#hair)'))
+    for old, new in [('#a4a4a0', '#5a4333'), ('#a5a5a1', '#4a3526'), ('#cfcfcb', '#4d3a2a'), ('#8f8f8b', '#6a4e38'), ('#6f6f6c', '#3a291c'), ('#f0f0ec', '#8a6a4c')]:
+        s = re.sub(r'(fill|stroke)="%s"' % old, lambda m: m.group(1) + '=' + Y(new, old), s)
     s = re.sub(r'<g id="j-(\w+)" data-j="\w+"', lambda m: f'<g id="j-{m.group(1)}" transform={{T.{m.group(1)}}}', s)
     s = s.replace('<g id="j-root">', '<g id="j-root" transform={T.root}>')
     s = s.replace('class="', 'className="')
@@ -26,10 +38,12 @@ import React from 'react';
 import type {{RigTransforms}} from './pose';
 
 export const RigDefs: React.FC = () => (
-  <defs>{jsx(defs)}</defs>
+  <defs>{jsx(defs)}<linearGradient id="hairY" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6a4a30" /><stop offset="1" stopColor="#2e1d12" /></linearGradient></defs>
 );
 
-export const RigBody: React.FC<{{T: RigTransforms}}> = ({{T}}) => (
+export type RigVariant = {{young?: boolean; patch?: boolean; scars?: boolean; stump?: boolean; bandages?: boolean}};
+
+export const RigBody: React.FC<{{T: RigTransforms; V: RigVariant}}> = ({{T, V}}) => (
   {jsx(body)}
 );
 """

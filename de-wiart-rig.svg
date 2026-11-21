@@ -298,6 +298,12 @@
             <path d="M644 886 L650 1042 M702 886 L712 1030" class="seam"/>
             <path d="M646 1026 L716 1014 L718 1034 L648 1046 Z" fill="#8c8656" stroke="#3c391f" stroke-width="2.5"/>
             <path d="M652 1036 L714 1024" class="stitch" stroke-width="1.4"/>
+            <g id="handR" display="none">
+              <path d="M713 1050 Q723 1100 705 1140 Q673 1154 649 1132 Q635 1090 649 1056 Z" fill="url(#skin)" stroke="#6b3f24" stroke-width="3"/>
+              <path d="M697 1068 V1114 M682 1064 V1118 M667 1066 V1116" stroke="#9c6b46" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <ellipse cx="656" cy="1098" rx="9" ry="22" fill="#d9a37b" stroke="#6b3f24" stroke-width="2.5" transform="rotate(-8 656 1098)"/>
+              <path d="M691 1140 Q679 1146 663 1140" stroke="#fff" stroke-width="3" fill="none" opacity=".25"/>
+            </g>
             <g id="bandageHand">
               <path d="M646 1038 L718 1024 Q742 1062 738 1106 Q694 1136 660 1116 Q650 1074 646 1038 Z" fill="url(#gauze)" stroke="#7d7767" stroke-width="2.5"/>
               <path d="M650 1056 Q694 1066 732 1040 M652 1074 Q696 1086 736 1060 M656 1092 Q700 1104 738 1080 M662 1108 Q704 1120 738 1100" stroke="#aaa392" stroke-width="2" fill="none"/>
@@ -369,15 +375,16 @@
           <path d="M452 628 Q468 600 500 612 Q532 600 550 628 Q540 646 520 634 Q500 642 480 634 Q460 646 452 628 Z" fill="#a4a4a0" stroke="#5f5f5c" stroke-width="2.5"/>
           <path d="M468 618 q10 8 22 4 M512 620 q10 4 22 -4 M462 628 q8 6 16 4 M522 630 q8 2 18 -4" stroke="#6f6f6c" stroke-width="2" fill="none" stroke-linecap="round"/>
           <path d="M462 614 Q484 606 500 614" stroke="#f0f0ec" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/>
-          <path d="M424 512 Q468 522 506 546" stroke="#151515" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <g id="eyeR" display="none"><path d="M544 550 Q526 538 510 548" stroke="#a5a5a1" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="526" cy="565" rx="12" ry="7.5" fill="#fbfbf6" stroke="#6b3f24" stroke-width="1.5"/><circle cx="524" cy="565" r="6" fill="#4a86b8"/><circle cx="524" cy="565" r="2.8" fill="#0f1822"/><circle cx="526" cy="562.5" r="1.6" fill="#fff"/><path d="M540 563 Q526 553 511 562" stroke="#4a2a18" stroke-width="2.5" fill="none" stroke-linecap="round"/></g>
+          <g id="eyepatch"><path d="M424 512 Q468 522 506 546" stroke="#151515" stroke-width="7" fill="none" stroke-linecap="round"/>
           <path d="M424 510 Q468 520 506 544" stroke="#4a4a4a" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/>
           <path d="M550 554 Q570 554 584 560" stroke="#151515" stroke-width="7" fill="none" stroke-linecap="round"/>
           <ellipse cx="530" cy="566" rx="29" ry="25" fill="#000" opacity=".35"/>
           <ellipse cx="528" cy="564" rx="28" ry="24" fill="#161616" stroke="#000" stroke-width="2"/>
           <ellipse cx="528" cy="564" rx="23" ry="19" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-dasharray="3 3"/>
-          <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/>
-          <path d="M564 560 Q574 582 566 604" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/>
-          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/>
+          <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/></g>
+          <g id="scars"><path d="M564 560 Q574 582 566 604" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/>
+          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/></g>
         </g>
 
         <!-- ===== LEFT ARM (viewer's left): fist, drawn last so it can salute in front of the face ===== -->
