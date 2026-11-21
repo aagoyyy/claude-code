@@ -30,10 +30,14 @@ def rifle(far=0,kind=0):
     return x*0.55
 def bolt():
     n=nz(0.2); return (hp(n,2500)*env(len(n),.001,.01)+ lp(n,800)*env(len(n),.02,.03)*.5)*0.12
-def whiz(d=.4):
-    n=int(d*SR); t=np.arange(n)/SR; f=3200-2400*(t/d)**.7
-    s=np.sin(2*np.pi*np.cumsum(f)/SR); a=np.sin(np.pi*t/d)**1.5
-    return (s*0.25+hp(nz(d),2500)*0.2)*a*0.5
+def whiz(d=.22):
+    # bullet pass-by: a short airy "fft" (noise only, no tone) that brightens then dulls, with a tiny snap
+    n=int(d*SR); t=np.arange(n)/SR; w=np.linspace(0,1,n); x=rng.standard_normal(n)
+    hi=hp(x,3500); mid=lp(hp(x,900),2200)
+    sig=hi*(1-w)**1.5+mid*w
+    a=np.sin(np.pi*np.clip(t/d,0,1))**3
+    snap=hp(rng.standard_normal(n),2500)*np.exp(-t/0.006)*0.35
+    return (sig*a*0.45+snap)*0.35
 def thud(d=.3):
     n=nz(d); return (lp(n,200)*env(len(n),.003,.07)*1.4)*0.6
 def boom(d=3.2,big=1.0):
@@ -86,8 +90,9 @@ def volleys(a,b,every,pan=0.5,g=.5):
     f=a
     while f<b:
         tt=F(f)
-        put(whiz()*g,tt+rng.random()*.2,1,rng.uniform(-.8,.8),0.2)
-        if rng.random()<.5: put(thud(.15)*.5*g,tt+.25,1,rng.uniform(-.6,.6),.1)
+        
+        if rng.random()<.6: put(whiz()*g*.7,tt+rng.random()*.2,1,rng.uniform(-.8,.8),0.15)
+        if rng.random()<.35: put(thud(.15)*.5*g,tt+.25,1,rng.uniform(-.6,.6),.1)
         f+=every+rng.integers(-2,3)
 def die(tf,pan,big=0):
     put(thud(.35)*(1.2 if big else .8),F(tf)+.18,1,pan,.1)
