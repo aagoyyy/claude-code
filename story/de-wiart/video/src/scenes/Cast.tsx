@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {Figure, FigureDefs} from '../rig/Figure';
-import {aimPose, idlePose, kneelPose, Pal, SideOpts, walkPose} from '../rig/Side';
+import {aimPose, idlePose, kneelPose, Pal, runPose, SideOpts, walkPose} from '../rig/Side';
 import {H, W} from '../world/util';
 
 export const CAST_FRAMES = 48;
@@ -17,10 +17,10 @@ export const Cast: React.FC = () => {
     const list: {o: SideOpts; p: any}[] = [
       {o: hero({face, patch: true, stump: true, bandages: true}), p: walkPose(ph, 1)},
       {o: soldier({face}), p: walkPose(ph + 1, 0.9)},
-      {o: {pal: {...khaki, skin: '#e0a880', hair: '#5a3a22', top: '#8a7a4a', bottom: '#6a5a3a', puttee: undefined}, head: 'slouch', hat: '#7a5a3a', beard: true, gear: 'rifle', face}, p: aimPose(f / 6)},
-      {o: {pal: {skin: '#8a5a3a', hair: '#1a1410', top: '#e8dcc0', bottom: '#d8cca8', belt: '#5a3a22', boots: '#5a3a22'}, head: 'turban', hat: '#efe7d0', gear: 'spear', face, mustache: true}, p: walkPose(ph + 2, 1.1)},
-      {o: {pal: {...khaki, top: '#5a6a5a', bottom: '#4e5a4e', puttee: undefined, boots: '#1d1109'}, head: 'stahl', hat: '#4a5058', gear: 'rifle+pack', face}, p: walkPose(ph + 3, 0.8)},
-      {o: {pal: {...khaki, top: '#6a7a62', bottom: '#58645a', puttee: undefined}, head: 'bustina', hat: '#6a7a62', face}, p: idlePose(f / 8)},
+      {o: {pal: {...khaki, skin: '#e0a880', hair: '#5a3a22', top: '#8a7a4a', bottom: '#6a5a3a', puttee: undefined}, head: 'slouch', hat: '#7a5a3a', beard: true, gear: 'rifle', rifle: 'mauser', face}, p: aimPose(f / 6)},
+      {o: {pal: {skin: '#8a5a3a', hair: '#1a1410', top: '#e8dcc0', bottom: '#d8cca8', belt: '#5a3a22', boots: '#5a3a22'}, head: 'turban', hat: '#efe7d0', gear: 'rifle', rifle: 'martini', face, mustache: true}, p: aimPose(f / 6)},
+      {o: {pal: {...khaki, top: '#5a6a5a', bottom: '#4e5a4e', puttee: undefined, boots: '#1d1109'}, head: 'stahl', hat: '#4a5058', gear: 'rifle+pack', rifle: 'mauser', face}, p: walkPose(ph + 3, 0.8)},
+      {o: {...soldier({face}), gear: 'rifle+pack'}, p: runPose(ph * 1.4)},
       {o: {pal: {...khaki, top: '#cfc9b8', bottom: '#8e8858'}, head: 'cap', hat: '#d8d2c0', face}, p: kneelPose(f / 8)},
     ];
     return list.map((c, i) => <Figure key={`${face}${i}`} uid={`c${face}${i}`} x={xs[i]} y={y} s={0.3} o={c.o} p={c.p} light="warm" />);

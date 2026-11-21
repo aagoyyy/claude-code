@@ -11,7 +11,7 @@ const SPEED = 16;     // px/frame of the depth-1 plane
 const khaki: Pal = {skin: '#e0a880', hair: '#3a2a1c', top: '#a39c66', bottom: '#8e8858', belt: '#6f4122', boots: '#7a4726', puttee: '#948e5c'};
 export const heroYoung = (face: 'left' | 'right'): SideOpts => ({pal: {...khaki, hair: '#4a3020'}, hero: true, young: true, head: 'slouch', hat: '#8a7448', face});
 export const tommy = (face: 'left' | 'right', skin = '#e0a880'): SideOpts => ({pal: {...khaki, skin, hair: '#3a2a1c'}, head: 'slouch', hat: '#8a7448', gear: 'rifle+pack', face});
-export const boer = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#d9a07a', hair: '#5a3a22', top: '#7a6a48', bottom: '#5a4a34', belt: '#3a2a1a', boots: '#3a2a1a'}, head: 'slouch', hat: '#6a5030', beard: true, gear: 'rifle', face});
+export const boer = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#d9a07a', hair: '#5a3a22', top: '#7a6a48', bottom: '#5a4a34', belt: '#3a2a1a', boots: '#3a2a1a'}, head: 'slouch', hat: '#6a5030', beard: true, gear: 'rifle', rifle: 'mauser', face});
 
 export const BoerA: React.FC = () => {
   const f = useCurrentFrame();

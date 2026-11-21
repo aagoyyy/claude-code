@@ -12,7 +12,7 @@ const SPEED = 14;
 const khaki: Pal = {skin: '#e0a880', hair: '#4a3020', top: '#8e8a62', bottom: '#7a7656', belt: '#5a3a22', boots: '#4a2e1c', puttee: '#7a7650'};
 export const heroTrench = (face: 'left' | 'right', extra: Partial<SideOpts> = {}): SideOpts => ({pal: khaki, hero: true, young: true, patch: true, scars: true, head: 'cap', hat: '#6e6c4a', face, ...extra});
 export const tommyW1 = (face: 'left' | 'right', skin = '#e0a880', gear: SideOpts['gear'] = 'rifle+pack'): SideOpts => ({pal: {...khaki, skin}, head: 'brodie', hat: '#6a6a50', gear, face});
-export const german = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#d9a07a', hair: '#5a3a22', top: '#5a6a5a', bottom: '#4e5a4e', belt: '#2a1a10', boots: '#1d1109'}, head: 'stahl', hat: '#4a5058', gear: 'rifle', face});
+export const german = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#d9a07a', hair: '#5a3a22', top: '#5a6a5a', bottom: '#4e5a4e', belt: '#2a1a10', boots: '#1d1109'}, head: 'stahl', hat: '#4a5058', gear: 'rifle', rifle: 'mauser', face});
 export const medic = (face: 'left' | 'right'): SideOpts => ({pal: {...khaki, top: '#a9a68a', bottom: '#7a7656'}, head: 'cap', hat: '#bdb99a', gear: 'none', face});
 
 export const FLARES = [

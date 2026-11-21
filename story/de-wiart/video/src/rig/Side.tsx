@@ -4,7 +4,7 @@ import {mix} from '../world/util';
 /** Side-view (profile) rig. Local space: feet on y=0, figure faces +x, ~1270 tall. Mirror with `face='left'`. */
 export type Pal = {skin: string; hair: string; top: string; bottom: string; belt: string; boots: string; puttee?: string; metal?: string};
 export type Head = 'none' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina';
-export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number};
+export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean};
 
 export type SideOpts = {
   pal: Pal;
@@ -18,6 +18,7 @@ export type SideOpts = {
   hat?: string;                   // headgear colour
   scars?: boolean;
   bayonet?: boolean;
+  rifle?: 'enfield' | 'mauser' | 'martini';   // model: British Lee-Enfield, German Gewehr 98, Martini-Henry (dervishes)
   fine?: boolean;                 // full-detail (cloth grain, AO blurs); false for far/background figures
 };
 
@@ -203,12 +204,14 @@ const HeadGear: React.FC<{kind: Head; c: string}> = ({kind, c}) => {
 
 
 /** Lee-Enfield style bolt-action rifle. Axis along +y (butt at -300, muzzle at +490); sights on +x, magazine on -x. */
-const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean}> = ({metal, bayonet, fine = true}) => {
+const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean; kind?: 'enfield' | 'mauser' | 'martini'}> = ({metal, bayonet, fine = true, kind = 'enfield'}) => {
   const steel = '#3b3f47', steelL = '#7d848f';
   return (
     <g>
       <defs>
         <linearGradient id="rfWood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#b57a45" /><stop offset=".5" stopColor="#8a5428" /><stop offset="1" stopColor="#4e2c14" /></linearGradient>
+        <linearGradient id="rfWood2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#d6a064" /><stop offset=".5" stopColor="#a8683a" /><stop offset="1" stopColor="#6a3c1c" /></linearGradient>
+        <linearGradient id="rfWood3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#8a5a38" /><stop offset=".5" stopColor="#5e3820" /><stop offset="1" stopColor="#331c0e" /></linearGradient>
         <linearGradient id="rfSteel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#8a919c" /><stop offset=".5" stopColor="#4a4f58" /><stop offset="1" stopColor="#23262c" /></linearGradient>
       </defs>
       {/* sling */}
@@ -223,14 +226,44 @@ const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean}> = ({me
       <path d="M-12 -126 L12 -126 L14 -10 L-12 -10 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.4" />
       <rect x={-11} y={-108} width={22} height={86} fill="url(#rfSteel)" stroke={OUT} strokeWidth="2.4" />
       <rect x={-8} y={-96} width={14} height={30} fill="#1a1c21" opacity=".5" />
-      <path d="M10 -84 L40 -92" stroke={steel} strokeWidth="6" strokeLinecap="round" /><circle cx={44} cy={-93} r={9} fill={steel} stroke={OUT} strokeWidth="2" /><circle cx={41} cy={-96} r={3} fill={steelL} opacity=".8" />
-      {/* magazine box + trigger guard (underside = -x) */}
+      {kind === 'enfield' && (<g><path d="M10 -84 L40 -92" stroke={steel} strokeWidth="6" strokeLinecap="round" /><circle cx={44} cy={-93} r={9} fill={steel} stroke={OUT} strokeWidth="2" /><circle cx={41} cy={-96} r={3} fill={steelL} opacity=".8" /></g>)}
+      {kind === 'mauser' && (<g><path d="M10 -84 L30 -88 L40 -70" stroke={steel} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" /><circle cx={41} cy={-66} r={8} fill={steel} stroke={OUT} strokeWidth="2" /></g>)}
+      {kind === 'enfield' && (<g>
       <path d="M-11 -90 L-30 -90 L-30 -26 L-11 -26 Z" fill="url(#rfSteel)" stroke={OUT} strokeWidth="2.2" />
       <path d="M-14 -4 Q-46 -2 -42 -44 Q-42 -60 -14 -60" fill="none" stroke={steel} strokeWidth="4" strokeLinecap="round" />
       <path d="M-18 -32 L-26 -18" stroke={steel} strokeWidth="3.5" strokeLinecap="round" />
+      </g>)}
+      {kind === 'mauser' && (<g>
+        <path d="M-11 -70 L-22 -70 L-22 -36 L-11 -36 Z" fill="url(#rfSteel)" stroke={OUT} strokeWidth="2" />
+        <path d="M-14 -4 Q-40 -2 -38 -40 Q-38 -54 -14 -54" fill="none" stroke={steel} strokeWidth="4" strokeLinecap="round" />
+      </g>)}
+      {kind === 'martini' && (<g>
+        <path d="M-12 -4 Q-52 4 -50 -48 Q-50 -66 -12 -62" fill="none" stroke="#c9a24c" strokeWidth="5" strokeLinecap="round" />
+        <path d="M-12 -60 Q-34 -86 -30 -112" stroke="#c9a24c" strokeWidth="6" fill="none" strokeLinecap="round" />
+        <circle cx={-30} cy={-114} r={7} fill="#c9a24c" stroke="#5e4614" strokeWidth="1.5" />
+        <path d="M11 -96 L30 -110 L34 -102 L14 -86 Z" fill={steel} stroke={OUT} strokeWidth="2" />
+      </g>)}
       {/* rear sight ladder */}
       <path d="M11 20 L26 14 L26 52 L11 46 Z" fill={steel} stroke={OUT} strokeWidth="2" />
       <path d="M26 20 V48 M18 24 V46" stroke={steelL} strokeWidth="1.4" opacity=".8" />
+      {kind === 'mauser' && (<g>
+        <path d="M-11 -10 L12 -10 L11 420 L-10 420 Z" fill="url(#rfWood2)" stroke={OUT} strokeWidth="2.4" />
+        <path d="M-5 -4 L-5 414 M4 -4 L4 414" stroke="#7a4624" strokeWidth="1.4" opacity=".5" />
+        {[110, 250, 405].map((y) => <rect key={y} x={-12} y={y} width={25} height={8} fill="#7d848f" stroke={OUT} strokeWidth="1.4" />)}
+        <rect x={-4.5} y={420} width={9} height={50} fill="url(#rfSteel)" stroke={OUT} strokeWidth="1.6" />
+        <path d="M-7 454 L9 450 L9 472 L-7 476 Z" fill={steel} stroke={OUT} strokeWidth="1.6" /><path d="M-8 452 L-8 474" stroke={steelL} strokeWidth="2" opacity=".7" />
+        <circle cx={0} cy={476} r={5.5} fill="#15171a" stroke={OUT} strokeWidth="1.5" />
+      </g>)}
+      {kind === 'martini' && (<g>
+        <path d="M-10 -10 L11 -10 L10 200 L-9 200 Z" fill="url(#rfWood3)" stroke={OUT} strokeWidth="2.4" />
+        <rect x={-11} y={96} width={23} height={8} fill="#c9a24c" stroke="#5e4614" strokeWidth="1.4" /><rect x={-11} y={190} width={23} height={8} fill="#c9a24c" stroke="#5e4614" strokeWidth="1.4" />
+        <rect x={-4.5} y={198} width={9} height={296} fill="url(#rfSteel)" stroke={OUT} strokeWidth="1.8" />
+        {[250, 330, 410].map((y) => <rect key={y} x={-6} y={y} width={12} height={7} fill="#c9a24c" stroke="#5e4614" strokeWidth="1.2" />)}
+        <path d="M5 470 L18 466 L18 486 L5 490 Z" fill={steel} stroke={OUT} strokeWidth="1.6" />
+        <circle cx={0} cy={494} r={5.5} fill="#15171a" stroke={OUT} strokeWidth="1.5" />
+        <path d="M-20 -304 L-26 -300 L-26 -282 L-20 -280 Z" fill="#c9a24c" stroke="#5e4614" strokeWidth="1.2" />
+      </g>)}
+      {kind === 'enfield' && (<g>
       {/* fore-end with brass band, wooden handguard over the barrel */}
       <path d="M-11 -10 L12 -10 L13 270 L-12 270 Z" fill="url(#rfWood)" stroke={OUT} strokeWidth="2.4" />
       <path d="M-4 -4 L-4 262 M4 -4 L4 262" stroke="#5a3418" strokeWidth="1.4" opacity=".5" />
@@ -243,6 +276,7 @@ const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean}> = ({me
       <path d="M6 462 L22 458 L22 482 L6 486 Z" fill={steel} stroke={OUT} strokeWidth="1.6" />
       <circle cx={0} cy={490} r={6.5} fill="#15171a" stroke={OUT} strokeWidth="1.5" /><circle cx={0} cy={490} r={2.4} fill="#000" />
       <path d="M-2 340 V486" stroke="#d7dde6" strokeWidth="2" opacity=".55" />
+      </g>)}
       {bayonet && (
         <g>
           <rect x={-9} y={474} width={18} height={20} fill={steel} stroke={OUT} strokeWidth="2" />
@@ -252,6 +286,22 @@ const Rifle: React.FC<{metal: string; bayonet?: boolean; fine?: boolean}> = ({me
       )}
     </g>
   );
+};
+
+const dirA = (deg: number): [number, number] => [-Math.sin((deg * Math.PI) / 180), Math.cos((deg * Math.PI) / 180)];
+/** far arm reaches the rifle fore-end held by the near arm (angles in the arm convention, 0 = hanging down) */
+const gripAngles = (uaN: number, faN: number): [number, number] => {
+  const a1 = uaN, a2 = uaN + faN - 3;
+  const u1 = dirA(a1), u2 = dirA(a2);
+  const th = (a2 * Math.PI) / 180;
+  const P: [number, number] = [175 * u1[0] + 354 * u2[0] - 15 * Math.cos(th), 175 * u1[1] + 354 * u2[1] - 15 * Math.sin(th)];
+  const L1 = 175, L2 = 226;
+  const d = Math.min(L1 + L2 - 2, Math.hypot(P[0], P[1]));
+  const phi = (Math.atan2(-P[0], P[1]) * 180) / Math.PI;
+  const al = (Math.acos(Math.max(-1, Math.min(1, (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d)))) * 180) / Math.PI;
+  const be = (Math.acos(Math.max(-1, Math.min(1, (L2 * L2 + d * d - L1 * L1) / (2 * L2 * d)))) * 180) / Math.PI;
+  const A1 = phi + al, A2 = phi - be;
+  return [A1, A2 - A1];
 };
 
 export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
@@ -265,6 +315,11 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   const stumpNear = o.hero && o.stump && nearIsLeftArm, stumpFar = o.hero && o.stump && !nearIsLeftArm;
   const rot = (a?: number) => `rotate(${(a || 0).toFixed(2)})`;
   const stitchC = sh(top, 0.5);
+  const hasRifle = o.gear === 'rifle' || o.gear === 'rifle+pack';
+  const sling = !!p.sling && hasRifle;
+  const rk = o.rifle || 'enfield';
+  const fg = p.grip && hasRifle && !sling ? gripAngles(p.uaN || 0, p.faN || 0) : null;
+  const uaF = fg ? fg[0] : p.uaF, faF = fg ? fg[1] : p.faF;
   const tid = nid();
   const torsoP = 'M-34 -352 L44 -352 Q100 -336 120 -270 Q134 -190 130 -110 Q126 -50 104 -4 L-92 -4 Q-112 -60 -114 -130 Q-118 -230 -104 -296 Q-90 -340 -34 -352 Z';
 
@@ -313,8 +368,8 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
               <path d="M-16 56 Q0 62 14 56" stroke="#fff" strokeWidth="3" fill="none" opacity=".22" />
             </g>
           )}
-          {near && (o.gear === 'rifle' || o.gear === 'rifle+pack') && (
-            <g transform="translate(0 204) rotate(-3)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} /></g>
+          {near && hasRifle && !sling && (
+            <g transform="translate(0 204) rotate(-3)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g>
           )}
           {near && o.gear === 'spear' && (
             <g transform="translate(0 220)"><rect x={-5} y={-420} width={10} height={720} fill="#6a4a2a" stroke={OUT} strokeWidth="2" /><path d="M0 -520 L18 -420 L-18 -420 Z" fill="#aab0b8" stroke={OUT} strokeWidth="2" /><path d="M-1 -515 L-1 -425" stroke="#fff" strokeWidth="2" opacity=".6" /></g>
@@ -400,7 +455,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
 
   const art = (
     <g>
-      <Arm near={false} ua={p.uaF} fa={p.faF} stump={stumpFar} />
+      <Arm near={false} ua={uaF} fa={faF} stump={stumpFar} />
       <Leg near={false} th={p.thF} shn={p.shF} ft={p.ftF} />
       <Leg near th={p.thN} shn={p.shN} ft={p.ftN} />
       {(o.gear === 'pack' || o.gear === 'rifle+pack') && (
@@ -414,6 +469,9 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           <rect x={-168} y={-232} width={26} height={20} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" />
           <path d="M-90 -320 Q-60 -330 -30 -330" stroke="#5a4a2a" strokeWidth="10" fill="none" />
         </g>
+      )}
+      {sling && (
+        <g transform={`translate(0 -666) ${rot(p.torso)}`}><g transform="translate(-118 -150) rotate(192)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g></g>
       )}
       <g transform={`translate(0 -666) ${rot(p.torso)} scale(1 ${p.br || 1})`}>
         <ellipse cx={0} cy={0} rx={96 * B} ry={64} fill={bot} stroke={OUT} strokeWidth="3" />
@@ -489,6 +547,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         <rect x={86 * B} y={-34} width={32} height={46} rx={5} fill="url(#goldS)" stroke="#5e4614" strokeWidth="3" />
         <rect x={92 * B} y={-26} width={20} height={30} rx={2} fill="#3a2a0c" stroke="#8a6a22" strokeWidth="1.5" />
         <rect x={96 * B} y={-14} width={12} height={5} fill="#d8b559" /><path d={`M${88 * B} -30 H${116 * B}`} stroke="#fff3bd" strokeWidth="2" opacity=".7" />
+        {sling && (<g><path d="M-40 -350 Q-92 -276 -112 -176" stroke="#3a2414" strokeWidth="11" fill="none" strokeLinecap="round" /><path d="M-40 -350 Q-90 -276 -110 -178" stroke="#8a5a32" strokeWidth="2" fill="none" strokeDasharray="7 5" opacity=".7" /><rect x={-58} y={-346} width={16} height={22} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" transform="rotate(-18 -50 -335)" /></g>)}
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
           <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} /></g>
@@ -509,11 +568,11 @@ export const walkPose = (phase: number, stride = 1): SidePose => {
   return {
     thN: n.th, shN: n.sh, ftN: -(n.th + n.sh) * 0.7, thF: f.th, shF: f.sh, ftF: -(f.th + f.sh) * 0.7,
     uaN: 24 * stride * s, faN: -22 - 10 * Math.max(0, -s), uaF: -24 * stride * s, faF: -22 - 10 * Math.max(0, s),
-    torso: -2.5 * s, head: 1.5 * s, dy: -9 * Math.abs(s) * stride,
+    torso: -2.5 * s, head: 1.5 * s, dy: -9 * Math.abs(s) * stride, sling: true,
   };
 };
 export const idlePose = (t: number): SidePose => ({torso: 0.6 * Math.sin(t), br: 1 + 0.006 * Math.sin(t), head: 0.8 * Math.sin(t * 0.7), uaN: 3, faN: -12, uaF: -2, faF: -10, shN: 3, shF: 3});
-export const aimPose = (t: number): SidePose => ({torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)});
+export const aimPose = (t: number): SidePose => ({grip: true, torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)});
 export const kneelPose = (t: number): SidePose => ({torso: -8, head: 10, thN: -88, shN: 88, ftN: 0, thF: 0, shF: 90, ftF: -70, uaN: -45, faN: -50, uaF: -38, faF: -40, dy: 316, br: 1 + 0.005 * Math.sin(t)});
 
 export const runPose = (phase: number): SidePose => {
@@ -522,11 +581,11 @@ export const runPose = (phase: number): SidePose => {
   const n = leg(s, c), f = leg(sF, cF);
   return {
     thN: n.th, shN: n.sh, ftN: -(n.th + n.sh) * 0.5, thF: f.th, shF: f.sh, ftF: -(f.th + f.sh) * 0.5,
-    uaN: -38 + 10 * s, faN: -88, uaF: -30 - 10 * s, faF: -92,      // rifle carried across the chest
-    torso: 11 + 2 * s, head: -4, dy: -22 * Math.abs(s) - 6,
+    uaN: 36 * s, faN: -74 - 10 * Math.max(0, -s), uaF: -36 * s, faF: -74 - 10 * Math.max(0, s),   // arms pump; rifle slung on the shoulder
+    torso: 11 + 2 * s, head: -4, dy: -22 * Math.abs(s) - 6, sling: true,
   };
 };
-export const kneelAimPose = (t: number): SidePose => ({...kneelPose(t), torso: -2, head: 2, uaN: -80, faN: -12, uaF: -72, faF: -28});
+export const kneelAimPose = (t: number): SidePose => ({...kneelPose(t), grip: true, torso: -2, head: 2, uaN: -80, faN: -12, uaF: -72, faF: -28});
 export const deadPose = (t: number): SidePose => ({thN: -6, shN: 14, ftN: 20, thF: 8, shF: 6, ftF: 30, uaN: -48, faN: -10, uaF: -62, faF: -4, head: -16, torso: 0});
 
 /** where the muzzle is, in the figure's own (unflipped, right-facing) space; rifle carried by the near arm */

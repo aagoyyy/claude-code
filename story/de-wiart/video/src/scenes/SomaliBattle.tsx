@@ -1,12 +1,12 @@
 import React from 'react';
 import {Spec} from '../fx/Battle';
-import {askari, dervish, heroPith, officer} from './SomaliA';
+import {askari, dervish, dervishRifle, heroPith, officer} from './SomaliA';
 import {ProfileBattle} from './ProfileBattle';
 import {kf} from '../rig/pose';
 
 const heroSpec = (extra: Partial<Spec> = {}): Spec => ({id: 'hero', o: {...heroPith('right'), gear: 'rifle'}, x: 900, y: 935, s: 0.567, face: 'right', mode: 'run', fixed: true, ...extra});
 // defenders on the fort wall (far layer, world coordinates), firing down at the column
-const defenders = (aim: (f: number) => [number, number], from = 4): Spec[] => [-70, 10, 90, 170, 250].map((lx, i) => ({id: `df${i}`, o: dervish('left'), x: 1450 + lx * 0.82, y: 700 - 130 * 0.82 + 2, s: 0.045, face: 'left' as const, mode: 'aim' as const, fireFrom: from + i * 4, period: 14, aim, lo: true}));
+const defenders = (aim: (f: number) => [number, number], from = 4): Spec[] => [-70, 10, 90, 170, 250].map((lx, i) => ({id: `df${i}`, o: dervishRifle('left'), x: 1450 + lx * 0.82, y: 700 - 130 * 0.82 + 2, s: 0.045, face: 'left' as const, mode: 'aim' as const, fireFrom: from + i * 4, period: 14, aim, lo: true}));
 const runner = (id: string, x: number, die: number | undefined, s = 0.3, y = 850): Spec => ({id, o: dervish('left'), x, y, s, face: 'left', mode: 'run', vx: -9, stopAt: die, dieAt: die, lo: true});
 
 /* shot 1: the column advances on the fort while dervishes pour out of the gate and are shot down */

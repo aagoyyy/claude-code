@@ -9,7 +9,7 @@ import {Post} from '../fx/Post';
 import {Actors, Tracer} from '../fx/Battle';
 import {Figure, FigureDefs} from '../rig/Figure';
 import {idlePose} from '../rig/Side';
-import {askari, dervish, officer} from './SomaliA';
+import {askari, dervish, dervishRifle, officer} from './SomaliA';
 
 export const FPS = 24;
 export const SOMALI_FRAMES = 192;
@@ -89,7 +89,7 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
       <Layer cam={cam} depth={0.12}>
         <Fort x={1450} y={700} s={0.82} f={f} haze={0.52} />
         <FigureDefs />
-        {[-70, 10, 90, 170, 250].map((lx, k) => <Figure key={'dw' + k} uid={`dw${k}`} x={1450 + lx * 0.82} y={700 - 130 * 0.82 + 2} s={0.042} o={dervish('left')} p={{...idlePose(f / 7 + k), uaN: -30, faN: -40}} light="desert" lo />)}
+        {[-70, 10, 90, 170, 250].map((lx, k) => <Figure key={'dw' + k} uid={`dw${k}`} x={1450 + lx * 0.82} y={700 - 130 * 0.82 + 2} s={0.042} o={dervishRifle('left')} p={{...idlePose(f / 7 + k), uaN: -30, faN: -40}} light="desert" lo />)}
         {muzzle > 0 && <circle cx={1450 + 200 * 0.82} cy={700 - 88 * 0.82} r={20 * muzzle + 5} fill="#fff4cc" opacity={muzzle} />}
       </Layer>
       <Layer cam={cam} depth={0.2} blur={0.5}><Dunes seed={5} base={705} amp={44} haze={0.46} /></Layer>

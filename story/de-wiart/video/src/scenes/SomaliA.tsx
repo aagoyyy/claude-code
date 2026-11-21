@@ -12,6 +12,7 @@ const SPEED = 16;
 const khaki: Pal = {skin: '#e0a880', hair: '#4a3020', top: '#b2a878', bottom: '#9a9068', belt: '#6f4122', boots: '#7a4726', puttee: '#a29a6a'};
 export const heroPith = (face: 'left' | 'right', extra: Partial<SideOpts> = {}): SideOpts => ({pal: khaki, hero: true, young: true, head: 'pith', hat: '#eadfc4', face, ...extra});
 export const askari = (face: 'left' | 'right', gear: SideOpts['gear'] = 'rifle+pack'): SideOpts => ({pal: {skin: '#7a4a30', hair: '#1a1410', top: '#b2a070', bottom: '#9a8a5c', belt: '#5a3a22', boots: '#5a3a22', puttee: '#a29a6a'}, head: 'turban', hat: '#efe7d0', gear, face, mustache: true});
+export const dervishRifle = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#6a4028', hair: '#1a1410', top: '#e8dcc0', bottom: '#d8cca8', belt: '#5a3a22', boots: '#5a3a22'}, head: 'turban', hat: '#f2ead6', gear: 'rifle', rifle: 'martini', face, mustache: true});
 export const dervish = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#6a4028', hair: '#1a1410', top: '#e8dcc0', bottom: '#d8cca8', belt: '#5a3a22', boots: '#5a3a22'}, head: 'turban', hat: '#f2ead6', gear: 'spear', face, mustache: true});
 export const officer = (face: 'left' | 'right'): SideOpts => ({pal: {...khaki, skin: '#d9a07a', hair: '#6a4a30'}, head: 'pith', hat: '#eadfc4', gear: 'none', face, mustache: true});
 
