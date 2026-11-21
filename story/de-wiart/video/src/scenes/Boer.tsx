@@ -46,6 +46,7 @@ export const boerPose = (f: number): Pose => {
     yaw: kf(t, [[0, 0], [0.5, -24], [1.3, -24], [1.9, 24], [th - 0.15, 24], [th + 0.08, -34], [th + 0.9, -12], [th + 2.2, 0], [20, 0]]),
     turn: kf(t, [[0, 0], [1.9, 10], [th, 10], [th + 0.4, -14], [th + 2, 0]]),
     armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k), armR: mixA(p.armR, R.ua, k), foreR: mixA(p.foreR, R.fore, k),
+    mouth: f >= HIT ? 0.55 * k * (0.6 + 0.4 * Math.sin(f * 0.5)) : (f > 8 && f < HIT - 8 ? 0.2 + 0.8 * Math.abs(Math.sin(f * 0.8)) * (0.6 + 0.4 * Math.abs(Math.sin(f * 0.23))) : 0),
     torso: (p.torso || 0) + 10 * k, dx: 10 * Math.sin(Math.min(1, Math.max(0, (t - th) / 0.6)) * 3) * k,
   };
 };

@@ -4,16 +4,27 @@ import {Cam, camT, clamp, H, mix, mulberry32, ridge, W} from './util';
 const SUN = {x: 360, y: 610};
 const HAZE = '#ffc98e';
 
-export const Layer: React.FC<{cam: Cam; depth: number; blur?: number; blend?: string; opacity?: number; children: React.ReactNode}> = ({cam, depth, blur = 0, blend, opacity, children}) => (
-  <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0, overflow: 'visible', filter: blur ? `blur(${blur}px)` : undefined, mixBlendMode: blend as any, opacity}}>
-    <g transform={camT(cam, depth)}>{children}</g>
-  </svg>
-);
+export const Layer: React.FC<{cam: Cam; depth: number; blur?: number; blend?: string; opacity?: number; bx?: number; fx?: string; children: React.ReactNode}> = ({cam, depth, blur = 0, blend, opacity, bx = 0, fx, children}) => {
+  const filt = [blur ? `blur(${blur}px)` : '', fx || ''].filter(Boolean).join(' ') || undefined;
+  const id = `mb${Math.round(depth * 100)}`;
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0, overflow: 'visible', filter: filt, mixBlendMode: blend as any, opacity}}>
+      {bx > 0.6 && <defs><filter id={id} filterUnits="userSpaceOnUse" x={-800} y={-400} width={W + 1600} height={H + 800}><feGaussianBlur stdDeviation={`${bx.toFixed(2)} 0`} /></filter></defs>}
+      <g transform={camT(cam, depth)}><g filter={bx > 0.6 ? `url(#${id})` : undefined}>{children}</g></g>
+    </svg>
+  );
+};
 
 /** endless horizontal scroll for repeating layers: children must tile with period P */
-export const Scroll: React.FC<{off: number; P?: number; children: React.ReactNode}> = ({off, P = 2920, children}) => {
+export const Scroll: React.FC<{off: number; P?: number; mb?: number; children: React.ReactNode}> = ({off, P = 2920, mb = 0, children}) => {
   const o = ((off % P) + P) % P;
-  return <><g transform={`translate(${-o} 0)`}>{children}</g><g transform={`translate(${-o + P} 0)`}>{children}</g></>;
+  const id = `sc${Math.round(mb * 4)}`;
+  return (
+    <>
+      {mb > 0.6 && <defs><filter id={id} filterUnits="userSpaceOnUse" x={-1200} y={-400} width={P + 2400} height={H + 800}><feGaussianBlur stdDeviation={`${mb.toFixed(2)} 0`} /></filter></defs>}
+      <g filter={mb > 0.6 ? `url(#${id})` : undefined}><g transform={`translate(${-o} 0)`}>{children}</g><g transform={`translate(${-o + P} 0)`}>{children}</g></g>
+    </>
+  );
 };
 
 /* ---------- sky ---------- */
@@ -148,6 +159,7 @@ export const Plains: React.FC<{seed: number; y0: number; y1: number; count: numb
       <g mask={`url(#pmk${seed})`}>
       <rect x={-4000} y={y0} width={12000} height={y1 - y0 + 400} fill={`url(#pl${seed})`} />
       <rect x={-4000} y={y0} width={12000} height={y1 - y0 + 400} fill={`url(#pls${seed})`} />
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => { const r2 = mulberry32(seed * 31 + i); const yy = y0 + r2() * (y1 - y0 + 60); return <ellipse key={'pt' + i} cx={-500 + r2() * 2920} cy={yy} rx={260 + r2() * 420} ry={14 + r2() * 38} fill={mix(cAt(yy), i % 2 ? '#ffffff' : '#000000', 0.14)} opacity={0.4} style={{filter: 'blur(18px)'}} />; })}
       {strokes.map((s, i) => <path key={i} d={`M${s.x} ${s.y} q${s.l * 0.15} ${-s.l * 0.6} ${s.l * 0.3} ${-s.l}`} stroke={s.c} strokeWidth={s.w} opacity={s.o} fill="none" strokeLinecap="round" />)}
       {sunPatch && [0, 1, 2, 3, 4].map((i) => <polygon key={i} points={`${160 + i * 330},${y0} ${260 + i * 330},${y0} ${60 + i * 360},${y1 + 200} ${-140 + i * 360},${y1 + 200}`} fill="#ffe0a0" opacity=".07" />)}
       </g>

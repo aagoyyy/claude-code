@@ -1,7 +1,8 @@
 import React from 'react';
 import {Spec} from '../fx/Battle';
 import {askari, camelRider, dervish, dervishRifle, heroPith, officer} from './SomaliA';
-import {talk} from '../fx/Battle';
+import {mob, talk} from '../fx/Battle';
+import {tommy as _t} from './BoerA';
 import {ProfileBattle} from './ProfileBattle';
 import {kf} from '../rig/pose';
 
@@ -16,9 +17,13 @@ export const SomaliShot1: React.FC = () => (
     kind="desert" frames={132} fadeIn
     T={(f) => f * 13}
     caption={{title: 'SOMALILAND', sub: '1914', from: 10, to: 100}}
-    shake={[{t: 70, a: 7}, {t: 104, a: 7}]}
+    shake={[{t: 70, a: 7}, {t: 104, a: 9}]}
+    zoom={(f) => kf(f, [[0, 0.76], [46, 0.99], [132, 1.06]])}
+    fortHit={104}
+    roll={(f) => (f >= 104 ? 2.2 * Math.exp(-(f - 104) / 14) : 0)}
     far={{specs: defenders(() => [880 + (((Math.round(Math.random() * 0)) * 1)) , 925], 4)}}
-    mid={{specs: [
+    mid={{booms: [{x: 1450 + 13 * 104 * 0.5 + 0, y: 700, t: 104, r: 90}],
+    specs: [...mob('dx', 10, {id: 'x', o: dervish('left'), x: 0, y: 850, s: 0.3, face: 'left', mode: 'run', vx: -9, lo: true}, {x0: 2300, dx: 130, jx: 70, dy: 14, seed: 4}),
       {...runner('d1', 1750, 62), die: 'forward' as const}, {...runner('d2', 1900, 80), die: 'back' as const}, {...runner('d3', 2050, 96), die: 'stumble' as const}, runner('d4', 2200, undefined), {...runner('d5', 2350, 118), die: 'crawl' as const},
       {id: 'k1', o: askari('right'), x: 500, y: 846, s: 0.3, face: 'right', mode: 'run', vx: 6.5, stopAt: 34, after: 'kneelAim', fireFrom: 40, period: 12, aim: (f) => [1500 - (f - 40) * 9, 840], lo: true},
       {id: 'k2', o: askari('right'), x: 380, y: 850, s: 0.3, face: 'right', mode: 'run', vx: 6.5, stopAt: 48, after: 'kneelAim', fireFrom: 54, period: 11, aim: (f) => [1500 - (f - 40) * 9, 840], lo: true},

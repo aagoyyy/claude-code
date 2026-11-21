@@ -51,6 +51,7 @@ export const ypresPose = (f: number): Pose => {
     ...p,
     yaw: kf(t, [[0, 0], [0.7, 20], [1.6, -24], [2.4, 14], [th, 14], [th + 0.1, 30], [th + 1.0, 6], [th + 2.2, 20], [(VC - 10) / 24, 20], [VC / 24 + 0.4, 0], [20, 0]]),
     turn: kf(t, [[0, 0], [th, 0], [th + 0.4, 14], [th + 2.5, 8], [VC / 24, 0]]),
+    mouth: f >= HIT ? 0.6 * Math.max(k, 0.3) * (0.6 + 0.4 * Math.sin(f * 0.55)) : (f > 12 && f < HIT - 8 ? 0.15 + 0.7 * Math.abs(Math.sin(f * 0.7)) : 0),
     armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k),
   };
 };

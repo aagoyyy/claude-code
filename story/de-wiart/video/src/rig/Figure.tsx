@@ -40,11 +40,12 @@ export const FigureDefs: React.FC = () => (
 export type FigureProps = {
   uid: string; x: number; y: number; s?: number; o: SideOpts; p: SidePose;
   light?: LightName; lit?: number; lo?: boolean; shadow?: number; alpha?: number;
+  glow?: {x: number; y: number; k: number; color?: string};   // dynamic light (muzzle flash / blast) in figure-local space
   art?: React.ReactNode; box?: [number, number, number, number];   // custom artwork (animals) + its bounding box
 };
 
 /** A lit profile character standing on (x,y). Render inside an <svg> that has <FigureDefs/>. */
-export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo = false, shadow, alpha = 1, art, box = [-520, -1500, 1040, 1640]}) => {
+export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo = false, shadow, alpha = 1, glow, art, box = [-520, -1500, 1040, 1640]}) => {
   const L = LIGHTS[light];
   const sh = shadow ?? L.shadow;
   return (
@@ -61,11 +62,15 @@ export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light
       )}
       {!lo ? <g filter={`url(#fRim_${light})`}><use href={`#${uid}a`} /></g> : <use href={`#${uid}a`} />}
       {!lo && (
-        <g mask={`url(#${uid}m)`} opacity={Math.min(1, 0.4 + lit * 0.6)}>
+        <g mask={`url(#${uid}m)`} opacity={Math.min(1, 0.4 + lit * 0.6 + (glow ? glow.k * 0.5 : 0))}>
           <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figKey_${light})`} />
           <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="url(#figShade)" />
           <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figBounce_${light})`} />
           <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figHaze_${light})`} />
+          {glow && glow.k > 0.02 && (<>
+            <defs><radialGradient id={`${uid}g`} gradientUnits="userSpaceOnUse" cx={glow.x} cy={glow.y} r={1100}><stop offset="0" stopColor={glow.color ?? '#ffb24a'} stopOpacity={Math.min(0.85, glow.k)} /><stop offset=".45" stopColor={glow.color ?? '#ff8a2a'} stopOpacity={glow.k * 0.35} /><stop offset="1" stopColor="#ff7a1a" stopOpacity="0" /></radialGradient></defs>
+            <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#${uid}g)`} />
+          </>)}
         </g>
       )}
     </g>

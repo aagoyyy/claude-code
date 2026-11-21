@@ -45,6 +45,7 @@ export const somaliPose = (f: number): Pose => {
     ...p,
     yaw: kf(t, [[0, 0], [0.6, 26], [th - 0.1, 26], [th + 0.1, -38], [th + 1.2, -14], [th + 2.6, -4], [20, -4]]),
     turn: kf(t, [[0, 0], [1, 12], [th, 12], [th + 0.3, -12], [th + 2, -4]]),
+    mouth: f >= HIT ? 0.7 * k * (0.6 + 0.4 * Math.sin(f * 0.6)) : (f > 10 && f < HIT - 8 ? 0.2 + 0.7 * Math.abs(Math.sin(f * 0.75)) : 0),
     armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k),
   };
 };

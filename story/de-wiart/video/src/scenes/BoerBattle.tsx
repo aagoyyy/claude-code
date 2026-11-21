@@ -1,7 +1,7 @@
 import React from 'react';
 import {Spec} from '../fx/Battle';
 import {boer, civilianWoman, heroYoung, horseOfficer, tommy} from './BoerA';
-import {talk} from '../fx/Battle';
+import {mob, talk} from '../fx/Battle';
 import {ProfileBattle} from './ProfileBattle';
 import {kf} from '../rig/pose';
 
@@ -16,8 +16,11 @@ export const BoerShot1: React.FC = () => (
     T={(f) => f * 14}
     caption={{title: 'AFRIKA SELATAN', sub: '1899 · Perang Boer', from: 10, to: 100}}
     shake={[{t: 92, a: 11}]}
-    far={{specs: enemies((f) => [820 + ((f * 53) % 9) * 36, 925], 4)}}
-    mid={{specs: [
+    zoom={(f) => kf(f, [[0, 0.74], [50, 0.98], [132, 1.06]])}
+    roll={(f) => (f >= 92 ? 2.4 * Math.exp(-(f - 92) / 14) : 0)}
+    far={{specs: [...enemies((f) => [820 + ((f * 53) % 9) * 36, 925], 4), ...mob('fi', 14, {id: 'x', o: tommy('right'), x: 0, y: 770, s: 0.11, face: 'right', mode: 'run', vx: 14 * 0.33 * 0.5, lo: true}, {x0: -160, dx: 70, jx: 40, dy: 8, seed: 3})]}}
+    mid={{mounts: [0, 1, 2, 3].map((i) => ({id: 'cv' + i, a: {kind: 'horse' as const, coat: ['#7a4a2a', '#4a3020', '#9a7a52', '#2e2218'][i], mane: '#241810', tack: true}, x: 1500 + i * 210, y: 842 + (i % 2) * 6, s: 0.3, face: 'right' as const, vx: 14 * 0.5 + 2.6, stride: 1.4, phaseOff: i * 1.3, rider: horseOfficer('right'), lo: true})),
+    specs: [...mob('inf', 9, {id: 'x', o: tommy('right'), x: 0, y: 850, s: 0.3, face: 'right', mode: 'run', vx: 7, lo: true}, {x0: 120, dx: 120, jx: 70, dy: 14, seed: 5}),
       {id: 'k1', o: tommy('right'), x: 560, y: 846, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 46, after: 'kneelAim', fireFrom: 52, period: 12, aim: () => [1330, 640], lo: true},
       {id: 'k2', o: tommy('right', '#c89870'), x: 420, y: 850, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 60, after: 'kneelAim', fireFrom: 66, period: 11, aim: () => [1330, 640], lo: true},
       {id: 'k3', o: tommy('right'), x: 760, y: 842, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 38, after: 'kneelAim', fireFrom: 44, period: 13, aim: () => [1330, 640], lo: true, flinch: [95]},
@@ -28,7 +31,7 @@ export const BoerShot1: React.FC = () => (
         {id: 'a1', o: {...tommy('right'), bayonet: true}, x: 640, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
         {id: 'a2', o: {...tommy('right', '#c89870'), bayonet: true}, x: 440, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
         {id: 'a3', o: tommy('right'), x: 250, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, stopAt: 74, dieAt: 74, die: 'stumble' as const, lo: false},
-        {id: 'a4', o: tommy('right'), x: 790, y: 892, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true},
+        {id: 'a4', o: tommy('right'), x: 790, y: 892, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, stopAt: 92, dieAt: 92, die: 'blast' as const, lo: false},
       ],
       booms: [{x: 1500 + 14 * 92 * 0.78, y: 905, t: 92, r: 80}],
       mounts: [{id: 'hz1', a: {kind: 'horse', coat: '#7a4a2a', mane: '#241810', tack: true}, x: 1380, y: 900, s: 0.44, face: 'right', vx: 14 * 0.78, stride: 1.25, rider: horseOfficer('right')}],

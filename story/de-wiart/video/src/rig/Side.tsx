@@ -4,7 +4,7 @@ import {mix} from '../world/util';
 /** Side-view (profile) rig. Local space: feet on y=0, figure faces +x, ~1270 tall. Mirror with `face='left'`. */
 export type Pal = {skin: string; hair: string; top: string; bottom: string; belt: string; boots: string; puttee?: string; metal?: string};
 export type Head = 'none' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina' | 'flatcap' | 'scarf' | 'nursecap';
-export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; mouth?: number; brow?: number; squint?: number; grimace?: number};
+export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; hatLag?: number; slingLag?: number; packBounce?: number; spin?: number; mouth?: number; brow?: number; squint?: number; grimace?: number};
 
 export type SideOpts = {
   pal: Pal;
@@ -93,7 +93,7 @@ const Button: React.FC<{x: number; y: number; r?: number}> = ({x, y, r = 5.5}) =
   <g><circle cx={x} cy={y} r={r} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.2" /><circle cx={x - r * 0.3} cy={y - r * 0.3} r={r * 0.32} fill="#fff6c8" /></g>
 );
 
-const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; mouth?: number; brow?: number; squint?: number; grimace?: number}> = ({o, near, blink, mouth = 0, brow = 0, squint = 0, grimace = 0}) => {
+const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; hatLag?: number; mouth?: number; brow?: number; squint?: number; grimace?: number}> = ({o, near, blink, hatLag = 0, mouth = 0, brow = 0, squint = 0, grimace = 0}) => {
   const {pal} = o;
   const fine = o.fine !== false;
   const skinD = sh(pal.skin, 0.3), skinL = hl(pal.skin, 0.22), skinM = sh(pal.skin, 0.12);
@@ -191,7 +191,7 @@ const HeadArt: React.FC<{o: SideOpts; near: boolean; blink: number; mouth?: numb
       )}
       {o.hairStyle === 'bun' && <g><circle cx={-74} cy={-34} r={24} fill={pal.hair} stroke={sh(pal.hair, 0.5)} strokeWidth="2.5" /><path d="M-86 -40 Q-74 -52 -62 -40" stroke={hl(pal.hair, 0.4)} strokeWidth="3" fill="none" opacity=".6" /></g>}
       {o.hairStyle === 'long' && <path d="M-70 -50 Q-110 20 -84 120 L-44 110 Q-60 40 -40 -10 Z" fill={pal.hair} stroke={sh(pal.hair, 0.5)} strokeWidth="2.5" />}
-      <HeadGear kind={o.head || 'none'} c={hatC} />
+      <g transform={`rotate(${hatLag} 0 -50)`}><HeadGear kind={o.head || 'none'} c={hatC} /></g>
     </g>
   );
 };
@@ -489,7 +489,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         </g>
       )}
       {(o.gear === 'pack' || o.gear === 'rifle+pack') && (
-        <g transform={`translate(0 -666) ${rot(p.torso)}`}>
+        <g transform={`translate(0 -666) ${rot(p.torso)} translate(${-(p.packBounce || 0) * 0.5} ${p.packBounce || 0})`}>
           <rect x={-200} y={-330} width={110} height={250} rx={26} fill={sh('#8a8458', 0.2)} stroke={OUT} strokeWidth="3" />
           <rect x={-200} y={-330} width={110} height={250} rx={26} fill="url(#sideShade)" />
           <rect x={-200} y={-330} width={110} height={250} rx={26} fill="url(#weaveS)" />
@@ -501,7 +501,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         </g>
       )}
       {sling && (
-        <g transform={`translate(0 -666) ${rot(p.torso)}`}><g transform="translate(-118 -150) rotate(192)"><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g></g>
+        <g transform={`translate(0 -666) ${rot(p.torso)}`}><g transform={`translate(-118 -150) rotate(${192 + (p.slingLag || 0)})`}><Rifle metal={metal} bayonet={o.bayonet} fine={fine} kind={rk} /></g></g>
       )}
       <g transform={`translate(0 -666) ${rot(p.torso)} scale(1 ${p.br || 1})`}>
         <ellipse cx={0} cy={0} rx={96 * B} ry={64} fill={bot} stroke={OUT} strokeWidth="3" />
@@ -580,7 +580,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
         {sling && (<g><path d="M-40 -350 Q-92 -276 -112 -176" stroke="#3a2414" strokeWidth="11" fill="none" strokeLinecap="round" /><path d="M-40 -350 Q-90 -276 -110 -178" stroke="#8a5a32" strokeWidth="2" fill="none" strokeDasharray="7 5" opacity=".7" /><rect x={-58} y={-346} width={16} height={22} rx={3} fill="url(#goldS)" stroke="#6b5214" strokeWidth="1.5" transform="rotate(-18 -50 -335)" /></g>)}
         {/* head */}
         <g transform={`translate(5 -352) ${rot(p.head)}`}>
-          <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} /></g>
+          <g transform="translate(10 -106)"><HeadArt o={o} near={nearIsLeftArm} blink={p.blink === undefined ? 1 : p.blink} hatLag={p.hatLag} mouth={p.mouth} brow={p.brow} squint={p.squint} grimace={p.grimace} /></g>
         </g>
       </g>
       <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} />
@@ -588,7 +588,7 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   );
   const fk = p.fall || 0;
   const fa = Math.abs(fk);
-  return <g transform={`translate(${(p.dx || 0).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''} translate(0 ${(-(fk > 0 ? 114 : 130) * fa).toFixed(1)}) rotate(${(-88 * fk).toFixed(2)}) scale(1 ${o.stretch ?? 1})`}>{art}</g>;
+  return <g transform={`translate(${(p.dx || 0).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''} translate(0 ${(-(fk > 0 ? 114 : 130) * fa).toFixed(1)}) rotate(${(-88 * fk + (p.spin || 0)).toFixed(2)}) scale(1 ${o.stretch ?? 1})`}>{art}</g>;
 };
 
 /** walking cycle (phase in radians); stride scales the swing */

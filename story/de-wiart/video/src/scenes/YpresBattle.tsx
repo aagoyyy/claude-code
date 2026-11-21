@@ -1,7 +1,7 @@
 import React from 'react';
 import {Spec} from '../fx/Battle';
 import {german, heroTrench, tommyW1} from './YpresA';
-import {talk} from '../fx/Battle';
+import {mob, talk} from '../fx/Battle';
 import {kf} from '../rig/pose';
 import {ProfileBattle} from './ProfileBattle';
 
@@ -14,10 +14,12 @@ export const YpresShot1: React.FC = () => (
     T={(f) => f * 9}
     caption={{title: 'YPRES, BELGIA', sub: '1915 · Perang Dunia I', from: 10, to: 100}}
     shake={[{t: 36, a: 12}, {t: 78, a: 14}, {t: 112, a: 10}]}
+    zoom={(f) => kf(f, [[0, 0.78], [50, 1.0], [132, 1.05]])}
+    roll={(f) => [36, 78, 112].reduce((a, t) => a + (f >= t ? (t === 78 ? 2.8 : 1.6) * Math.exp(-(f - t) / 12) : 0), 0)}
     flash={(f) => [36, 78, 112].reduce((a, t) => a + (f >= t && f < t + 8 ? Math.exp(-(f - t) / 2) : 0), 0)}
     bagHits={[{x: 1666, t: 36}, {x: 2276, t: 78}, {x: 2126, t: 112}]}
     focus={(f) => kf(f, [[0, 1.6], [36, 1.0], [100, 0.5], [132, 1.0]])}
-    far={{specs: germans(() => [900, 760])}}
+    far={{specs: [...germans(() => [900, 760]), ...mob('gx', 10, {id: 'x', o: german('left'), x: 0, y: 784, s: 0.15, face: 'left', mode: 'aim', fireFrom: 6, period: 12, aim: () => [900, 760], lo: true}, {x0: 1000, dx: 60, jx: 30, dy: 6, seed: 7})]}}
     mid={{
       specs: [
         {id: 'r1', o: tommyW1('right'), x: 640, y: 846, s: 0.3, face: 'right', mode: 'run', vx: 4.5, stopAt: 60, dieAt: 60, die: 'stumble' as const, lo: false},

@@ -289,6 +289,7 @@ export const RigBody: React.FC<{T: RigTransforms; V: RigVariant}> = ({T, V}) => 
           <path d="M498 606 Q504 610 510 608" stroke="#6b3f24" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
           <path d="M486 650 Q500 658 514 650" stroke="#a85c46" strokeWidth="4" fill="none" strokeLinecap="round"/>
           <path d="M490 664 Q500 668 510 664" stroke="#9c6544" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity=".7"/>
+          <g id="mouthF" transform={T.mouth}><ellipse cx="500" cy="654" rx="13" ry="9" fill="#2e0e0a" stroke="#7a2a1c" strokeWidth="1.5"/><rect x="491" y="647" width="18" height="4" fill="#f1e9d8" opacity=".9"/><ellipse cx="500" cy="660" rx="7" ry="3.5" fill="#b0504a"/></g>
           <path d="M452 628 Q468 600 500 612 Q532 600 550 628 Q540 646 520 634 Q500 642 480 634 Q460 646 452 628 Z" fill={V.young ? '#5a4333' : '#a4a4a0'} stroke="#5f5f5c" strokeWidth="2.5"/>
           <path d="M468 618 q10 8 22 4 M512 620 q10 4 22 -4 M462 628 q8 6 16 4 M522 630 q8 2 18 -4" stroke={V.young ? '#3a291c' : '#6f6f6c'} strokeWidth="2" fill="none" strokeLinecap="round"/>
           <path d="M462 614 Q484 606 500 614" stroke={V.young ? '#8a6a4c' : '#f0f0ec'} strokeWidth="3" fill="none" opacity=".6" strokeLinecap="round"/>

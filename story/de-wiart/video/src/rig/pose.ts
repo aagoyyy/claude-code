@@ -3,7 +3,7 @@ export type JointName =
   | 'torso' | 'head' | 'armL' | 'foreL' | 'armR' | 'foreR'
   | 'thighL' | 'shinL' | 'footL' | 'thighR' | 'shinR' | 'footR';
 
-export type Pose = Partial<Record<JointName, number>> & {dx?: number; dy?: number; br?: number; blink?: number; yaw?: number; turn?: number};
+export type Pose = Partial<Record<JointName, number>> & {dx?: number; dy?: number; br?: number; blink?: number; yaw?: number; turn?: number; mouth?: number};
 
 export const PIVOT: Record<JointName | 'root', [number, number]> = {
   root: [505, 1040], torso: [505, 1030], head: [500, 675],
@@ -21,7 +21,7 @@ export const CHAIN: Record<string, (JointName | 'root')[]> = {
   thighR: ['root', 'thighR'], shinR: ['root', 'thighR', 'shinR'], footR: ['root', 'thighR', 'shinR', 'footR'],
 };
 
-export type RigTransforms = Record<JointName | 'root' | 'blink' | 'headYaw' | 'feat', string>;
+export type RigTransforms = Record<JointName | 'root' | 'blink' | 'headYaw' | 'feat' | 'mouth', string>;
 
 const f = (n: number) => +n.toFixed(3);
 
@@ -39,6 +39,7 @@ export function transforms(p: Pose): RigTransforms {
   t.blink = `translate(474 565) scale(1 ${f(b)}) translate(-474 -565)`;
   const yw = ((p.yaw || 0) * Math.PI) / 180;
   t.headYaw = `translate(500 0) scale(${f(Math.max(0.55, Math.cos(yw)))} 1) translate(-500 0)`;
+  t.mouth = `translate(500 648) scale(1 ${f(Math.max(0.001, p.mouth || 0))}) translate(-500 -648)`;
   t.feat = `translate(${f(Math.sin(yw) * 58)} 0)`;
   return t;
 }

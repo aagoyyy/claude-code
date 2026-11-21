@@ -11,14 +11,18 @@ let UID = 0;
 
 const Leg: React.FC<{x: number; belly: number; up: number; lo: number; th: number; sh2: number; c: string; w: number}> = ({x, belly, up, lo, th, sh2, c, w}) => (
   <g transform={`translate(${x} ${-belly}) rotate(${th})`}>
-    <path d={`M${-w / 2} 0 L${w / 2} 0 L${w * 0.32} ${up} L${-w * 0.32} ${up} Z`} fill={c} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
-    <circle cx={0} cy={0} r={w / 2} fill={c} />
-    <path d={`M${-w * 0.25} 10 L${-w * 0.2} ${up - 10}`} stroke="#fff" strokeWidth="4" opacity=".16" />
+    {/* thigh / forearm: thick muscle tapering to the knee */}
+    <path d={`M${-w * 0.62} 0 Q${-w * 0.6} ${up * 0.4} ${-w * 0.26} ${up} L${w * 0.26} ${up} Q${w * 0.6} ${up * 0.4} ${w * 0.62} 0 Z`} fill={c} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
+    <path d={`M${-w * 0.4} ${up * 0.1} Q${-w * 0.2} ${up * 0.5} ${-w * 0.16} ${up * 0.9}`} stroke="#fff" strokeWidth="6" fill="none" opacity=".16" />
+    <path d={`M${w * 0.3} ${up * 0.1} Q${w * 0.22} ${up * 0.5} ${w * 0.14} ${up * 0.9}`} stroke="#000" strokeWidth="8" fill="none" opacity=".18" />
     <g transform={`translate(0 ${up}) rotate(${sh2})`}>
-      <path d={`M${-w * 0.3} 0 L${w * 0.3} 0 L${w * 0.2} ${lo} L${-w * 0.2} ${lo} Z`} fill={sh(c, 0.12)} stroke={OUT} strokeWidth="3" strokeLinejoin="round" />
-      <circle cx={0} cy={0} r={w * 0.3} fill={sh(c, 0.12)} />
-      <path d={`M${-w * 0.26} ${lo - 6} L${w * 0.3} ${lo - 6} L${w * 0.38} ${lo + 34} L${-w * 0.3} ${lo + 34} Z`} fill="#201810" stroke={OUT} strokeWidth="2.5" />
-      <path d={`M${-w * 0.2} 10 L${-w * 0.16} ${lo - 8}`} stroke="#fff" strokeWidth="3" opacity=".14" />
+      <circle cx={0} cy={0} r={w * 0.3} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" />
+      {/* cannon bone, fetlock joint, pastern, hoof */}
+      <path d={`M${-w * 0.2} 0 L${w * 0.2} 0 L${w * 0.14} ${lo} L${-w * 0.14} ${lo} Z`} fill={sh(c, 0.1)} stroke={OUT} strokeWidth="2.5" strokeLinejoin="round" />
+      <circle cx={0} cy={lo} r={w * 0.2} fill={sh(c, 0.12)} stroke={OUT} strokeWidth="2.5" />
+      <path d={`M${-w * 0.13} ${lo} L${w * 0.17} ${lo} L${w * 0.2} ${lo + 30} L${-w * 0.14} ${lo + 30} Z`} fill={sh(c, 0.14)} stroke={OUT} strokeWidth="2.5" />
+      <path d={`M${-w * 0.24} ${lo + 26} L${w * 0.3} ${lo + 26} L${w * 0.36} ${lo + 54} L${-w * 0.3} ${lo + 54} Z`} fill="#241a12" stroke={OUT} strokeWidth="2.5" />
+      <path d={`M${-w * 0.14} 8 L${-w * 0.1} ${lo - 6}`} stroke="#fff" strokeWidth="3" opacity=".14" />
     </g>
   </g>
 );
@@ -61,6 +65,8 @@ export const AnimalArt: React.FC<{o: AnimalOpts; p: AnimalPose}> = ({o, p}) => {
         <path d={`M-300 ${camel ? -900 : -680} Q0 ${camel ? -840 : -640} 280 ${camel ? -880 : -690}`} stroke="#000" strokeWidth="46" fill="none" opacity=".25" filter="url(#sBlur6)" />
         <path d={`M-330 ${camel ? -1240 : -960} Q-100 ${camel ? -1330 : -1040} 200 ${camel ? -1300 : -1000}`} stroke="#fff" strokeWidth="26" fill="none" opacity=".16" filter="url(#sBlur6)" />
         <path d={`M200 ${camel ? -980 : -860} Q150 ${camel ? -900 : -760} 190 ${camel ? -850 : -690} M-210 ${camel ? -980 : -860} Q-170 ${camel ? -900 : -760} -230 ${camel ? -850 : -690}`} stroke={sh(c, 0.4)} strokeWidth="4" fill="none" opacity=".5" />
+        <ellipse cx={camel ? 200 : 190} cy={camel ? -1020 : -800} rx={camel ? 130 : 120} ry={camel ? 190 : 160} fill="#fff" opacity=".07" />
+        <ellipse cx={camel ? -230 : -210} cy={camel ? -1040 : -800} rx={camel ? 160 : 150} ry={camel ? 210 : 180} fill="#fff" opacity=".07" />
         <path d={`M300 ${camel ? -1250 : -1000} Q380 ${camel ? -1100 : -900} 340 ${camel ? -900 : -760}`} stroke="#000" strokeWidth="22" fill="none" opacity=".2" filter="url(#sBlur6)" />
       </g>
       {/* mane / hump fur / forelock */}
@@ -71,6 +77,7 @@ export const AnimalArt: React.FC<{o: AnimalOpts; p: AnimalPose}> = ({o, p}) => {
         <ellipse cx={camel ? 626 : 590} cy={camel ? -1556 : -1220} rx={11} ry={8} fill="#1a1008" /><circle cx={camel ? 629 : 593} cy={camel ? -1559 : -1223} r={3} fill="#fff" opacity=".7" />
         <circle cx={camel ? 716 : 694} cy={camel ? -1504 : -1140} r={6} fill="#1a1008" opacity=".8" />
         <path d={camel ? 'M630 -1506 Q680 -1494 722 -1498' : 'M600 -1140 Q650 -1128 690 -1128'} stroke="#3a2418" strokeWidth="3" fill="none" />
+        <path d={camel ? 'M560 -1530 Q600 -1500 640 -1504' : 'M520 -1190 Q560 -1130 640 -1130'} stroke={sh(c, 0.35)} strokeWidth="5" fill="none" opacity=".6" />
         <path d={camel ? 'M540 -1600 L526 -1656 L570 -1612 Z' : 'M500 -1250 L480 -1330 L540 -1262 Z'} fill={sh(c, 0.2)} stroke={OUT} strokeWidth="3" />
       </g>
       {/* tack: blanket, saddle, girth, bridle, reins */}

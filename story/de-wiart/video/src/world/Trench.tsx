@@ -74,7 +74,7 @@ export const DeadTree: React.FC<{x: number; y: number; s: number; haze: number; 
   );
 };
 
-export const Wire: React.FC<{y: number; x0: number; x1: number; s: number; haze: number; seed: number}> = ({y, x0, x1, s, haze, seed}) => {
+export const Wire: React.FC<{y: number; x0: number; x1: number; s: number; haze: number; seed: number; f?: number; hits?: {x: number; t: number}[]}> = ({y, x0, x1, s, haze, seed, f = 0, hits = []}) => {
   const c = mix('#0d1118', NHAZE, haze);
   const r = mulberry32(seed);
   const posts = [] as number[];
@@ -87,7 +87,7 @@ export const Wire: React.FC<{y: number; x0: number; x1: number; s: number; haze:
   }
   return (
     <g>
-      {posts.map((x, i) => <path key={i} d={`M${x} ${y} L${x + (i % 2) * 4} ${y - 120 * s}`} stroke={c} strokeWidth={5 * s} />)}
+      {posts.map((x, i) => { let tilt = 0; hits.forEach((h) => { const age = f - h.t, d = x - h.x; if (age > 0 && Math.abs(d) < 360) tilt += Math.sign(d) * (1 - Math.abs(d) / 360) * 24 * (1 - Math.exp(-age / 4)); }); return <path key={i} d={`M${x} ${y} L${x + (i % 2) * 4 + tilt} ${y - 120 * s * Math.cos(tilt / 40)}`} stroke={c} strokeWidth={5 * s} />; })}
       <path d={coil} stroke={c} strokeWidth={2 * s} fill="none" />
       <path d={coil} stroke="#ff9a5a" strokeWidth={1 * s} fill="none" opacity={0.28 * (1 - haze)} transform="translate(-2 -2)" />
     </g>
@@ -164,6 +164,25 @@ export const Smoke: React.FC<{f: number; x: number; y: number; seed: number; w: 
       {Array.from({length: 9}, (_, i) => {
         const k = ((f * 0.4 + i * 22) % 200) / 200;
         return <ellipse key={i} cx={x + (r() - 0.5) * w * 0.4 + k * 120 + Math.sin(f * 0.02 + i) * 14} cy={y - k * 460} rx={(w * 0.3) * (0.6 + k * 1.6)} ry={(w * 0.2) * (0.6 + k * 1.4)} fill="#1a1c24" opacity={0.55 * (1 - k)} />;
+      })}
+    </>
+  );
+};
+
+/** puddles reflecting the sky glow; rain makes rings */
+export const Puddles: React.FC<{f: number; seed: number; y0: number; y1: number; glow: number; count?: number}> = ({f, seed, y0, y1, glow, count = 9}) => {
+  const r = mulberry32(seed);
+  return (
+    <>
+      {Array.from({length: count}, (_, i) => {
+        const x = r() * 2920 - 500, y = y0 + r() * (y1 - y0), w = 90 + r() * 220, k = (y - y0) / (y1 - y0);
+        return (
+          <g key={i}>
+            <ellipse cx={x} cy={y} rx={w * (0.6 + k)} ry={w * 0.09 * (0.6 + k)} fill="#0c1018" opacity=".7" />
+            <ellipse cx={x} cy={y - 1} rx={w * (0.6 + k) * 0.9} ry={w * 0.06 * (0.6 + k)} fill={mix('#3a4a66', '#ff9a4a', 0.3 + 0.5 * glow)} opacity={0.55 + 0.3 * glow} />
+            {[0, 1].map((j) => { const ph = ((f * 0.05 + i * 0.37 + j * 0.5) % 1); return <ellipse key={j} cx={x + Math.sin(i * 3 + j) * w * 0.3} cy={y} rx={w * 0.4 * ph * (0.6 + k)} ry={w * 0.05 * ph * (0.6 + k)} fill="none" stroke="#9fb4d8" strokeWidth="2" opacity={0.6 * (1 - ph)} />; })}
+          </g>
+        );
       })}
     </>
   );

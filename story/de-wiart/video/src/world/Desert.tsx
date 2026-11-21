@@ -41,7 +41,8 @@ export const Dunes: React.FC<{seed: number; base: number; amp: number; haze: num
 };
 
 /** mud-brick fort with towers, crenellations, shaded right side and a flapping flag */
-export const Fort: React.FC<{x: number; y: number; s: number; f: number; haze: number}> = ({x, y, s, f, haze}) => {
+export const Fort: React.FC<{x: number; y: number; s: number; f: number; haze: number; hit?: number}> = ({x, y, s, f, haze, hit}) => {
+  const age = hit === undefined ? -1 : f - hit;
   const lit = mix('#e7c48c', HZ, haze), mid = mix('#c49462', HZ, haze), sh = mix('#7a4e48', HZ, haze * 0.8), dark = mix('#3a2528', HZ, haze * 0.6);
   const cren = (x0: number, w: number, yy: number) => Array.from({length: Math.floor(w / 26)}, (_, i) => <rect key={i} x={x0 + i * 26 + 4} y={yy - 14} width={14} height={16} fill={lit} />);
   const wave = Math.sin(f * 0.22) * 6;
@@ -57,11 +58,19 @@ export const Fort: React.FC<{x: number; y: number; s: number; f: number; haze: n
       <rect x={-170} y={-210} width={80} height={214} fill={mid} /><rect x={-170} y={-210} width={34} height={214} fill={lit} /><rect x={-118} y={-210} width={28} height={214} fill={sh} opacity=".7" />
       {cren(-170, 80, -210)}
       <rect x={250} y={-190} width={76} height={194} fill={mid} /><rect x={250} y={-190} width={26} height={194} fill={lit} /><rect x={296} y={-190} width={30} height={194} fill={sh} opacity=".8" />
-      {cren(250, 76, -190)}
+      {age < 0 && cren(250, 76, -190)}
       {/* gate + windows */}
       <path d="M30 4 V-70 Q30 -100 62 -100 Q94 -100 94 -70 V4 Z" fill={dark} />
       {[ -60, 120, 200 ].map((wx, i) => <rect key={i} x={wx} y={-100} width={14} height={26} rx={7} fill={dark} />)}
       <rect x={-146} y={-136} width={432} height={8} fill={lit} opacity=".7" />
+      {/* shell damage: the right tower crumbles — blocks tumble, rubble and a dust column remain */}
+      {age >= 0 && (
+        <g>
+          <path d="M250 4 L262 -64 L282 -40 L300 -92 L326 -60 L326 4 Z" fill={sh} />
+          {[0, 1, 2, 3, 4, 5].map((i) => { const t = Math.min(age, 60), vx = (i - 2.5) * 5, vy = -(10 + (i % 3) * 6); return <rect key={i} x={288 + vx * t * 0.8} y={-170 + vy * t * 0.4 + 0.5 * 0.9 * t * t * 0.6} width={22 + (i % 3) * 8} height={18} fill={i % 2 ? lit : mid} transform={`rotate(${i * 27 + t * 9} ${300 + vx * t * 0.8} ${-170})`} opacity={clamp(1.4 - age / 70)} />; })}
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => <ellipse key={'d' + i} cx={288 + Math.sin(i * 1.7) * 40 + age * 0.4} cy={-30 - Math.min(age, 90) * 2.6 - i * 12} rx={34 + age * 0.9} ry={26 + age * 0.7} fill="#c8aa80" opacity={0.5 * clamp(1 - age / 110)} style={{filter: 'blur(10px)'}} />)}
+        </g>
+      )}
       {/* flag */}
       <path d="M-130 -210 V-300" stroke={dark} strokeWidth="4" />
       <path d={`M-128 -296 Q${-90 + wave} ${-300 - wave * 0.6} ${-50 + wave * 1.4} ${-292} L${-50 + wave * 1.4} ${-268} Q${-90 + wave} ${-274 + wave * 0.6} -128 -270 Z`} fill="#b3322a" />
