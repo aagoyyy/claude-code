@@ -83,3 +83,6 @@ export const BoerA: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+export const civilianWoman = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#e0a880', hair: '#6a3a22', top: '#7a5a4a', bottom: '#5a4a3a', belt: '#3a2a1a', boots: '#241810'}, head: 'scarf', hat: '#b8a888', outfit: 'skirt', hairStyle: 'long', build: 0.9, face});
+export const horseOfficer = (face: 'left' | 'right'): SideOpts => ({pal: {...khaki, hair: '#4a3020'}, head: 'slouch', hat: '#8a7448', mustache: true, gear: 'none', face});

@@ -6,6 +6,8 @@ import {Ypres, YPRES_FRAMES} from './scenes/Ypres';
 import {Cast, CAST_FRAMES} from './scenes/Cast';
 import {Boer2, BOER2_FRAMES} from './scenes/Boer2';
 import {HeroSide, HEROSIDE_FRAMES} from './scenes/HeroSide';
+import {Cast2, CAST2_FRAMES} from './scenes/Cast2';
+import {MapTransition, MAP_FRAMES, MedalInsert, MEDAL_FRAMES} from './scenes/Inserts';
 import {Somali2, SOMALI2_FRAMES} from './scenes/Somali2';
 import {Ypres2, YPRES2_FRAMES} from './scenes/Ypres2';
 import {Story, STORY_FRAMES, BoerChapter, BOERCH, SomaliChapter, SOMCH, YpresChapter, YPRCH} from './scenes/Story';
@@ -26,5 +28,8 @@ export const Root: React.FC = () => (
     <Composition id="SomaliChapter" component={SomaliChapter} durationInFrames={SOMCH} fps={FPS} width={1920} height={1080} />
     <Composition id="YpresChapter" component={YpresChapter} durationInFrames={YPRCH} fps={FPS} width={1920} height={1080} />
     <Composition id="Story" component={Story} durationInFrames={STORY_FRAMES} fps={FPS} width={1920} height={1080} />
+    <Composition id="Cast2" component={Cast2} durationInFrames={CAST2_FRAMES} fps={FPS} width={1920} height={1080} />
+    <Composition id="MapIns" component={() => <MapTransition from={[600, 860, 'Afrika Selatan']} to={[930, 420, 'Somaliland']} y0={1899} y1={1914} sub="SOMALILAND" />} durationInFrames={MAP_FRAMES} fps={FPS} width={1920} height={1080} />
+    <Composition id="MedalIns" component={MedalInsert} durationInFrames={MEDAL_FRAMES} fps={FPS} width={1920} height={1080} />
   </>
 );

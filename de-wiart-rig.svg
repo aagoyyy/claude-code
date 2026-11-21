@@ -344,7 +344,7 @@
         </g>
 
         <!-- ===== HEAD ===== -->
-        <g id="j-head" data-j="head">
+        <g id="j-head" data-j="head"><g id="headYaw">
           <rect x="470" y="640" width="60" height="60" fill="#c28a62"/>
           <path d="M470 646 Q500 676 530 646 V670 Q500 690 470 670 Z" fill="#000" opacity=".3" filter="url(#blur3)"/>
           <ellipse cx="428" cy="572" rx="13" ry="24" fill="#dfae86" stroke="#6b3f24" stroke-width="2.5"/><path d="M426 560 Q420 572 428 584" stroke="#a8714b" stroke-width="2.5" fill="none"/>
@@ -364,7 +364,7 @@
           <path d="M440 470 Q470 450 510 448 M452 486 Q490 466 536 474 M432 520 Q440 494 458 484 M566 520 Q564 500 552 488" stroke="#8f8f8b" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/>
           <path d="M448 466 Q500 440 556 472" stroke="#fff" stroke-width="4" fill="none" opacity=".6" stroke-linecap="round"/>
           <path d="M424 556 Q426 580 432 592 Q430 560 436 540 Z M576 556 Q574 580 568 592 Q570 560 564 540 Z" fill="#cfcfcb" stroke="#7a7a76" stroke-width="1.5"/>
-          <path d="M456 550 Q474 538 490 548" stroke="#a5a5a1" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <g id="faceFeat"><path d="M456 550 Q474 538 490 548" stroke="#a5a5a1" stroke-width="6" fill="none" stroke-linecap="round"/>
           <g class="blink"><ellipse cx="474" cy="565" rx="12" ry="7.5" fill="#fbfbf6" stroke="#6b3f24" stroke-width="1.5"/><circle cx="476" cy="565" r="6" fill="#4a86b8"/><circle cx="476" cy="565" r="2.8" fill="#0f1822"/><circle cx="478" cy="562.5" r="1.6" fill="#fff"/></g>
           <path d="M460 563 Q474 553 489 562" stroke="#4a2a18" stroke-width="2.5" fill="none" stroke-linecap="round"/>
           <path d="M502 566 Q494 592 498 604 Q512 610 520 600" stroke="#9c6544" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -384,8 +384,8 @@
           <ellipse cx="528" cy="564" rx="23" ry="19" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-dasharray="3 3"/>
           <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/></g>
           <g id="scars"><path d="M564 560 Q574 582 566 604" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/>
-          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/></g>
-        </g>
+          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".75"/></g></g>
+        </g></g>
 
         <!-- ===== LEFT ARM (viewer's left): fist, drawn last so it can salute in front of the face ===== -->
         <g id="j-armL" data-j="armL">

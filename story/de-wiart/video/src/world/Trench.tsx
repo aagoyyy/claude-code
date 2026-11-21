@@ -95,7 +95,7 @@ export const Wire: React.FC<{y: number; x0: number; x1: number; s: number; haze:
 };
 
 /** sandbag parapet behind/around the character */
-export const Sandbags: React.FC<{y: number; x0: number; x1: number; rows: number; s: number; light: number; seed: number}> = ({y, x0, x1, rows, s, light, seed}) => {
+export const Sandbags: React.FC<{y: number; x0: number; x1: number; rows: number; s: number; light: number; seed: number; f?: number; hits?: {x: number; t: number}[]}> = ({y, x0, x1, rows, s, light, seed, f = 0, hits = []}) => {
   const r = mulberry32(seed);
   const bags: React.ReactNode[] = [];
   const bw = 120 * s, bh = 50 * s;
@@ -104,8 +104,18 @@ export const Sandbags: React.FC<{y: number; x0: number; x1: number; rows: number
       const k = r();
       const base = mix('#3a3224', '#8a7a58', clamp(light * 0.7 + k * 0.3));
       const yy = y - row * bh * 0.82;
+      // blast reaction: bags near a shell burst are thrown up and sideways, then settle displaced
+      let dx = 0, dy = 0, rotB = 0;
+      hits.forEach((h) => {
+        const age = f - h.t; if (age <= 0) return;
+        const d = x + bw / 2 - h.x, amp = clamp(1 - Math.abs(d) / 300); if (amp <= 0) return;
+        const vy = -(24 + 26 * amp) * (0.7 + k * 0.6) * (1 + (rows - row) * 0.15), g = 3, aL = (2 * -vy) / g, a = Math.min(age, aL);
+        dx += Math.sign(d || 1) * amp * (40 + 60 * k) * (1 - Math.exp(-a / 8));
+        dy += vy * a + 0.5 * g * a * a;
+        rotB += Math.sign(d || 1) * amp * (a < aL ? a * 6 : 28 + 14 * k);
+      });
       bags.push(
-        <g key={`${row}-${x}`}>
+        <g key={`${row}-${x}`} transform={`translate(${dx} ${dy}) rotate(${rotB} ${x + bw / 2} ${yy - bh / 2})`}>
           <rect x={x} y={yy - bh} width={bw - 4} height={bh} rx={bh * 0.4} fill={base} stroke="#14100a" strokeWidth={2 * s} />
           <path d={`M${x + bw * 0.12} ${yy - bh * 0.78} Q${x + bw * 0.5} ${yy - bh * 1.02} ${x + bw * 0.86} ${yy - bh * 0.78}`} stroke="#d9c79a" strokeWidth={2.4 * s} fill="none" opacity={0.2 + light * 0.4} strokeLinecap="round" />
           <path d={`M${x + bw * 0.1} ${yy - bh * 0.35} L${x + bw * 0.9} ${yy - bh * 0.4}`} stroke="#14100a" strokeWidth={1.6 * s} opacity=".4" />

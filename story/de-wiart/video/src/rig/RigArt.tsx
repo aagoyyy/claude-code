@@ -261,7 +261,7 @@ export const RigBody: React.FC<{T: RigTransforms; V: RigVariant}> = ({T, V}) => 
         </g>
 
         
-        <g id="j-head" transform={T.head}>
+        <g id="j-head" transform={T.head}><g id="headYaw" transform={T.headYaw}>
           <rect x="470" y="640" width="60" height="60" fill="#c28a62"/>
           <path d="M470 646 Q500 676 530 646 V670 Q500 690 470 670 Z" fill="#000" opacity=".3" filter="url(#blur3)"/>
           <ellipse cx="428" cy="572" rx="13" ry="24" fill="#dfae86" stroke="#6b3f24" strokeWidth="2.5"/><path d="M426 560 Q420 572 428 584" stroke="#a8714b" strokeWidth="2.5" fill="none"/>
@@ -281,7 +281,7 @@ export const RigBody: React.FC<{T: RigTransforms; V: RigVariant}> = ({T, V}) => 
           <path d="M440 470 Q470 450 510 448 M452 486 Q490 466 536 474 M432 520 Q440 494 458 484 M566 520 Q564 500 552 488" stroke={V.young ? '#6a4e38' : '#8f8f8b'} strokeWidth="2" fill="none" opacity=".7" strokeLinecap="round"/>
           <path d="M448 466 Q500 440 556 472" stroke="#fff" strokeWidth="4" fill="none" opacity=".6" strokeLinecap="round"/>
           <path d="M424 556 Q426 580 432 592 Q430 560 436 540 Z M576 556 Q574 580 568 592 Q570 560 564 540 Z" fill={V.young ? '#4d3a2a' : '#cfcfcb'} stroke="#7a7a76" strokeWidth="1.5"/>
-          <path d="M456 550 Q474 538 490 548" stroke={V.young ? '#4a3526' : '#a5a5a1'} strokeWidth="6" fill="none" strokeLinecap="round"/>
+          <g id="faceFeat" transform={T.feat}><path d="M456 550 Q474 538 490 548" stroke={V.young ? '#4a3526' : '#a5a5a1'} strokeWidth="6" fill="none" strokeLinecap="round"/>
           <g transform={T.blink}><ellipse cx="474" cy="565" rx="12" ry="7.5" fill="#fbfbf6" stroke="#6b3f24" strokeWidth="1.5"/><circle cx="476" cy="565" r="6" fill="#4a86b8"/><circle cx="476" cy="565" r="2.8" fill="#0f1822"/><circle cx="478" cy="562.5" r="1.6" fill="#fff"/></g>
           <path d="M460 563 Q474 553 489 562" stroke="#4a2a18" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
           <path d="M502 566 Q494 592 498 604 Q512 610 520 600" stroke="#9c6544" strokeWidth="3" fill="none" strokeLinecap="round"/>
@@ -301,8 +301,8 @@ export const RigBody: React.FC<{T: RigTransforms; V: RigVariant}> = ({T, V}) => 
           <ellipse cx="528" cy="564" rx="23" ry="19" fill="none" stroke="#3a3a3a" strokeWidth="1.5" strokeDasharray="3 3"/>
           <ellipse cx="519" cy="555" rx="11" ry="6" fill="#fff" opacity=".16"/></g>
           <g id="scars" display={V.scars ? 'inline' : 'none'}><path d="M564 560 Q574 582 566 604" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/>
-          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/></g>
-        </g>
+          <path d="M480 478 Q492 492 486 506" stroke="#c8604a" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity=".75"/></g></g>
+        </g></g>
 
         
         <g id="j-armL" transform={T.armL}>

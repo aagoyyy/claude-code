@@ -3,7 +3,7 @@ export type JointName =
   | 'torso' | 'head' | 'armL' | 'foreL' | 'armR' | 'foreR'
   | 'thighL' | 'shinL' | 'footL' | 'thighR' | 'shinR' | 'footR';
 
-export type Pose = Partial<Record<JointName, number>> & {dx?: number; dy?: number; br?: number; blink?: number};
+export type Pose = Partial<Record<JointName, number>> & {dx?: number; dy?: number; br?: number; blink?: number; yaw?: number; turn?: number};
 
 export const PIVOT: Record<JointName | 'root', [number, number]> = {
   root: [505, 1040], torso: [505, 1030], head: [500, 675],
@@ -21,7 +21,7 @@ export const CHAIN: Record<string, (JointName | 'root')[]> = {
   thighR: ['root', 'thighR'], shinR: ['root', 'thighR', 'shinR'], footR: ['root', 'thighR', 'shinR', 'footR'],
 };
 
-export type RigTransforms = Record<JointName | 'root' | 'blink', string>;
+export type RigTransforms = Record<JointName | 'root' | 'blink' | 'headYaw' | 'feat', string>;
 
 const f = (n: number) => +n.toFixed(3);
 
@@ -32,11 +32,14 @@ export function transforms(p: Pose): RigTransforms {
     const a = (p as any)[k] || 0;
     if (k === 'root') t[k] = `translate(${f(p.dx || 0)} ${f(p.dy || 0)})`;
     else if (k === 'torso')
-      t[k] = `rotate(${f(a)} ${cx} ${cy}) translate(${cx} ${cy}) scale(1 ${f(p.br || 1)}) translate(${-cx} ${-cy})`;
+      t[k] = `rotate(${f(a)} ${cx} ${cy}) translate(${cx} ${cy}) scale(${f(Math.cos(((p.turn || 0) * Math.PI) / 180))} ${f(p.br || 1)}) translate(${-cx} ${-cy})`;
     else t[k] = `rotate(${f(a)} ${cx} ${cy})`;
   });
   const b = p.blink === undefined ? 1 : p.blink;
   t.blink = `translate(474 565) scale(1 ${f(b)}) translate(-474 -565)`;
+  const yw = ((p.yaw || 0) * Math.PI) / 180;
+  t.headYaw = `translate(500 0) scale(${f(Math.max(0.55, Math.cos(yw)))} 1) translate(-500 0)`;
+  t.feat = `translate(${f(Math.sin(yw) * 58)} 0)`;
   return t;
 }
 
@@ -59,7 +62,7 @@ function jointMatrix(k: JointName | 'root', p: Pose): M {
   const a = (p as any)[k] || 0;
   if (k === 'root') return T(p.dx || 0, p.dy || 0);
   let m = mul(T(cx, cy), R(a));
-  if (k === 'torso') m = mul(m, S(1, p.br || 1));
+  if (k === 'torso') m = mul(m, S(Math.cos(((p.turn || 0) * Math.PI) / 180), p.br || 1));
   return mul(m, T(-cx, -cy));
 }
 
@@ -67,6 +70,10 @@ function jointMatrix(k: JointName | 'root', p: Pose): M {
 export function attach(part: string, x: number, y: number, p: Pose): [number, number] {
   let m: M = [1, 0, 0, 1, 0, 0];
   CHAIN[part].forEach((j) => (m = mul(m, jointMatrix(j, p))));
+  if (part === 'head' && p.yaw) {
+    const yw = (p.yaw * Math.PI) / 180, c = Math.max(0.55, Math.cos(yw));
+    x = 500 + (x + (y >= 520 ? Math.sin(yw) * 58 : 0) - 500) * c;
+  }
   return [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
 }
 
@@ -83,3 +90,25 @@ export function kf(t: number, pts: [number, number][], ease = true): number {
   }
   return pts[pts.length - 1][1];
 }
+
+/* ---- two-link IK for the front rig's arms: reach a point given in torso-local rig coordinates ---- */
+const dA = (deg: number): [number, number] => [-Math.sin((deg * Math.PI) / 180), Math.cos((deg * Math.PI) / 180)];
+const ARM = {
+  L: {sh: [352, 738] as [number, number], el: [335, 890] as [number, number], hand: [332, 1100] as [number, number], outward: 1},
+  R: {sh: [650, 738] as [number, number], el: [673, 892] as [number, number], hand: [700, 1085] as [number, number], outward: -1},
+};
+export function reach(side: 'L' | 'R', tx: number, ty: number): {ua: number; fore: number} {
+  const A = ARM[side];
+  const L1 = Math.hypot(A.el[0] - A.sh[0], A.el[1] - A.sh[1]), L2 = Math.hypot(A.hand[0] - A.el[0], A.hand[1] - A.el[1]);
+  const restUp = (Math.atan2(-(A.el[0] - A.sh[0]), A.el[1] - A.sh[1]) * 180) / Math.PI;
+  const restFo = (Math.atan2(-(A.hand[0] - A.el[0]), A.hand[1] - A.el[1]) * 180) / Math.PI;
+  const dx = tx - A.sh[0], dy = ty - A.sh[1];
+  const d = Math.min(L1 + L2 - 2, Math.max(Math.abs(L1 - L2) + 2, Math.hypot(dx, dy)));
+  const phi = (Math.atan2(-dx, dy) * 180) / Math.PI;
+  const al = (Math.acos(Math.max(-1, Math.min(1, (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d)))) * 180) / Math.PI;
+  const be = (Math.acos(Math.max(-1, Math.min(1, (L2 * L2 + d * d - L1 * L1) / (2 * L2 * d)))) * 180) / Math.PI;
+  const A1 = phi + A.outward * al, A2 = phi - A.outward * be;
+  const ua = A1 - restUp;
+  return {ua, fore: A2 - restFo - ua};
+}
+void dA;

@@ -11,6 +11,8 @@ def jsx(s):
     s = s.replace('class="blink"', 'transform={T.blink}')
     # story variants (V): young hair/mustache, eyepatch vs open eye, scars, hand vs bandaged stump, leg bandages
     Y = lambda a, b: "{V.young ? '%s' : '%s'}" % (a, b)
+    s = s.replace('<g id="headYaw">', '<g id="headYaw" transform={T.headYaw}>')
+    s = s.replace('<g id="faceFeat">', '<g id="faceFeat" transform={T.feat}>')
     s = s.replace('<g id="eyepatch">', '<g id="eyepatch" display={V.patch ? \'inline\' : \'none\'}>')
     s = s.replace('<g id="eyeR" display="none">', '<g id="eyeR" display={V.patch ? \'none\' : \'inline\'}>')
     s = s.replace('<g id="scars">', '<g id="scars" display={V.scars ? \'inline\' : \'none\'}>')

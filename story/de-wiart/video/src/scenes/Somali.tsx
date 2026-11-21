@@ -4,7 +4,7 @@ import {Grass, Layer, Motes, Plains, Rock} from '../world/Savanna';
 import {Dunes, dcol, Fort, SandStreaks, Scrub, SkyHot} from '../world/Desert';
 import {Cam, camXY, clamp, ease, easeOut, easeOutBack, H, lerp, W} from '../world/util';
 import {Character, place} from '../rig/Character';
-import {attach, kf, Pose} from '../rig/pose';
+import {attach, kf, Pose, reach} from '../rig/pose';
 import {Post} from '../fx/Post';
 import {Actors, Tracer} from '../fx/Battle';
 import {Figure, FigureDefs} from '../rig/Figure';
@@ -16,7 +16,7 @@ export const SOMALI_FRAMES = 192;
 const HIT = 70;
 const PIV: [number, number] = [797, 300]; // head, in screen space
 
-export const somaliPose = (f: number): Pose => {
+const somaliPoseRaw = (f: number): Pose => {
   const t = f / FPS, th = HIT / FPS;
   const b = Math.sin((t * Math.PI * 2) / 2.6);
   return {
@@ -33,6 +33,19 @@ export const somaliPose = (f: number): Pose => {
     shinL: kf(t, [[0, 0], [th, 0], [th + 0.15, 4], [th + 1.2, 1], [9, 0]]),
     shinR: kf(t, [[0, 0], [th, 0], [th + 0.15, -4], [th + 1.2, -1], [9, 0]]),
     blink: f >= HIT && f < HIT + 30 ? 0.05 : 1 - 0.92 * Math.max(0, 1 - Math.abs(f - 44) / 3), // eye squeezed shut right after the hit
+  };
+};
+
+export const somaliPose = (f: number): Pose => {
+  const p = somaliPoseRaw(f), t = f / FPS, th = HIT / FPS;
+  const mixA = (a: number | undefined, b: number, k: number) => (a || 0) * (1 - k) + b * k;
+  const k = kf(t, [[0, 0], [th + 0.2, 0], [th + 0.5, 1], [20, 1]]);
+  const L = reach('L', 512, 604);
+  return {
+    ...p,
+    yaw: kf(t, [[0, 0], [0.6, 26], [th - 0.1, 26], [th + 0.1, -38], [th + 1.2, -14], [th + 2.6, -4], [20, -4]]),
+    turn: kf(t, [[0, 0], [1, 12], [th, 12], [th + 0.3, -12], [th + 2, -4]]),
+    armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k),
   };
 };
 
@@ -106,10 +119,10 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
 
       <Layer cam={cam} depth={0.82}>
         <Actors f={f} specs={[
-          {id: 'c1', o: officer('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 8, period: 13, aim: () => [1500, 640], lo: true},
-          {id: 'c2', o: askari('right'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 14, period: 12, aim: () => [1500, 640], lo: true, flinch: [HIT]},
-          {id: 'c3', o: askari('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1500, 640], lo: true, dieAt: HIT + 16},
-          {id: 'c4', o: askari('right'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1500, 640], lo: true, flinch: [HIT]},
+          {id: 'c1', o: officer('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 8, period: 13, aim: () => [1500, 640], lo: false},
+          {id: 'c2', o: askari('right'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 14, period: 12, aim: () => [1500, 640], lo: false, flinch: [HIT]},
+          {id: 'c3', o: askari('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1500, 640], lo: true, dieAt: HIT + 16, die: 'forward' as const},
+          {id: 'c4', o: askari('right'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1500, 640], lo: false, flinch: [HIT]},
         ]} />
       </Layer>
 

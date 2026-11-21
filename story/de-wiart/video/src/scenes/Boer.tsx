@@ -3,7 +3,7 @@ import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {Acacia, Grass, Hills, Layer, Motes, Mountains, Plains, Rays, Rock, Sky} from '../world/Savanna';
 import {Cam, camXY, clamp, easeOut, easeOutBack, ease, H, W} from '../world/util';
 import {Character, place} from '../rig/Character';
-import {attach, kf, Pose} from '../rig/pose';
+import {attach, kf, Pose, reach} from '../rig/pose';
 import {Post} from '../fx/Post';
 import {Figure, FigureDefs} from '../rig/Figure';
 import {aimPose, idlePose} from '../rig/Side';
@@ -16,7 +16,7 @@ const HIT = 60; // frame of the gunshot
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-export const boerPose = (f: number): Pose => {
+const boerPoseRaw = (f: number): Pose => {
   const t = f / FPS, th = HIT / FPS;
   const b = Math.sin((t * Math.PI * 2) / 2.6);
   return {
@@ -33,6 +33,20 @@ export const boerPose = (f: number): Pose => {
     shinL: kf(t, [[0, 0], [th, 0], [th + 0.15, 4], [th + 1.2, 1], [6, 0]]),
     shinR: kf(t, [[0, 0], [th, 0], [th + 0.15, -4], [th + 1.2, -1], [6, 0]]),
     blink: 1 - 0.92 * (Math.max(0, 1 - Math.abs(f - 36) / 3) + Math.max(0, 1 - Math.abs(f - 104) / 3)),
+  };
+};
+
+export const boerPose = (f: number): Pose => {
+  const p = boerPoseRaw(f), t = f / FPS, th = HIT / FPS;
+  const mixA = (a: number | undefined, b: number, k: number) => (a || 0) * (1 - k) + b * k;
+  const k = kf(t, [[0, 0], [th + 0.12, 0], [th + 0.42, 1], [20, 1]]);
+  const L = reach('L', 452, 918), R = reach('R', 548, 912);
+  return {
+    ...p,
+    yaw: kf(t, [[0, 0], [0.5, -24], [1.3, -24], [1.9, 24], [th - 0.15, 24], [th + 0.08, -34], [th + 0.9, -12], [th + 2.2, 0], [20, 0]]),
+    turn: kf(t, [[0, 0], [1.9, 10], [th, 10], [th + 0.4, -14], [th + 2, 0]]),
+    armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k), armR: mixA(p.armR, R.ua, k), foreR: mixA(p.foreR, R.fore, k),
+    torso: (p.torso || 0) + 10 * k, dx: 10 * Math.sin(Math.min(1, Math.max(0, (t - th) / 0.6)) * 3) * k,
   };
 };
 
@@ -106,10 +120,10 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
 
       <Layer cam={cam} depth={0.82}>
         <Actors f={f} specs={[
-          {id: 'c1', o: tommy('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 8, period: 12, aim: () => [1170, 600], lo: true},
-          {id: 'c2', o: tommy('right', '#c89870'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 14, period: 13, aim: () => [1170, 600], lo: true, flinch: [HIT]},
-          {id: 'c3', o: tommy('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1180, 604], lo: true, dieAt: HIT + 14},
-          {id: 'c4', o: tommy('right', '#c89870'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1180, 604], lo: true, flinch: [HIT]},
+          {id: 'c1', o: tommy('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 8, period: 12, aim: () => [1170, 600], lo: false},
+          {id: 'c2', o: tommy('right', '#c89870'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 14, period: 13, aim: () => [1170, 600], lo: false, flinch: [HIT]},
+          {id: 'c3', o: tommy('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1180, 604], lo: false, dieAt: HIT + 14, die: 'stumble' as const},
+          {id: 'c4', o: tommy('right', '#c89870'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1180, 604], lo: false, flinch: [HIT]},
         ]} />
       </Layer>
       {/* character plane */}

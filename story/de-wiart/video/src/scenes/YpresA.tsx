@@ -84,3 +84,5 @@ export const YpresA: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+export const nurse = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#e8b898', hair: '#4a2a18', top: '#f0ece2', bottom: '#4a4a5a', belt: '#3a2a1a', boots: '#241810'}, head: 'nursecap', hat: '#f4f0e6', outfit: 'skirt', apron: true, hairStyle: 'bun', build: 0.88, face});

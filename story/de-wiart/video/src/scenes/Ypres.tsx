@@ -4,13 +4,13 @@ import {Layer, Motes, Plains} from '../world/Savanna';
 import {Beams, DeadTree, Flare, flareLight, mcol, NHAZE, Rain, Ruins, Sandbags, SkyNight, Smoke, Wire} from '../world/Trench';
 import {Cam, camXY, clamp, ease, easeOut, easeOutBack, H, lerp, W} from '../world/util';
 import {Character, place} from '../rig/Character';
-import {attach, kf, Pose} from '../rig/pose';
+import {attach, kf, Pose, reach} from '../rig/pose';
 import {Callout, VictoriaCross} from '../ui/Callout';
 import {Post} from '../fx/Post';
 import {Figure, FigureDefs} from '../rig/Figure';
 import {Actors, Tracer} from '../fx/Battle';
 import {aimPose, idlePose, kneelPose, walkPose, SidePose} from '../rig/Side';
-import {german, medic, tommyW1} from './YpresA';
+import {german, medic, nurse, tommyW1} from './YpresA';
 
 export const FPS = 24;
 export const YPRES_FRAMES = 336;
@@ -19,7 +19,7 @@ const MONT = 140;      // wound montage starts
 const VC = 250;        // Victoria Cross beat
 const imp = (f: number, t0: number) => (f < t0 ? 0 : Math.exp(-(f - t0) / 4.5));
 
-export const ypresPose = (f: number): Pose => {
+const ypresPoseRaw = (f: number): Pose => {
   const t = f / FPS, th = HIT / FPS;
   const b = Math.sin((t * Math.PI * 2) / 2.2);                     // heavy breathing
   const fl = [150, 162, 174, 186].reduce((a, k, i) => a + imp(f, k) * (i % 2 ? -1 : 1), 0);   // flinch per wound
@@ -38,6 +38,20 @@ export const ypresPose = (f: number): Pose => {
     shinL: kf(t, [[0, 0], [th, 0], [th + 0.12, 5], [th + 1.5, 2], [20, 0]]),
     shinR: kf(t, [[0, 0], [th, 0], [th + 0.12, -5], [th + 1.5, -2], [20, 0]]),
     blink: 1 - 0.92 * (Math.max(0, 1 - Math.abs(f - 50) / 3) + Math.max(0, 1 - Math.abs(f - 210) / 3)),
+  };
+};
+
+export const ypresPose = (f: number): Pose => {
+  const p = ypresPoseRaw(f), t = f / FPS, th = HIT / FPS;
+  const mixA = (a: number | undefined, b: number, k: number) => (a || 0) * (1 - k) + b * k;
+  const sal = f >= VC ? 1 : 0;
+  const k = sal ? 0 : kf(t, [[0, 0], [th + 0.4, 0], [th + 0.9, 1], [(VC - 6) / 24, 1], [VC / 24, 0]]);
+  const L = reach('L', 676, 1060);
+  return {
+    ...p,
+    yaw: kf(t, [[0, 0], [0.7, 20], [1.6, -24], [2.4, 14], [th, 14], [th + 0.1, 30], [th + 1.0, 6], [th + 2.2, 20], [(VC - 10) / 24, 20], [VC / 24 + 0.4, 0], [20, 0]]),
+    turn: kf(t, [[0, 0], [th, 0], [th + 0.4, 14], [th + 2.5, 8], [VC / 24, 0]]),
+    armL: mixA(p.armL, L.ua, k), foreL: mixA(p.foreL, L.fore, k),
   };
 };
 
@@ -82,7 +96,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
   // medic: runs in from the right, kneels and bandages the stump
   const arrive = ease(clamp((f - (HIT + 24)) / 34));
   const kneelK = ease(clamp((f - (HIT + 56)) / 14));
-  const medicX = lerp(1850, 1080, arrive);
+  const medicX = lerp(1900, 1190, arrive);
   const wp = walkPose((f / 22) * Math.PI * 2, 1.15), kp = kneelPose(f / 8);
   const medicPose: SidePose = {};
   (['torso', 'head', 'uaN', 'faN', 'uaF', 'faF', 'thN', 'shN', 'ftN', 'thF', 'shF', 'ftF', 'dy'] as const).forEach((k) => {
@@ -138,7 +152,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
       </Layer>
       <Layer cam={cam} depth={0.78}><Plains seed={27} y0={850} y1={960} count={460} haze0={0.22} haze1={0.12} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
       <Layer cam={cam} depth={0.8}>
-        <Actors f={f} specs={[240, 440, 1560, 1760].map((x, i) => ({id: `tc${i}`, o: tommyW1(i < 2 ? 'right' : 'left', i % 2 ? '#c89870' : '#e0a880'), x, y: 930, s: 0.46, face: (i < 2 ? 'right' : 'left') as 'left' | 'right', mode: 'aim' as const, fireFrom: 6 + i * 3, period: 12, aim: () => [i < 2 ? 1250 : 700, 790], lo: true, light: 'night' as const, lit: G, flinch: [HIT], dieAt: i === 3 ? HIT + 30 : undefined}))} />
+        <Actors f={f} specs={[240, 440, 1560, 1760].map((x, i) => ({id: `tc${i}`, o: tommyW1(i < 2 ? 'right' : 'left', i % 2 ? '#c89870' : '#e0a880'), x, y: 930, s: 0.46, face: (i < 2 ? 'right' : 'left') as 'left' | 'right', mode: 'aim' as const, fireFrom: 6 + i * 3, period: 12, aim: () => [i < 2 ? 1250 : 700, 790], lo: true, light: 'night' as const, lit: G, flinch: [HIT], dieAt: i === 3 ? HIT + 30 : undefined, die: 'forward' as const}))} />
       </Layer>
       <Layer cam={cam} depth={0.82}><Sandbags y={915} x0={-300} x1={2300} rows={2} s={0.9} light={G} seed={11} /></Layer>
       <Layer cam={cam} depth={1.0}><Plains seed={28} y0={930} y1={1080} count={480} haze0={0.1} haze1={0.0} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
@@ -154,6 +168,9 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
 
       <Layer cam={cam} depth={1}>
         <FigureDefs />
+        {f >= HIT + 30 && (
+          <Figure uid="nurse" x={lerp(2250, 1560, ease(clamp((f - (HIT + 30)) / 40)))} y={935} s={0.567} o={nurse('left')} p={ease(clamp((f - (HIT + 30)) / 40)) < 1 ? walkPose((f / 24) * Math.PI * 2, 0.85) : idlePose(f / 8)} light="night" lit={0.3 + 0.9 * G} />
+        )}
         {f >= HIT + 24 && (
           <Figure uid="medic" x={medicX} y={935} s={0.567} o={medic('left')} p={medicPose} light="night" lit={0.3 + 0.9 * G} />
         )}
@@ -191,7 +208,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
         {f >= 186 && <Callout f={f} sx={ank[0]} sy={ank[1]} {...tm(186)} side="left" lx={520} ly={960} title="GELANGAN KAKI" sub="tertembak" />}
 
         {count > 0 && (
-          <g transform={`translate(1560 930) scale(${cScale})`}>
+          <g transform={`translate(330 250) scale(${cScale})`}>
             <text textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontWeight={900} fontSize={150} fill="#f6e8c8" stroke="#e0b86a" strokeWidth={2}>{count}×</text>
             <text y={44} textAnchor="middle" fontFamily="'Helvetica Neue', Arial, sans-serif" fontWeight={800} fontSize={30} letterSpacing={5} fill="#d9c7a0">TERLUKA</text>
           </g>

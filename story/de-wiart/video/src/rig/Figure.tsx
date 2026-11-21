@@ -40,17 +40,18 @@ export const FigureDefs: React.FC = () => (
 export type FigureProps = {
   uid: string; x: number; y: number; s?: number; o: SideOpts; p: SidePose;
   light?: LightName; lit?: number; lo?: boolean; shadow?: number; alpha?: number;
+  art?: React.ReactNode; box?: [number, number, number, number];   // custom artwork (animals) + its bounding box
 };
 
 /** A lit profile character standing on (x,y). Render inside an <svg> that has <FigureDefs/>. */
-export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo = false, shadow, alpha = 1}) => {
+export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light = 'warm', lit = 1, lo = false, shadow, alpha = 1, art, box = [-520, -1500, 1040, 1640]}) => {
   const L = LIGHTS[light];
   const sh = shadow ?? L.shadow;
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`} opacity={alpha}>
       <defs>
-        <g id={`${uid}a`}><SideArt o={lo ? {...o, fine: false} : o} p={p} /></g>
-        {!lo && <mask id={`${uid}m`} maskUnits="userSpaceOnUse" x="-520" y="-1500" width="1040" height="1640" style={{maskType: 'alpha'} as any}><use href={`#${uid}a`} /></mask>}
+        <g id={`${uid}a`}>{art ?? <SideArt o={lo ? {...o, fine: false} : o} p={p} />}</g>
+        {!lo && <mask id={`${uid}m`} maskUnits="userSpaceOnUse" x={box[0]} y={box[1]} width={box[2]} height={box[3]} style={{maskType: 'alpha'} as any}><use href={`#${uid}a`} /></mask>}
       </defs>
       <ellipse cx={20} cy={4} rx={190} ry={22} fill="#1a0e08" opacity={0.5 * sh / 0.5} filter={lo ? undefined : 'url(#fBlurC)'} />
       {!lo && (
@@ -61,10 +62,10 @@ export const Figure: React.FC<FigureProps> = ({uid, x, y, s = 0.567, o, p, light
       {!lo ? <g filter={`url(#fRim_${light})`}><use href={`#${uid}a`} /></g> : <use href={`#${uid}a`} />}
       {!lo && (
         <g mask={`url(#${uid}m)`} opacity={Math.min(1, 0.4 + lit * 0.6)}>
-          <rect x="-520" y="-1500" width="1040" height="1640" fill={`url(#figKey_${light})`} />
-          <rect x="-520" y="-1500" width="1040" height="1640" fill="url(#figShade)" />
-          <rect x="-520" y="-1500" width="1040" height="1640" fill={`url(#figBounce_${light})`} />
-          <rect x="-520" y="-1500" width="1040" height="1640" fill={`url(#figHaze_${light})`} />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figKey_${light})`} />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="url(#figShade)" />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figBounce_${light})`} />
+          <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill={`url(#figHaze_${light})`} />
         </g>
       )}
     </g>

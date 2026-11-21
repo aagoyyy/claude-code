@@ -1,6 +1,7 @@
 import React from 'react';
 import {Spec} from '../fx/Battle';
-import {boer, heroYoung, tommy} from './BoerA';
+import {boer, civilianWoman, heroYoung, horseOfficer, tommy} from './BoerA';
+import {talk} from '../fx/Battle';
 import {ProfileBattle} from './ProfileBattle';
 import {kf} from '../rig/pose';
 
@@ -20,18 +21,21 @@ export const BoerShot1: React.FC = () => (
       {id: 'k1', o: tommy('right'), x: 560, y: 846, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 46, after: 'kneelAim', fireFrom: 52, period: 12, aim: () => [1330, 640], lo: true},
       {id: 'k2', o: tommy('right', '#c89870'), x: 420, y: 850, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 60, after: 'kneelAim', fireFrom: 66, period: 11, aim: () => [1330, 640], lo: true},
       {id: 'k3', o: tommy('right'), x: 760, y: 842, s: 0.3, face: 'right', mode: 'run', vx: 7, stopAt: 38, after: 'kneelAim', fireFrom: 44, period: 13, aim: () => [1330, 640], lo: true, flinch: [95]},
+      {id: 'w1', o: civilianWoman('left'), x: 1200 + 7 * 90, y: 850, s: 0.3, face: 'left', mode: 'idle', lo: false, flinch: [95], fixed: false},
     ]}}
     back={{
       specs: [
         {id: 'a1', o: {...tommy('right'), bayonet: true}, x: 640, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
         {id: 'a2', o: {...tommy('right', '#c89870'), bayonet: true}, x: 440, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true, flinch: [95]},
-        {id: 'a3', o: tommy('right'), x: 250, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, stopAt: 74, dieAt: 74, lo: true},
+        {id: 'a3', o: tommy('right'), x: 250, y: 896, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, stopAt: 74, dieAt: 74, die: 'stumble' as const, lo: false},
         {id: 'a4', o: tommy('right'), x: 790, y: 892, s: 0.44, face: 'right', mode: 'run', vx: 14 * 0.78, lo: true},
       ],
       booms: [{x: 1500 + 14 * 92 * 0.78, y: 905, t: 92, r: 80}],
+      mounts: [{id: 'hz1', a: {kind: 'horse', coat: '#7a4a2a', mane: '#241810', tack: true}, x: 1380, y: 900, s: 0.44, face: 'right', vx: 14 * 0.78, stride: 1.25, rider: horseOfficer('right')}],
     }}
+    focus={(f) => kf(f, [[0, 1], [40, 1], [80, 0.6], [132, 1]])}
     hero={{
-      specs: [heroSpec()],
+      specs: [heroSpec({pose: (f, b) => ({...b, mouth: talk(f, 14, 70), brow: -0.4, grimace: 0.3})})],
       volleys: [{x0: 1780, y0: 640, x1: 960, y1: 928, t0: 6, every: 9, spread: 380, seed: 2, w: 3, r: 26}],
     }}
   />
@@ -48,13 +52,14 @@ export const BoerShot3: React.FC = () => (
     mid={{specs: [
       {id: 'k1', o: tommy('right'), x: 1120, y: 846, s: 0.3, face: 'right', mode: 'kneelAim', fireFrom: 4, period: 11, aim: () => [1330, 640], lo: true},
       {id: 'k2', o: tommy('right', '#c89870'), x: 1260, y: 850, s: 0.3, face: 'right', mode: 'kneelAim', fireFrom: 10, period: 12, aim: () => [1330, 640], lo: true},
-      {id: 'k3', o: tommy('right'), x: 980, y: 846, s: 0.3, face: 'right', mode: 'kneelAim', fireFrom: 8, period: 13, aim: () => [1330, 640], dieAt: 60, lo: true},
+      {id: 'k3', o: tommy('right'), x: 980, y: 846, s: 0.3, face: 'right', mode: 'kneelAim', fireFrom: 8, period: 13, aim: () => [1330, 640], dieAt: 60, die: 'forward' as const, lo: false},
     ]}}
     back={{
       specs: [
         {id: 'a1', o: tommy('right'), x: 130, y: 896, s: 0.44, face: 'right', mode: 'kneelAim', fireFrom: 6, period: 12, aim: () => [1400, 700], lo: true},
-        {id: 'a2', o: tommy('right', '#c89870'), x: 1560, y: 896, s: 0.44, face: 'left', mode: 'aim', fireFrom: 3, period: 13, aim: () => [1900, 700], lo: true, dieAt: 84},
-        {id: 'a3', o: tommy('right'), x: 1320, y: 900, s: 0.44, face: 'right', mode: 'idle', dieAt: 0, lo: true},
+        {id: 'a2', o: tommy('right', '#c89870'), x: 1560, y: 896, s: 0.44, face: 'left', mode: 'aim', fireFrom: 3, period: 13, aim: () => [1900, 700], lo: false, dieAt: 84, die: 'crawl' as const},
+        {id: 'a3', o: tommy('right'), x: 1320, y: 900, s: 0.44, face: 'right', mode: 'idle', dieAt: 0, lo: false, xf: (f: number) => 1320 - f * 0.6},
+        {id: 'dr', o: tommy('left'), x: 0, y: 898, s: 0.44, face: 'left', mode: 'walk', phase: 0, xf: (f: number) => 1320 - f * 0.6 - 560, lo: false, pose: (f: number, b: any) => ({...b, uaN: -22, faN: -34, uaF: -26, faF: -30, torso: 8, sling: false})},
       ],
       booms: [{x: 1580, y: 905, t: 38, r: 90}],
     }}
@@ -64,7 +69,7 @@ export const BoerShot3: React.FC = () => (
           mode: 'kneel', fixed: true, x: 1000,
           pose: (f, b) => {
             const k = kf(f, [[0, 0], [14, 1], [90, 1], [120, 0.6]]);
-            return {...b, torso: (b.torso || 0) + 24 * k, head: (b.head || 0) + 22 * k, uaN: -30 * k + (b.uaN || 0) * (1 - k), faN: -105 * k + (b.faN || 0) * (1 - k), uaF: -34 * k + (b.uaF || 0) * (1 - k), faF: -100 * k + (b.faF || 0) * (1 - k), dy: (b.dy || 0)};
+            return {...b, grimace: k, squint: 0.7 * k, mouth: 0.25 * k * (0.5 + 0.5 * Math.sin(f * 0.5)), brow: -0.8 * k, torso: (b.torso || 0) + 24 * k, head: (b.head || 0) + 22 * k, uaN: -30 * k + (b.uaN || 0) * (1 - k), faN: -105 * k + (b.faN || 0) * (1 - k), uaF: -34 * k + (b.uaF || 0) * (1 - k), faF: -100 * k + (b.faF || 0) * (1 - k), dy: (b.dy || 0)};
           },
         }),
         // comrade runs in from the left and kneels beside him; another stands guard firing

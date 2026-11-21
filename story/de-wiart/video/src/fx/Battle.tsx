@@ -1,6 +1,7 @@
 import React from 'react';
 import {Figure, FigureDefs, LightName} from '../rig/Figure';
-import {aimPose, deadPose, idlePose, kneelAimPose, kneelPose, muzzleOf, runPose, SideOpts, SidePose, walkPose} from '../rig/Side';
+import {AnimalArt, AnimalOpts, saddleHeight} from '../rig/Animals';
+import {aimPose, deadPose, idlePose, kneelAimPose, kneelPose, muzzleOf, ridePose, runPose, SideOpts, SidePose, walkPose} from '../rig/Side';
 import {clamp, ease, easeOut, mulberry32} from '../world/util';
 
 export type Mode = 'run' | 'walk' | 'aim' | 'kneelAim' | 'kneel' | 'idle';
@@ -15,6 +16,8 @@ export type Spec = {
   dieAt?: number; flinch?: number[]; phase?: number;
   pose?: (f: number, base: SidePose) => SidePose;   // custom override
   fixed?: boolean;                 // does not scroll with the camera track (the hero)
+  die?: 'back' | 'forward' | 'stumble' | 'crawl';   // how the actor goes down at dieAt
+  xf?: (f: number) => number;      // custom x (e.g. a body being dragged)
 };
 
 const hash = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return (h % 1000) / 1000; };
@@ -25,7 +28,8 @@ export function actorAt(a: Spec, f: number, camT = 0, depth = 1): ActorState {
   const dir = a.face === 'right' ? 1 : -1;
   const j = hash(a.id);
   const moving = a.stopAt === undefined || f < a.stopAt;
-  const x = a.x + (a.vx || 0) * Math.min(f, a.stopAt ?? f) - (a.fixed ? 0 : camT * depth);
+  let x = a.x + (a.vx || 0) * Math.min(f, a.stopAt ?? f) - (a.fixed ? 0 : camT * depth);
+  if (a.xf) x = a.xf(f) - (a.fixed ? 0 : camT * depth);
   const dead = a.dieAt !== undefined && f >= a.dieAt;
   const mode: Mode = dead ? 'idle' : moving ? a.mode : a.after ?? a.mode;
   const ph = (f / (mode === 'run' ? 17 : 34)) * Math.PI * 2 + (a.phase ?? j * 6);
@@ -46,12 +50,29 @@ export function actorAt(a: Spec, f: number, camT = 0, depth = 1): ActorState {
   (a.flinch || []).forEach((t) => {
     if (f >= t && !dead) { const r = Math.exp(-(f - t) / 5); pose = {...pose, dy: (pose.dy || 0) + 9 * r, torso: (pose.torso || 0) - 6 * r, head: (pose.head || 0) - 8 * r}; }
   });
-  // shot dead: fall backwards
+  // going down: four different ways
   if (dead && a.dieAt !== undefined) {
-    const k = clamp((f - a.dieAt) / 13);
-    const fall = 1 - (1 - ease(k)) ** 2 + 0.03 * Math.sin(k * 3.14) ;
-    pose = {...deadPose(f), fall: clamp(fall, 0, 1.02)};
-    if (k < 1) pose = {...pose, uaN: -90 * (1 - k), uaF: -80 * (1 - k)};
+    const tt = f - a.dieAt, kind = a.die ?? 'back';
+    if (kind === 'back') {
+      const k = clamp(tt / 13);
+      pose = {...deadPose(f), fall: clamp(1 - (1 - ease(k)) ** 2 + 0.03 * Math.sin(k * 3.14), 0, 1.02)};
+      if (k < 1) pose = {...pose, uaN: -90 * (1 - k), uaF: -80 * (1 - k)};
+    } else if (kind === 'forward') {
+      const k = clamp(tt / 12);
+      pose = {...deadPose(f), fall: -clamp(ease(k) * 1.01, 0, 1), uaN: 50 * (1 - k) - 20, uaF: 40 * (1 - k) - 10, head: 10, thN: 4, shN: 6, thF: -4, shF: 6};
+    } else if (kind === 'stumble') {
+      const kn = ease(clamp((tt - 4) / 10)), fk = ease(clamp((tt - 16) / 12));
+      const kp = kneelPose(f);
+      const stag: SidePose = {torso: -10 * Math.sin(tt * 1.1), head: -16, uaN: -70 + 30 * Math.sin(tt * 0.9), uaF: 40 * Math.sin(tt * 1.3), faN: -30, faF: -20, thN: -10 * Math.sin(tt), thF: 10 * Math.sin(tt), shN: 20, shF: 20, dy: 4 * Math.sin(tt * 2)};
+      const mix2 = (key: keyof SidePose) => ((stag as any)[key] || 0) * (1 - kn) + ((kp as any)[key] || 0) * kn;
+      pose = {torso: mix2('torso') + 22 * fk, head: mix2('head') + 10 * fk, uaN: mix2('uaN'), uaF: mix2('uaF'), faN: mix2('faN'), faF: mix2('faF'), thN: mix2('thN'), thF: mix2('thF'), shN: mix2('shN'), shF: mix2('shF'), ftN: kp.ftN, ftF: kp.ftF, dy: mix2('dy'), fall: -fk};
+    } else {
+      // crawl: drops prone, then drags itself forward on its elbows
+      const k = ease(clamp(tt / 8)), cr = clamp((tt - 8) / 70);
+      const w = (f / 5) * Math.PI;
+      pose = {...deadPose(f), fall: -k, uaN: 70 * Math.sin(w) * cr - 20, uaF: -70 * Math.sin(w) * cr - 10, faN: -30, faF: -30, thN: 24 * Math.sin(w + 1) * cr, thF: -24 * Math.sin(w + 1) * cr, shN: 30, shF: 30, head: 20};
+      x += dir * 1.1 * Math.max(0, tt - 8) * Math.max(0, 1 - tt / 90);
+    }
   }
   if (a.pose) pose = a.pose(f, pose);
   let muzzle: [number, number] | null = null;
@@ -105,25 +126,65 @@ export const Impact: React.FC<{x: number; y: number; age: number; r: number; see
   );
 };
 
-/** artillery shell burst: flash, fireball, shockwave, debris, rising smoke column */
+/** artillery shell burst: flash, volumetric fireball, tapered dirt column, trailing debris, lit smoke plume, ground dust */
 export const Explosion: React.FC<{x: number; y: number; age: number; r?: number; seed?: number}> = ({x, y, age, r = 120, seed = 3}) => {
-  if (age < 0 || age > 90) return null;
+  if (age < 0 || age > 130) return null;
   const rg = mulberry32(seed * 131);
-  const fb = clamp(1 - age / 14);
+  const fb = clamp(1 - age / 18), col = clamp(age / 70);
+  const id = `ex${seed}`;
   return (
     <g>
-      {age < 4 && <circle cx={x} cy={y - r * 0.6} r={r * 3.6} fill="#fff3d0" opacity={0.5 * (1 - age / 4)} style={{filter: 'blur(30px)'}} />}
-      {age < 16 && <circle cx={x} cy={y - r * 0.7 * easeOut(age / 9)} r={r * (0.7 + easeOut(age / 8) * 1.4)} fill="#ff9a2a" opacity={fb} style={{filter: 'blur(6px)'}} />}
-      {age < 12 && <circle cx={x} cy={y - r * 0.7 * easeOut(age / 9)} r={r * (0.2 + easeOut(age / 8) * 0.6)} fill="#fff1b8" opacity={fb} />}
-      {age < 18 && <ellipse cx={x} cy={y} rx={age * r * 0.22} ry={age * r * 0.05} fill="none" stroke="#f6e8c8" strokeWidth={3} opacity={1 - age / 18} />}
-      {Array.from({length: 16}, (_, i) => {
-        const vx = (rg() - 0.5) * 36, vy = -(10 + rg() * 20), t = age;
-        return <rect key={i} x={x + vx * t * 0.55} y={y + vy * t * 0.55 + 0.5 * 1.3 * t * t * 0.55} width={r * 0.07} height={r * 0.05} fill={i % 3 ? '#6a4a30' : '#2a1a10'} opacity={clamp(1.2 - age / 50)} transform={`rotate(${i * 40 + age * 17} ${x + vx * t * 0.55} ${y + vy * t * 0.55})`} />;
+      <defs>
+        <radialGradient id={`${id}f`}><stop offset="0" stopColor="#fff6c8" /><stop offset=".3" stopColor="#ffc24a" /><stop offset=".65" stopColor="#e2561a" /><stop offset="1" stopColor="#5a1a08" stopOpacity="0" /></radialGradient>
+        <radialGradient id={`${id}s`} cx=".3" cy=".3"><stop offset="0" stopColor="#6a5a50" /><stop offset=".55" stopColor="#2c2420" /><stop offset="1" stopColor="#14100e" stopOpacity="0" /></radialGradient>
+        <linearGradient id={`${id}d`} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#7a5a3a" /><stop offset="1" stopColor="#3a2a1c" stopOpacity="0" /></linearGradient>
+      </defs>
+      {age < 3 && <rect x={x - 2400} y={y - 1400} width={4800} height={2000} fill="#fff3d0" opacity={0.28 * (1 - age / 3)} />}
+      {age < 5 && <circle cx={x} cy={y - r * 0.6} r={r * 4.2} fill="#fff3d0" opacity={0.55 * (1 - age / 5)} style={{filter: 'blur(34px)'}} />}
+      {/* ground dust ring racing outward */}
+      {age < 60 && <ellipse cx={x} cy={y + 4} rx={r * (0.4 + easeOut(age / 40) * 3.6)} ry={r * (0.1 + easeOut(age / 40) * 0.5)} fill="#c8aa80" opacity={0.55 * (1 - age / 60)} style={{filter: 'blur(14px)'}} />}
+      {/* tapered column of dirt thrown up */}
+      {age < 40 && (() => {
+        const h = r * 4.4 * easeOut(age / 14), w0 = r * 1.2 * (1 + age / 30), w1 = r * 0.3;
+        return <path d={`M${x - w0} ${y} Q${x - w0 * 0.6} ${y - h * 0.5} ${x - w1} ${y - h} L${x + w1} ${y - h} Q${x + w0 * 0.6} ${y - h * 0.5} ${x + w0} ${y} Z`} fill={`url(#${id}d)`} opacity={clamp(1.2 - age / 36)} style={{filter: 'blur(5px)'}} />;
+      })()}
+      {/* fireball made of several lobes */}
+      {age < 22 && [0, 1, 2, 3, 4, 5].map((i) => {
+        const a = (i / 6) * Math.PI * 2 + seed, rad = r * (0.2 + easeOut(age / 10) * 0.7) * (0.6 + 0.4 * ((i % 3) / 2));
+        return <circle key={i} cx={x + Math.cos(a) * rad * 0.9} cy={y - r * 0.85 * easeOut(age / 10) + Math.sin(a) * rad * 0.7} r={r * (0.35 + easeOut(age / 8) * 0.8)} fill={`url(#${id}f)`} opacity={fb} />;
       })}
-      {Array.from({length: 9}, (_, i) => {
-        const k = clamp((age - i * 2) / 70);
-        return <ellipse key={'s' + i} cx={x + Math.sin(i * 2.1) * r * 0.5 * k * 1.4} cy={y - k * r * 4.4 - i * 8} rx={r * (0.5 + k * 0.9)} ry={r * (0.4 + k * 0.7)} fill="#241d18" opacity={0.7 * (1 - k) * clamp((age - 7) / 10)} style={{filter: 'blur(14px)'}} />;
+      {age < 16 && <circle cx={x} cy={y - r * 0.8} r={r * (0.25 + easeOut(age / 7) * 0.5)} fill="#fff4c0" opacity={fb} />}
+      {age < 20 && <ellipse cx={x} cy={y} rx={age * r * 0.26} ry={age * r * 0.06} fill="none" stroke="#f6e8c8" strokeWidth={3.5} opacity={1 - age / 20} />}
+      {/* debris with motion trails */}
+      {Array.from({length: 22}, (_, i) => {
+        const vx = (rg() - 0.5) * 44, vy = -(12 + rg() * 24), t = age * 0.55;
+        const px = x + vx * t, py = y + vy * t + 0.5 * 1.3 * t * t, ox = x + vx * (t - 1.2), oy = y + vy * (t - 1.2) + 0.5 * 1.3 * (t - 1.2) ** 2;
+        return (
+          <g key={i} opacity={clamp(1.3 - age / 55)}>
+            <line x1={ox} y1={oy} x2={px} y2={py} stroke={i % 3 ? '#8a6a44' : '#2a1a10'} strokeWidth={r * 0.035} strokeLinecap="round" opacity=".5" />
+            <rect x={px - r * 0.035} y={py - r * 0.025} width={r * 0.07 + (i % 4) * 2} height={r * 0.05} fill={i % 3 ? '#6a4a30' : '#1c120a'} transform={`rotate(${i * 40 + age * 19} ${px} ${py})`} />
+          </g>
+        );
       })}
+      {/* smoke plume: lit on one side, drifting with the wind, lingering */}
+      {Array.from({length: 14}, (_, i) => {
+        const k = clamp((age - 6 - i * 2.4) / 110);
+        return <circle key={'s' + i} cx={x + Math.sin(i * 1.9) * r * 0.5 * (0.4 + k * 1.6) + k * r * 1.1} cy={y - r * 0.7 - k * r * 5 - i * r * 0.22} r={r * (0.5 + k * 1.1 + (i % 3) * 0.1)} fill={`url(#${id}s)`} opacity={0.88 * (1 - col * 0.2) * (1 - k)} style={{filter: 'blur(9px)'}} />;
+      })}
+    </g>
+  );
+};
+
+/** persistent crater + scorch left behind after a shell lands */
+export const Crater: React.FC<{x: number; y: number; age: number; r?: number; dust?: string}> = ({x, y, age, r = 120, dust = '#8a6a44'}) => {
+  if (age < 4) return null;
+  const k = clamp((age - 4) / 8);
+  return (
+    <g opacity={k}>
+      <ellipse cx={x} cy={y + 6} rx={r * 1.25} ry={r * 0.26} fill="#1a1008" opacity=".55" style={{filter: 'blur(3px)'}} />
+      <ellipse cx={x} cy={y + 4} rx={r * 1.0} ry={r * 0.18} fill="#0e0804" opacity=".8" />
+      <ellipse cx={x - r * 0.1} cy={y - 2} rx={r * 1.18} ry={r * 0.22} fill="none" stroke={dust} strokeWidth={r * 0.06} opacity=".8" />
+      <ellipse cx={x} cy={y + 14} rx={r * 1.6} ry={r * 0.3} fill="#2a1c10" opacity=".3" style={{filter: 'blur(10px)'}} />
     </g>
   );
 };
@@ -189,3 +250,29 @@ export const Volleys: React.FC<{list: Volley[]; f: number}> = ({list, f}) => (
     })}
   </>
 );
+
+/* ------------------------------ mounts (horse / camel + rider) ------------------------------ */
+export type MountSpec = {id: string; a: AnimalOpts; x: number; y: number; s: number; face: 'left' | 'right'; vx?: number; stopAt?: number; rider?: SideOpts; light?: LightName; lit?: number; lo?: boolean; stride?: number; phaseOff?: number};
+export const Mounts: React.FC<{list: MountSpec[]; f: number; camT?: number; depth?: number}> = ({list, f, camT = 0, depth = 1}) => (
+  <>
+    <FigureDefs />
+    {list.map((m) => {
+      const moving = m.stopAt === undefined || f < m.stopAt;
+      const x = m.x + (m.vx || 0) * Math.min(f, m.stopAt ?? f) - camT * depth;
+      const ph = moving ? (f / 18) * Math.PI * 2 + (m.phaseOff || 0) : 0;
+      const bob = moving ? -6 * Math.abs(Math.sin(ph)) : 0;
+      const st = moving ? m.stride ?? 1 : 0.02;
+      return (
+        <g key={m.id}>
+          <Figure uid={`mt${m.id}`} x={x} y={m.y} s={m.s} o={{pal: {skin: '', hair: '', top: '', bottom: '', belt: '', boots: ''}}} p={{}} art={<AnimalArt o={{...m.a, face: m.face}} p={{phase: ph, stride: st, dy: bob, head: 4 * Math.sin(ph)}} />} box={[-640, -1900, 1500, 1960]} light={m.light ?? 'warm'} lit={m.lit ?? 1} lo={m.lo} />
+          {m.rider && (
+            <Figure uid={`rd${m.id}`} x={x} y={m.y - m.s * (saddleHeight(m.a.kind) + 12 - 666) + bob * m.s} s={m.s} o={{...m.rider, face: m.face}} p={{...ridePose(f / 8), dy: 0, torso: moving ? 2 * Math.sin(ph) : 0}} light={m.light ?? 'warm'} lit={m.lit ?? 1} lo={m.lo} />
+          )}
+        </g>
+      );
+    })}
+  </>
+);
+
+/** mouth opening for speaking/shouting between frames a..b (0 outside) */
+export const talk = (f: number, a: number, b: number, seed = 0) => (f < a || f > b ? 0 : 0.18 + 0.82 * Math.abs(Math.sin(f * 0.8 + seed)) * (0.6 + 0.4 * Math.abs(Math.sin(f * 0.23 + seed))));

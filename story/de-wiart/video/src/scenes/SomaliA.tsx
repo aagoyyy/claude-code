@@ -73,3 +73,5 @@ export const SomaliA: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+export const camelRider = (face: 'left' | 'right'): SideOpts => ({pal: {skin: '#7a4a30', hair: '#1a1410', top: '#b2a070', bottom: '#9a8a5c', belt: '#5a3a22', boots: '#5a3a22', puttee: '#a29a6a'}, head: 'turban', hat: '#efe7d0', mustache: true, face});

@@ -27,6 +27,7 @@ export const Callout: React.FC<CalloutProps> = ({sx, sy, hs, line = 0, label = 0
       {line > 0 && title && <path d={`M${sx} ${sy} L${ex} ${ey}`} stroke={accent} strokeWidth="2.5" strokeLinecap="round" />}
       {title && (
         <g opacity={label} transform={`translate(${(1 - label) * 24 * dir} 0)`}>
+          <rect x={side === 'right' ? lx - 16 : lx - (Math.max(title.length * 31, (sub || '').length * 15) + 16)} y={ly - 46} width={Math.max(title.length * 31, (sub || '').length * 15) + 32} height={sub ? 100 : 62} rx={10} fill="#0c0806" opacity=".5" />
           <text x={lx} y={ly} textAnchor={anchor} fontFamily="'Helvetica Neue', Arial, sans-serif" fontWeight={800} fontSize={44} letterSpacing={4} fill={ink}>{title}</text>
           {sub && <text x={lx} y={ly + 36} textAnchor={anchor} fontFamily="'Helvetica Neue', Arial, sans-serif" fontSize={28} fill={subInk}>{sub}</text>}
         </g>
