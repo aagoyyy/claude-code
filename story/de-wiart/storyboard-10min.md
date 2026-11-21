@@ -53,19 +53,19 @@ Shot memakai adegan yang sudah ada: 32. Shot baru: 127.
 ## Bab 2. Perang Boer, 1899 (1:30)
 | # | Dur | Status | Shot |
 |---|--:|---|---|
-| 2.1 | 5 | B | WS meja pendaftaran |
-| 2.2 | 4 | B | CU ia menaikkan umur |
-| 2.3 | 3 | B | CU tanda tangan nama samaran |
-| 2.4 | 5 | B | MS barak latihan |
-| 2.5 | 5 | B | peta London ke Cape Town |
-| 2.6 | 4 | B | WS kapal |
+| 2.1 | 5 | B | peta London ke Cape Town |
+| 2.2 | 4 | B | WS kapal |
+| 2.3 | 5 | B | WS meja pendaftaran |
+| 2.4 | 4 | B | CU ia menaikkan umur |
+| 2.5 | 3 | B | CU tanda tangan nama samaran |
+| 2.6 | 5 | B | MS barak latihan |
 | 2.7 | 5 | A | WS savana, barisan maju (Boer Shot1) |
-| 2.8 | 4 | A | CU senapan menembak |
+| 2.8 | 4 | A | CU senapan menembak (insert) |
 | 2.9 | 4 | A | MS perwira berkuda |
-| 2.10 | 5 | A | WS tembakan dan ledakan |
-| 2.11 | 3 | B | CU petani Boer membidik |
-| 2.12 | 6 | A | MS Adrian tertembak |
-| 2.13 | 4 | B | CU wajah terkejut |
+| 2.10 | 5 | A | WS tembakan dan ledakan (Boer Shot1) |
+| 2.11 | 3 | A | CU musuh membidik |
+| 2.12 | 6 | A | MS Adrian tertembak (Boer depan) |
+| 2.13 | 4 | A | CU wajah terkejut |
 | 2.14 | 5 | A | WS rekan menolong (Boer Shot3) |
 | 2.15 | 4 | A | MS diusung mundur |
 | 2.16 | 5 | B | WS kapal rumah sakit |

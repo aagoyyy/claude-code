@@ -8,8 +8,8 @@ import {gent, worker, lady, boy, young, P} from './S1';
 import {doctor, nurse, patient, MapArt, Ocean, Ship, Ref, Flag, trooper, sergeant, khakiOfficer, adrianY} from './S2';
 import {askari, camelRider, dervish, heroPith, officer} from '../scenes/SomaliA';
 
-const hero = (f: 'left' | 'right', extra: Partial<SideOpts> = {}): SideOpts => ({...heroPith(f), ...extra});
-const camelMount = (id: string, x: number, y: number, s: number, f: 'left' | 'right', rider: SideOpts, p: any = {}, coat = '#b88a58', phase?: number) => {
+export const hero = (f: 'left' | 'right', extra: Partial<SideOpts> = {}): SideOpts => ({...heroPith(f), ...extra});
+export const camelMount = (id: string, x: number, y: number, s: number, f: 'left' | 'right', rider: SideOpts, p: any = {}, coat = '#b88a58', phase?: number) => {
   const drop = (saddleHeight('camel') - 666) * s;
   return (
     <g>
@@ -18,15 +18,15 @@ const camelMount = (id: string, x: number, y: number, s: number, f: 'left' | 'ri
     </g>
   );
 };
-const desertSky = (id: string) => (
+export const desertSky = (id: string) => (
   <>
     <SkyRect id={id} stops={[[0, '#6aa0cc'], [0.5, '#e8d4b0'], [1, '#ffe2b0']]} h={700} />
     <Clouds n={4} seed={3} y0={60} y1={300} c="#fff" o={0.35} />
     <Glow id={id + 'g'} x={300} y={320} r={520} c="#fff2d0" o={0.95} />
   </>
 );
-const dune = (seed: number, base: number, amp: number, c: string, o = 1) => <Sil seed={seed} base={base} amp={amp} fill={c} o={o} />;
-const sandGround = (y: number, c = '#d8b684') => (
+export const dune = (seed: number, base: number, amp: number, c: string, o = 1) => <Sil seed={seed} base={base} amp={amp} fill={c} o={o} />;
+export const sandGround = (y: number, c = '#d8b684') => (
   <g><rect y={y} width={W} height={H - y} fill={c} /><Mat kind="sand" o={0.55} light={0.4}><rect y={y} width={W} height={H - y} fill={c} /></Mat><rect y={y} width={W} height={H - y} fill="url(#aoV)" />
     {Array.from({length: 8}, (_, i) => <path key={i} d={`M0 ${y + 30 + i * 40} Q480 ${y + 20 + i * 40} 960 ${y + 30 + i * 40} T1920 ${y + 30 + i * 40}`} stroke="#8a6a40" strokeOpacity=".22" strokeWidth={3} fill="none" />)}</g>
 );
@@ -288,7 +288,7 @@ const S4_20: React.FC = () => (
 );
 
 /* =============================== CHAPTER 5 : back to war, 1914 =============================== */
-const loco = (x: number, y: number, s: number) => (
+export const loco = (x: number, y: number, s: number) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
     <ellipse cx={0} cy={4} rx={380} ry={14} fill="#000" opacity=".4" filter="url(#blM)" />
     <rect x={-300} y={-250} width={420} height={170} rx={80} fill="#1e2a2a" stroke="#0a1010" strokeWidth={6} /><rect x={-300} y={-250} width={420} height={170} rx={80} fill="url(#sideShade)" />
@@ -300,7 +300,7 @@ const loco = (x: number, y: number, s: number) => (
     <g filter="url(#blL)"><ellipse cx={-300} cy={-460} rx={120} ry={70} fill="#fff" opacity=".8" /><ellipse cx={-380} cy={-560} rx={170} ry={90} fill="#fff" opacity=".6" /><ellipse cx={-500} cy={-640} rx={210} ry={100} fill="#fff" opacity=".4" /></g>
   </g>
 );
-const carriage = (x: number, y: number, s: number, c = '#2a4a3a') => (
+export const carriage = (x: number, y: number, s: number, c = '#2a4a3a') => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
     <rect x={0} y={-260} width={460} height={190} fill={c} stroke="#0a1010" strokeWidth={5} /><rect x={0} y={-260} width={460} height={190} fill="url(#houseShade)" />
     {[0, 1, 2, 3].map((i) => <rect key={i} x={26 + i * 108} y={-230} width={80} height={80} fill="#c8d8e0" stroke="#14100c" strokeWidth={4} />)}
@@ -357,7 +357,7 @@ const S5_3: React.FC = () => (
     <Par d={1}><Motes n={50} seed={4} c="#fff6d8" o={0.4} r={3} /></Par>
   </Frame>
 );
-const crane = (x: number, y: number, s: number) => (
+export const crane = (x: number, y: number, s: number) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}><rect x={-14} y={-520} width={28} height={520} fill="#3a3a44" /><rect x={-70} y={-10} width={140} height={14} fill="#3a3a44" /><rect x={-20} y={-560} width={440} height={22} fill="#3a3a44" /><path d="M0 -560 L400 -540 M0 -520 L400 -540" stroke="#3a3a44" strokeWidth={4} /><line x1={380} y1={-540} x2={380} y2={-300} stroke="#14100c" strokeWidth={3} /><rect x={350} y={-300} width={60} height={50} fill="#8a5a2a" stroke="#14100c" strokeWidth={3} /></g>
 );
 const S5_4: React.FC = () => (
