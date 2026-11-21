@@ -58,7 +58,7 @@ export const BoerA: React.FC = () => {
         <FigureDefs />
         <Scroll off={T * 0.78}><Plains seed={7} y0={850} y1={960} count={900} haze0={0.18} haze1={0.1} fade={1} /></Scroll>
         <Scroll off={T * 0.78}><Grass f={f} seed={41} count={160} yMin={860} yMax={955} hMin={30} hMax={70} cDark="#6a5a2a" cLite="#d9b868" sway={0.8} /></Scroll>
-        {marching.map((m, i) => <Figure key={i} uid={`mr${i}`} x={m.x} y={896} s={0.44} o={tommy('right', i === 1 ? '#c89870' : '#e0a880')} p={walkPose(m.ph, 0.95)} light="warm" />)}
+        {marching.map((m, i) => <Figure key={i} uid={`mr${i}`} x={m.x} y={896} s={0.44} o={tommy('right', i === 1 ? '#c89870' : '#e0a880')} p={walkPose(m.ph, 0.95)} light="warm" lo />)}
       </Layer>
       <Layer cam={cam0} depth={1.0}>
         <FigureDefs />

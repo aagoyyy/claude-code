@@ -103,8 +103,8 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
 
       <Layer cam={cam} depth={0.82}>
         <FigureDefs />
-        {[250, 430].map((x, i) => <Figure key={'cl' + i} uid={`bl${i}`} x={x} y={872} s={0.4} o={tommy('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" />)}
-        {[1560, 1740].map((x, i) => <Figure key={'cr' + i} uid={`br${i}`} x={x} y={872} s={0.4} o={tommy('left', i ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" />)}
+        {[250, 430].map((x, i) => <Figure key={'cl' + i} uid={`bl${i}`} x={x} y={872} s={0.4} o={tommy('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" lo />)}
+        {[1560, 1740].map((x, i) => <Figure key={'cr' + i} uid={`br${i}`} x={x} y={872} s={0.4} o={tommy('left', i ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" lo />)}
       </Layer>
       {/* character plane */}
       <Character
