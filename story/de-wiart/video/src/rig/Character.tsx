@@ -13,13 +13,16 @@ type Props = {
   variant?: RigVariant;
   cam: Cam;
   depth?: number;
-  /** warm key (sun) strength 0..1 */
+  /** key light strength 0..1 */
   key?: number;
+  /** lighting palette (defaults = low warm sun) + cast-shadow skew/opacity */
+  light?: {rim?: string; key?: string; bounce?: string; haze?: string; skew?: number; shadow?: number; halo?: string};
   children?: React.ReactNode; // drawn in the same parallax plane, above the character (hotspots...)
   under?: React.ReactNode;    // drawn below the character (dust, grass)
 };
 
-export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, key = 1, children, under}) => {
+export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, key = 1, light = {}, children, under}) => {
+  const L = {rim: '#ffd9a0', key: '#ffe3b5', bounce: '#d9964c', haze: '#ffcf98', skew: -0.9, shadow: 0.5, halo: '#ffc27a', ...light};
   const T = transforms(pose);
   return (
     <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', left: 0, top: 0, overflow: 'visible'}}>
@@ -35,7 +38,7 @@ export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, 
           <feOffset in="SourceAlpha" dx="9" dy="6" result="o" />
           <feComposite in="SourceAlpha" in2="o" operator="out" result="edge" />
           <feGaussianBlur in="edge" stdDeviation="1.6" result="eb" />
-          <feFlood floodColor="#ffd9a0" floodOpacity={0.9 * key} result="fl" />
+          <feFlood floodColor={L.rim} floodOpacity={Math.min(1, 0.9 * key)} result="fl" />
           <feComposite in="fl" in2="eb" operator="in" result="rim" />
           <feOffset in="SourceAlpha" dx="-6" dy="-3" result="o2" />
           <feComposite in="SourceAlpha" in2="o2" operator="out" result="edge2" />
@@ -49,7 +52,7 @@ export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, 
           <feFlood floodColor="#1a0e08" result="f" /><feComposite in="f" in2="SourceAlpha" operator="in" result="s" /><feGaussianBlur in="s" stdDeviation="9" />
         </filter>
         <filter id="haloFx" x="-30%" y="-30%" width="160%" height="160%">
-          <feFlood floodColor="#ffc27a" result="f" /><feComposite in="f" in2="SourceAlpha" operator="in" result="s" /><feGaussianBlur in="s" stdDeviation="26" />
+          <feFlood floodColor={L.halo} result="f" /><feComposite in="f" in2="SourceAlpha" operator="in" result="s" /><feGaussianBlur in="s" stdDeviation="26" />
         </filter>
         <filter id="blurC"><feGaussianBlur stdDeviation="14" /></filter>
         <linearGradient id="shLen" gradientUnits="userSpaceOnUse" x1="500" y1="0" x2="1650" y2="0">
@@ -62,19 +65,19 @@ export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, 
           <use href="#charArt" />
         </mask>
         <radialGradient id="keyG" gradientUnits="userSpaceOnUse" cx="330" cy="760" r="640">
-          <stop offset="0" stopColor="#ffe3b5" stopOpacity={0.34 * key} /><stop offset="1" stopColor="#ffe3b5" stopOpacity="0" />
+          <stop offset="0" stopColor={L.key} stopOpacity={Math.min(0.6, 0.34 * key)} /><stop offset="1" stopColor={L.key} stopOpacity="0" />
         </radialGradient>
         <linearGradient id="shadeG" gradientUnits="userSpaceOnUse" x1="430" y1="0" x2="720" y2="0">
           <stop offset="0" stopColor="#1c1020" stopOpacity="0" /><stop offset="1" stopColor="#1c1020" stopOpacity=".42" />
         </linearGradient>
         <linearGradient id="bounceG" gradientUnits="userSpaceOnUse" x1="0" y1="1440" x2="0" y2="1712">
-          <stop offset="0" stopColor="#d9964c" stopOpacity="0" /><stop offset="1" stopColor="#d9964c" stopOpacity=".36" />
+          <stop offset="0" stopColor={L.bounce} stopOpacity="0" /><stop offset="1" stopColor={L.bounce} stopOpacity=".36" />
         </linearGradient>
         <linearGradient id="skyG" gradientUnits="userSpaceOnUse" x1="0" y1="430" x2="0" y2="760">
           <stop offset="0" stopColor="#a9b8ff" stopOpacity=".2" /><stop offset="1" stopColor="#a9b8ff" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="hazeG" gradientUnits="userSpaceOnUse" x1="0" y1="430" x2="0" y2="1712">
-          <stop offset="0" stopColor="#ffcf98" stopOpacity=".03" /><stop offset="1" stopColor="#ffcf98" stopOpacity=".12" />
+          <stop offset="0" stopColor={L.haze} stopOpacity=".03" /><stop offset="1" stopColor={L.haze} stopOpacity=".12" />
         </linearGradient>
       </defs>
 
@@ -83,8 +86,8 @@ export const Character: React.FC<Props> = ({pose, variant = {}, cam, depth = 1, 
         {/* contact + cast shadows on the ground (light from the low sun at left) */}
         <g transform={PLACE}>
           <ellipse cx="500" cy="1708" rx="250" ry="26" fill="#1a0e08" opacity=".55" filter="url(#blurC)" />
-          <g mask="url(#shMask)" opacity=".5">
-            <g transform="matrix(1 0 -0.9 -0.12 1530 1904)" filter="url(#shadowFx)"><use href="#charArt" /></g>
+          <g mask="url(#shMask)" opacity={L.shadow}>
+            <g transform={`matrix(1 0 ${L.skew} -0.12 ${-L.skew * 1700} 1904)`} filter="url(#shadowFx)"><use href="#charArt" /></g>
           </g>
           {/* warm halo behind the silhouette (backlight) */}
           <g opacity={0.16 * key} transform="translate(-14 -4)"><g filter="url(#haloFx)"><use href="#charArt" /></g></g>
