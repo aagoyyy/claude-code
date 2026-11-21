@@ -7,6 +7,9 @@ import {Character, place} from '../rig/Character';
 import {attach, kf, Pose} from '../rig/pose';
 import {Callout, VictoriaCross} from '../ui/Callout';
 import {Post} from '../fx/Post';
+import {Figure, FigureDefs} from '../rig/Figure';
+import {aimPose, idlePose, kneelPose, walkPose, SidePose} from '../rig/Side';
+import {german, medic, tommyW1} from './YpresA';
 
 export const FPS = 24;
 export const YPRES_FRAMES = 336;
@@ -37,7 +40,7 @@ export const ypresPose = (f: number): Pose => {
   };
 };
 
-export const Ypres: React.FC = () => {
+export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
   const f = useCurrentFrame();
   const pose = ypresPose(f);
   const variant = {young: true, patch: true, scars: true, stump: f >= HIT + 2, bandages: f >= 174};
@@ -72,6 +75,17 @@ export const Ypres: React.FC = () => {
   const hand = pt('foreR', 696, 1078), head = pt('head', 484, 486), hip = pt('torso', 352, 1052), leg = pt('thighL', 448, 1288), ank = pt('shinL', 452, 1607);
   const eyeP = pt('head', 528, 564), earP = pt('head', 574, 570), faceP = pt('head', 556, 618), bellyP = pt('torso', 482, 906);
 
+  // medic: runs in from the right, kneels and bandages the stump
+  const arrive = ease(clamp((f - (HIT + 24)) / 34));
+  const kneelK = ease(clamp((f - (HIT + 56)) / 14));
+  const medicX = lerp(1850, 1080, arrive);
+  const wp = walkPose((f / 22) * Math.PI * 2, 1.15), kp = kneelPose(f / 8);
+  const medicPose: SidePose = {};
+  (['torso', 'head', 'uaN', 'faN', 'uaF', 'faF', 'thN', 'shN', 'ftN', 'thF', 'shF', 'ftF', 'dy'] as const).forEach((k) => {
+    (medicPose as any)[k] = ((wp as any)[k] || 0) * (1 - kneelK) + ((kp as any)[k] || 0) * kneelK;
+  });
+  if (kneelK > 0.9) { medicPose.faN = (medicPose.faN || 0) + 6 * Math.sin(f * 0.6); medicPose.uaN = (medicPose.uaN || 0) + 3 * Math.sin(f * 0.6 + 1); }
+
   // wound counter
   const count = f >= 186 ? 8 : f >= 174 ? 7 : f >= 162 ? 6 : f >= 150 ? 5 : 0;
   const cT = [150, 162, 174, 186].reduce((a, k) => (f >= k ? f - k : a), 99);
@@ -87,8 +101,8 @@ export const Ypres: React.FC = () => {
   const vcShow = clamp((f - (VC + 14)) / 8);
   const vcText = easeOut((f - (VC + 62)) / 14);
 
-  const capIn = easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 66) / 12);
-  const fade = clamp(f / 14) * (1 - clamp((f - (YPRES_FRAMES - 14)) / 14));
+  const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 66) / 12);
+  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (YPRES_FRAMES - 14)) / 14));
   const flash = 0.7 * imp(f, HIT) * (f >= HIT && f < HIT + 12 ? 1 : 0);
 
   return (
@@ -110,12 +124,21 @@ export const Ypres: React.FC = () => {
         <DeadTree x={280} y={780} s={0.62} haze={0.56} seed={4} />
         <DeadTree x={1560} y={784} s={0.7} haze={0.54} seed={7} />
       </Layer>
+      <Layer cam={cam} depth={0.33}>
+        <FigureDefs />
+        {[1010, 1180, 1330].map((x, i) => <Figure key={'g' + i} uid={`gm${i}`} x={x} y={784} s={0.17} o={german('left')} p={aimPose(f / 6 + i)} light="night" lit={G} lo />)}
+        {f >= HIT - 4 && f < HIT + 3 && <circle cx={1010 - 62} cy={784 - 150} r={14} fill="#fff1c4" opacity={1 - (f - HIT + 4) / 7} />}
+      </Layer>
       <Layer cam={cam} depth={0.5}><Plains seed={26} y0={770} y1={880} count={420} haze0={0.4} haze1={0.28} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
       <Layer cam={cam} depth={0.52}>
         <Wire y={846} x0={-400} x1={2300} s={0.85} haze={0.4} seed={3} />
         <DeadTree x={1740} y={850} s={0.9} haze={0.4} seed={9} />
       </Layer>
       <Layer cam={cam} depth={0.78}><Plains seed={27} y0={850} y1={960} count={460} haze0={0.22} haze1={0.12} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
+      <Layer cam={cam} depth={0.8}>
+        <FigureDefs />
+        {[240, 440, 1560, 1760].map((x, i) => <Figure key={'tc' + i} uid={`tc${i}`} x={x} y={930} s={0.46} o={tommyW1(i < 2 ? 'right' : 'left', i % 2 ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 6 * Math.exp(-(f - HIT) / 6) : 0}} light="night" lit={G} lo />)}
+      </Layer>
       <Layer cam={cam} depth={0.82}><Sandbags y={915} x0={-300} x1={2300} rows={2} s={0.9} light={G} seed={11} /></Layer>
       <Layer cam={cam} depth={1.0}><Plains seed={28} y0={930} y1={1080} count={480} haze0={0.1} haze1={0.0} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
 
@@ -128,6 +151,12 @@ export const Ypres: React.FC = () => {
         light={{rim: '#cfeedd', key: '#d8ffe8', bounce: '#6a6a50', haze: '#2a3d58', skew: -0.45, shadow: 0.25 + 0.4 * G, halo: '#9fd8c0'}}
       />
 
+      <Layer cam={cam} depth={1}>
+        <FigureDefs />
+        {f >= HIT + 24 && (
+          <Figure uid="medic" x={medicX} y={935} s={0.567} o={medic('left')} p={medicPose} light="night" lit={0.3 + 0.9 * G} />
+        )}
+      </Layer>
       <Layer cam={cam} depth={1.3} blur={1}><Rain f={f} seed={7} count={70} /></Layer>
       <Layer cam={cam} depth={1.6} blur={3.5}><Sandbags y={1130} x0={-420} x1={520} rows={3} s={1.8} light={G * 0.6} seed={21} /><Sandbags y={1130} x0={1380} x1={2400} rows={3} s={1.8} light={G * 0.6} seed={22} /></Layer>
       <Layer cam={cam} depth={1.7} blur={2}><Motes f={f} seed={91} count={22} size={3} speed={1.1} /></Layer>
@@ -146,7 +175,7 @@ export const Ypres: React.FC = () => {
           <text x={120} y={946} fontFamily="Georgia, serif" fontStyle="italic" fontSize={32} fill="#d9c7a0">1915 · Perang Dunia I</text>
         </g>
 
-        {f >= HIT + 8 && <Callout f={f} sx={hand[0]} sy={hand[1]} {...tm(HIT + 8)} lx={1290} ly={640} title="TANGAN KIRI" sub="putus, Ypres 1915" />}
+        {f >= HIT + 8 && <Callout f={f} sx={hand[0]} sy={hand[1]} {...tm(HIT + 8)} lx={1290} ly={190} title="TANGAN KIRI" sub="putus, Ypres 1915" />}
         {f >= MONT && f < 150 + 30 && null}
         {f >= MONT && <>
           <Callout f={f} sx={eyeP[0]} sy={eyeP[1]} {...dim(MONT)} />

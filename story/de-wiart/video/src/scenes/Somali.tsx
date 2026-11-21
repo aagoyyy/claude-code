@@ -6,6 +6,9 @@ import {Cam, camXY, clamp, ease, easeOut, easeOutBack, H, lerp, W} from '../worl
 import {Character, place} from '../rig/Character';
 import {attach, kf, Pose} from '../rig/pose';
 import {Post} from '../fx/Post';
+import {Figure, FigureDefs} from '../rig/Figure';
+import {idlePose} from '../rig/Side';
+import {askari, dervish, officer} from './SomaliA';
 
 export const FPS = 24;
 export const SOMALI_FRAMES = 192;
@@ -52,7 +55,7 @@ const Callout: React.FC<{sx: number; sy: number; hs: number; line: number; label
   );
 };
 
-export const Somali: React.FC = () => {
+export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
   const f = useCurrentFrame();
   const pose = somaliPose(f);
   const hit = f >= HIT;
@@ -75,8 +78,8 @@ export const Somali: React.FC = () => {
   const flashA = f >= 68 && f < 80 ? 0.7 * Math.exp(-(f - 68) / 2.4) : 0;
   const muzzle = f >= 64 && f < 71 ? 1 - (f - 64) / 7 : 0;
   const dustT = clamp((f - (HIT + 2)) / 60);
-  const capIn = easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 60) / 12);
-  const fade = clamp(f / 14) * (1 - clamp((f - (SOMALI_FRAMES - 12)) / 12));
+  const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 60) / 12);
+  const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (SOMALI_FRAMES - 12)) / 12));
 
   return (
     <AbsoluteFill style={{background: '#000'}}>
@@ -84,6 +87,8 @@ export const Somali: React.FC = () => {
       <Layer cam={cam} depth={0.06} blur={0.6}><Dunes seed={2} base={650} amp={34} haze={0.66} /></Layer>
       <Layer cam={cam} depth={0.12}>
         <Fort x={1450} y={700} s={0.82} f={f} haze={0.52} />
+        <FigureDefs />
+        {[-70, 10, 90, 170, 250].map((lx, k) => <Figure key={'dw' + k} uid={`dw${k}`} x={1450 + lx * 0.82} y={700 - 130 * 0.82 + 2} s={0.042} o={dervish('left')} p={{...idlePose(f / 7 + k), uaN: -30, faN: -40}} light="desert" lo />)}
         {muzzle > 0 && <circle cx={1450 + 200 * 0.82} cy={700 - 88 * 0.82} r={20 * muzzle + 5} fill="#fff4cc" opacity={muzzle} />}
       </Layer>
       <Layer cam={cam} depth={0.2} blur={0.5}><Dunes seed={5} base={705} amp={44} haze={0.46} /></Layer>
@@ -97,6 +102,12 @@ export const Somali: React.FC = () => {
       <Layer cam={cam} depth={0.78}><Plains seed={17} y0={850} y1={960} count={500} haze0={0.18} haze1={0.1} fade={1} colorAt={dcol} haze="#fbe2b4" /></Layer>
       <Layer cam={cam} depth={0.8}><Scrub seed={4} count={7} y0={880} y1={950} f={f} /></Layer>
       <Layer cam={cam} depth={1.0}><Plains seed={18} y0={930} y1={1080} count={520} haze0={0.08} haze1={0.0} fade={1} colorAt={dcol} haze="#fbe2b4" /></Layer>
+
+      <Layer cam={cam} depth={0.82}>
+        <FigureDefs />
+        {[250, 430].map((x, i) => <Figure key={'sl' + i} uid={`sl${i}`} x={x} y={872} s={0.4} o={i ? askari('right') : officer('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="desert" lo />)}
+        {[1560, 1740].map((x, i) => <Figure key={'sr' + i} uid={`sr${i}`} x={x} y={872} s={0.4} o={askari('left')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="desert" lo />)}
+      </Layer>
 
       <Character
         pose={pose}
