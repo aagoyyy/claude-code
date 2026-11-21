@@ -6,6 +6,7 @@ import {Cam, camXY, clamp, ease, easeOut, easeOutBack, H, lerp, W} from '../worl
 import {Character, place} from '../rig/Character';
 import {attach, kf, Pose} from '../rig/pose';
 import {Post} from '../fx/Post';
+import {Actors, Tracer} from '../fx/Battle';
 import {Figure, FigureDefs} from '../rig/Figure';
 import {idlePose} from '../rig/Side';
 import {askari, dervish, officer} from './SomaliA';
@@ -76,7 +77,7 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
   const tm = (start: number) => ({hs: easeOutBack((f - start) / 10), line: easeOut((f - start - 4) / 14), label: easeOut((f - start - 12) / 12)});
 
   const flashA = f >= 68 && f < 80 ? 0.7 * Math.exp(-(f - 68) / 2.4) : 0;
-  const muzzle = f >= 64 && f < 71 ? 1 - (f - 64) / 7 : 0;
+  const muzzle = f >= HIT - 8 && f < HIT - 3 ? 1 - (f - (HIT - 8)) / 5 : 0;
   const dustT = clamp((f - (HIT + 2)) / 60);
   const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 60) / 12);
   const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (SOMALI_FRAMES - 12)) / 12));
@@ -104,9 +105,12 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
       <Layer cam={cam} depth={1.0}><Plains seed={18} y0={930} y1={1080} count={520} haze0={0.08} haze1={0.0} fade={1} colorAt={dcol} haze="#fbe2b4" /></Layer>
 
       <Layer cam={cam} depth={0.82}>
-        <FigureDefs />
-        {[250, 430].map((x, i) => <Figure key={'sl' + i} uid={`sl${i}`} x={x} y={872} s={0.4} o={i ? askari('right') : officer('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="desert" lo />)}
-        {[1560, 1740].map((x, i) => <Figure key={'sr' + i} uid={`sr${i}`} x={x} y={872} s={0.4} o={askari('left')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="desert" lo />)}
+        <Actors f={f} specs={[
+          {id: 'c1', o: officer('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 8, period: 13, aim: () => [1500, 640], lo: true},
+          {id: 'c2', o: askari('right'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 14, period: 12, aim: () => [1500, 640], lo: true, flinch: [HIT]},
+          {id: 'c3', o: askari('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1500, 640], lo: true, dieAt: HIT + 16},
+          {id: 'c4', o: askari('right'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1500, 640], lo: true, flinch: [HIT]},
+        ]} />
       </Layer>
 
       <Character
@@ -137,6 +141,7 @@ export const Somali: React.FC<{cut?: boolean}> = ({cut}) => {
           <text x={120} y={906} fontFamily="'Helvetica Neue', Arial, sans-serif" fontWeight={800} fontSize={40} letterSpacing={6} fill="#4a2a18">SOMALILAND</text>
           <text x={120} y={946} fontFamily="Georgia, serif" fontStyle="italic" fontSize={32} fill="#6a4630">1914</text>
         </g>
+        {(() => { const m = camXY(cam, 0.12, 1450 + 200 * 0.82, 700 - 88 * 0.82); return <Tracer x0={m[0]} y0={m[1]} x1={eye[0]} y1={eye[1]} age={f - (HIT - 8)} dur={8} w={4} />; })()}
         {hit && <>
           <Callout f={f} sx={eye[0]} sy={eye[1]} {...tm(HIT + 14)} lx={1250} ly={230} title="MATA KIRI" sub="Somaliland, 1914" />
           <Callout f={f} sx={ear[0]} sy={ear[1]} {...tm(HIT + 24)} lx={1250} ly={360} title="TELINGA" sub="tertembak" />

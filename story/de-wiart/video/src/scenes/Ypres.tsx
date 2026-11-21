@@ -8,6 +8,7 @@ import {attach, kf, Pose} from '../rig/pose';
 import {Callout, VictoriaCross} from '../ui/Callout';
 import {Post} from '../fx/Post';
 import {Figure, FigureDefs} from '../rig/Figure';
+import {Actors, Tracer} from '../fx/Battle';
 import {aimPose, idlePose, kneelPose, walkPose, SidePose} from '../rig/Side';
 import {german, medic, tommyW1} from './YpresA';
 
@@ -75,6 +76,9 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
   const hand = pt('foreR', 696, 1078), head = pt('head', 484, 486), hip = pt('torso', 352, 1052), leg = pt('thighL', 448, 1288), ank = pt('shinL', 452, 1607);
   const eyeP = pt('head', 528, 564), earP = pt('head', 574, 570), faceP = pt('head', 556, 618), bellyP = pt('torso', 482, 906);
 
+  const gScr = camXY(cam, 0.33, 1010 - 62, 784 - 150);
+  const trS: [number, number] = [960 + (gScr[0] - 960) / cam.zoom + cam.x, 640 + (gScr[1] - 640) / cam.zoom + cam.y];
+  const tr0y = trS[1];
   // medic: runs in from the right, kneels and bandages the stump
   const arrive = ease(clamp((f - (HIT + 24)) / 34));
   const kneelK = ease(clamp((f - (HIT + 56)) / 14));
@@ -125,9 +129,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
         <DeadTree x={1560} y={784} s={0.7} haze={0.54} seed={7} />
       </Layer>
       <Layer cam={cam} depth={0.33}>
-        <FigureDefs />
-        {[1010, 1180, 1330].map((x, i) => <Figure key={'g' + i} uid={`gm${i}`} x={x} y={784} s={0.17} o={german('left')} p={aimPose(f / 6 + i)} light="night" lit={G} lo />)}
-        {f >= HIT - 4 && f < HIT + 3 && <circle cx={1010 - 62} cy={784 - 150} r={14} fill="#fff1c4" opacity={1 - (f - HIT + 4) / 7} />}
+        <Actors f={f} aimShift={cam.x * 0.33} specs={[1010, 1090, 1180, 1290].map((x, i) => ({id: `gm${i}`, o: german('left'), x, y: 784 - (i % 2) * 5, s: 0.17, face: 'left' as const, mode: 'aim' as const, fireFrom: HIT - 8 + (i ? 4 + i * 6 : 0) - (i ? 0 : 0), period: 13, aim: () => [800, 900], lo: true, light: 'night' as const, lit: G}))} />
       </Layer>
       <Layer cam={cam} depth={0.5}><Plains seed={26} y0={770} y1={880} count={420} haze0={0.4} haze1={0.28} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
       <Layer cam={cam} depth={0.52}>
@@ -136,8 +138,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
       </Layer>
       <Layer cam={cam} depth={0.78}><Plains seed={27} y0={850} y1={960} count={460} haze0={0.22} haze1={0.12} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
       <Layer cam={cam} depth={0.8}>
-        <FigureDefs />
-        {[240, 440, 1560, 1760].map((x, i) => <Figure key={'tc' + i} uid={`tc${i}`} x={x} y={930} s={0.46} o={tommyW1(i < 2 ? 'right' : 'left', i % 2 ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 6 * Math.exp(-(f - HIT) / 6) : 0}} light="night" lit={G} lo />)}
+        <Actors f={f} specs={[240, 440, 1560, 1760].map((x, i) => ({id: `tc${i}`, o: tommyW1(i < 2 ? 'right' : 'left', i % 2 ? '#c89870' : '#e0a880'), x, y: 930, s: 0.46, face: (i < 2 ? 'right' : 'left') as 'left' | 'right', mode: 'aim' as const, fireFrom: 6 + i * 3, period: 12, aim: () => [i < 2 ? 1250 : 700, 790], lo: true, light: 'night' as const, lit: G, flinch: [HIT], dieAt: i === 3 ? HIT + 30 : undefined}))} />
       </Layer>
       <Layer cam={cam} depth={0.82}><Sandbags y={915} x0={-300} x1={2300} rows={2} s={0.9} light={G} seed={11} /></Layer>
       <Layer cam={cam} depth={1.0}><Plains seed={28} y0={930} y1={1080} count={480} haze0={0.1} haze1={0.0} fade={1} colorAt={mcol} haze={NHAZE} /></Layer>
@@ -175,6 +176,7 @@ export const Ypres: React.FC<{cut?: boolean}> = ({cut}) => {
           <text x={120} y={946} fontFamily="Georgia, serif" fontStyle="italic" fontSize={32} fill="#d9c7a0">1915 · Perang Dunia I</text>
         </g>
 
+        {(() => <Tracer x0={gScr[0]} y0={gScr[1]} x1={hand[0]} y1={hand[1]} age={f - (HIT - 8)} dur={8} w={4} />)()}
         {f >= HIT + 8 && <Callout f={f} sx={hand[0]} sy={hand[1]} {...tm(HIT + 8)} lx={1290} ly={190} title="TANGAN KIRI" sub="putus, Ypres 1915" />}
         {f >= MONT && f < 150 + 30 && null}
         {f >= MONT && <>

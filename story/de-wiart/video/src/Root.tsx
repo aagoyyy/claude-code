@@ -8,6 +8,7 @@ import {Boer2, BOER2_FRAMES} from './scenes/Boer2';
 import {HeroSide, HEROSIDE_FRAMES} from './scenes/HeroSide';
 import {Somali2, SOMALI2_FRAMES} from './scenes/Somali2';
 import {Ypres2, YPRES2_FRAMES} from './scenes/Ypres2';
+import {Story, STORY_FRAMES, BoerChapter, BOERCH, SomaliChapter, SOMCH, YpresChapter, YPRCH} from './scenes/Story';
 import {BoerA, BOERA_FRAMES} from './scenes/BoerA';
 
 export const Root: React.FC = () => (
@@ -21,5 +22,9 @@ export const Root: React.FC = () => (
     <Composition id="HeroSide" component={HeroSide} durationInFrames={HEROSIDE_FRAMES} fps={FPS} width={1920} height={1080} />
     <Composition id="Somali2" component={Somali2} durationInFrames={SOMALI2_FRAMES} fps={FPS} width={1920} height={1080} />
     <Composition id="Ypres2" component={Ypres2} durationInFrames={YPRES2_FRAMES} fps={FPS} width={1920} height={1080} />
+    <Composition id="BoerChapter" component={BoerChapter} durationInFrames={BOERCH} fps={FPS} width={1920} height={1080} />
+    <Composition id="SomaliChapter" component={SomaliChapter} durationInFrames={SOMCH} fps={FPS} width={1920} height={1080} />
+    <Composition id="YpresChapter" component={YpresChapter} durationInFrames={YPRCH} fps={FPS} width={1920} height={1080} />
+    <Composition id="Story" component={Story} durationInFrames={STORY_FRAMES} fps={FPS} width={1920} height={1080} />
   </>
 );

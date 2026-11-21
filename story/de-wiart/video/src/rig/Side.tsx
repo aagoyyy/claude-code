@@ -4,7 +4,7 @@ import {mix} from '../world/util';
 /** Side-view (profile) rig. Local space: feet on y=0, figure faces +x, ~1270 tall. Mirror with `face='left'`. */
 export type Pal = {skin: string; hair: string; top: string; bottom: string; belt: string; boots: string; puttee?: string; metal?: string};
 export type Head = 'none' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina';
-export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number};
+export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number};
 
 export type SideOpts = {
   pal: Pal;
@@ -261,11 +261,13 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
           )}
           {near && (o.gear === 'rifle' || o.gear === 'rifle+pack') && (
             <g transform="translate(0 220) rotate(-3)">
-              <rect x={-7} y={-250} width={14} height={470} rx={5} fill="#5a3a22" stroke={OUT} strokeWidth="2.5" />
-              <rect x={-5} y={80} width={10} height={150} fill={metal} />
-              <rect x={-5} y={-250} width={10} height={90} fill="#3a2414" />
-              <path d="M-4 -250 V220" stroke="#d9a977" strokeWidth="2" opacity=".5" />
-              <rect x={-9} y={-130} width={18} height={10} fill={metal} /><rect x={-9} y={-60} width={18} height={8} fill={metal} />
+              <rect x={-8} y={-300} width={16} height={560} rx={5} fill="#5a3a22" stroke={OUT} strokeWidth="2.5" />
+              <path d="M-10 -300 L10 -300 L12 -200 L-12 -190 Z" fill="#3a2414" stroke={OUT} strokeWidth="2" />
+              <rect x={-5} y={90} width={10} height={380} fill={metal} stroke={OUT} strokeWidth="1.5" />
+              <rect x={-4} y={-190} width={8} height={290} fill="#6a4426" />
+              <path d="M-4 -300 V460" stroke="#d9a977" strokeWidth="2" opacity=".5" />
+              <rect x={-10} y={-70} width={20} height={12} fill={metal} /><rect x={-10} y={30} width={20} height={9} fill={metal} />
+              <path d="M0 470 l0 -12 M-4 466 h8" stroke="#222" strokeWidth="3" />
             </g>
           )}
           {near && o.gear === 'spear' && (
@@ -449,7 +451,8 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
       <Arm near ua={p.uaN} fa={p.faN} stump={stumpNear} />
     </g>
   );
-  return <g transform={`translate(${(p.dx || 0).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''}`}>{art}</g>;
+  const fk = p.fall || 0;
+  return <g transform={`translate(${(p.dx || 0).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''} translate(0 ${(-114 * fk).toFixed(1)}) rotate(${(-88 * fk).toFixed(2)})`}>{art}</g>;
 };
 
 /** walking cycle (phase in radians); stride scales the swing */
@@ -466,3 +469,28 @@ export const walkPose = (phase: number, stride = 1): SidePose => {
 export const idlePose = (t: number): SidePose => ({torso: 0.6 * Math.sin(t), br: 1 + 0.006 * Math.sin(t), head: 0.8 * Math.sin(t * 0.7), uaN: 3, faN: -12, uaF: -2, faF: -10, shN: 3, shF: 3});
 export const aimPose = (t: number): SidePose => ({torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)});
 export const kneelPose = (t: number): SidePose => ({torso: -8, head: 10, thN: -88, shN: 88, ftN: 0, thF: 0, shF: 90, ftF: -70, uaN: -45, faN: -50, uaF: -38, faF: -40, dy: 316, br: 1 + 0.005 * Math.sin(t)});
+
+export const runPose = (phase: number): SidePose => {
+  const s = Math.sin(phase), c = Math.cos(phase), sF = Math.sin(phase + Math.PI), cF = Math.cos(phase + Math.PI);
+  const leg = (sv: number, cv: number) => ({th: -48 * sv, sh: 18 + 78 * Math.max(0, cv) ** 1.5});
+  const n = leg(s, c), f = leg(sF, cF);
+  return {
+    thN: n.th, shN: n.sh, ftN: -(n.th + n.sh) * 0.5, thF: f.th, shF: f.sh, ftF: -(f.th + f.sh) * 0.5,
+    uaN: -38 + 10 * s, faN: -88, uaF: -30 - 10 * s, faF: -92,      // rifle carried across the chest
+    torso: 11 + 2 * s, head: -4, dy: -22 * Math.abs(s) - 6,
+  };
+};
+export const kneelAimPose = (t: number): SidePose => ({...kneelPose(t), torso: -2, head: 2, uaN: -80, faN: -12, uaF: -72, faF: -28});
+export const deadPose = (t: number): SidePose => ({thN: -6, shN: 14, ftN: 20, thF: 8, shF: 6, ftF: 30, uaN: -48, faN: -10, uaF: -62, faF: -4, head: -16, torso: 0});
+
+/** where the muzzle is, in the figure's own (unflipped, right-facing) space; rifle carried by the near arm */
+export const muzzleOf = (p: SidePose): [number, number] => {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const t = rad(p.torso || 0);
+  const sx = -6, sy = -300;                                   // shoulder rel. hip
+  const rx = sx * Math.cos(t) - sy * Math.sin(t), ry = sx * Math.sin(t) + sy * Math.cos(t);
+  const a1 = rad(p.uaN || 0), a2 = rad((p.uaN || 0) + (p.faN || 0)) - rad(3);
+  const hx = rx + 175 * -Math.sin(a1 + t) + 410 * -Math.sin(a2 + t), hy = ry + 175 * Math.cos(a1 + t) + 410 * Math.cos(a2 + t);
+  const mx = hx + 470 * -Math.sin(a2 + t), my = hy + 470 * Math.cos(a2 + t);
+  return [mx, -666 + my + (p.dy || 0)];
+};

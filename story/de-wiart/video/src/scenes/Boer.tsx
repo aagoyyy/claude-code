@@ -1,13 +1,14 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {Acacia, Grass, Hills, Layer, Motes, Mountains, Plains, Rays, Rock, Sky} from '../world/Savanna';
-import {Cam, clamp, easeOut, easeOutBack, ease, H, W} from '../world/util';
+import {Cam, camXY, clamp, easeOut, easeOutBack, ease, H, W} from '../world/util';
 import {Character, place} from '../rig/Character';
 import {attach, kf, Pose} from '../rig/pose';
 import {Post} from '../fx/Post';
 import {Figure, FigureDefs} from '../rig/Figure';
 import {aimPose, idlePose} from '../rig/Side';
 import {boer, tommy} from './BoerA';
+import {Actors, Tracer} from '../fx/Battle';
 
 export const FPS = 24;
 export const BOER_FRAMES = 144;
@@ -49,6 +50,8 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
   };
 
   // hotspot + label timing
+  const mScr = camXY(cam, 0.54, 1062, 600);
+  const tr0: [number, number] = [960 + (mScr[0] - 960) / cam.zoom + cam.x, 640 + (mScr[1] - 640) / cam.zoom + cam.y];
   const hs = easeOutBack((f - (HIT + 6)) / 10);
   const line = easeOut((f - (HIT + 10)) / 14);
   const label = easeOut((f - (HIT + 18)) / 12);
@@ -62,8 +65,8 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
   // dust kicked up by the recoil
   const dustT = clamp((f - (HIT + 2)) / 60);
   const flashA = f >= 58 && f < 70 ? 0.55 * Math.exp(-(f - 58) / 2.2) : 0;
-  const muzzle = f >= 56 && f < 62 ? 1 - (f - 56) / 6 : 0;
-  const smoke = clamp((f - 57) / 70);
+  const muzzle = f >= HIT - 8 && f < HIT - 3 ? 1 - (f - (HIT - 8)) / 5 : 0;
+  const smoke = clamp((f - (HIT - 7)) / 70);
 
   const capIn = cut ? 0 : easeOut((f - 14) / 12), capOut = 1 - easeOut((f - 104) / 14);
   const fade = (cut ? 1 : clamp(f / 14)) * (1 - clamp((f - (BOER_FRAMES - 10)) / 10));
@@ -102,9 +105,12 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
       <Layer cam={cam} depth={1.0}><Plains seed={8} y0={930} y1={1080} count={900} haze0={0.08} haze1={0.0} fade={1} /></Layer>
 
       <Layer cam={cam} depth={0.82}>
-        <FigureDefs />
-        {[250, 430].map((x, i) => <Figure key={'cl' + i} uid={`bl${i}`} x={x} y={872} s={0.4} o={tommy('right')} p={{...idlePose(f / 9 + i), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" lo />)}
-        {[1560, 1740].map((x, i) => <Figure key={'cr' + i} uid={`br${i}`} x={x} y={872} s={0.4} o={tommy('left', i ? '#c89870' : '#e0a880')} p={{...idlePose(f / 9 + i + 2), dy: f >= HIT ? 5 * Math.exp(-(f - HIT) / 6) : 0}} light="warm" lo />)}
+        <Actors f={f} specs={[
+          {id: 'c1', o: tommy('right'), x: 250, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 8, period: 12, aim: () => [1170, 600], lo: true},
+          {id: 'c2', o: tommy('right', '#c89870'), x: 430, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 14, period: 13, aim: () => [1170, 600], lo: true, flinch: [HIT]},
+          {id: 'c3', o: tommy('right'), x: 1560, y: 872, s: 0.4, face: 'right', mode: 'kneelAim', fireFrom: 5, period: 11, aim: () => [1180, 604], lo: true, dieAt: HIT + 14},
+          {id: 'c4', o: tommy('right', '#c89870'), x: 1740, y: 872, s: 0.4, face: 'right', mode: 'aim', fireFrom: 10, period: 12, aim: () => [1180, 604], lo: true, flinch: [HIT]},
+        ]} />
       </Layer>
       {/* character plane */}
       <Character
@@ -131,6 +137,7 @@ export const Boer: React.FC<{cut?: boolean}> = ({cut}) => {
             <circle r={5 * hs} fill="#e0b86a" />
           </g>
         )}
+        <Tracer x0={tr0[0]} y0={tr0[1]} x1={hx} y1={hy} age={f - (HIT - 8)} dur={8} w={4} />
         {line > 0 && <path d={`M${hx} ${hy} L${lineEnd[0]} ${lineEnd[1]}`} stroke="#e0b86a" strokeWidth="2.5" strokeLinecap="round" fill="none" />}
         <g opacity={label} transform={`translate(${(1 - label) * 24} 0)`}>
           <text x={LX} y={LY} fontFamily="'Helvetica Neue', Arial, sans-serif" fontWeight={800} fontSize={44} letterSpacing={4} fill="#f6e8c8">PERUT</text>
