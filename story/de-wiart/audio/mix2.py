@@ -273,8 +273,28 @@ def load(f):
     subprocess.run(['ffmpeg','-y','-loglevel','error','-i',f,'-ar',str(SR),'-ac','1','-f','f32le','/tmp/_v.raw'],check=True)
     return np.fromfile('/tmp/_v.raw','<f4').astype(np.float64)
 vo=np.zeros(N)
-for i,t0 in enumerate([0.6,19.5,40.2,58.6,65.5,78.5]):
-    x=load(os.path.join(D,f'v{i+1}.mp3')); vo[S(t0):S(t0)+len(x)]+=x[:N-S(t0)]
+def seg(f,a,b,t0,tempo=1.0):
+    af=f"atempo={tempo}" if tempo!=1 else "anull"
+    cmd=['ffmpeg','-y','-loglevel','error','-ss',str(a)]+(['-to',str(b)] if b else [])+['-i',os.path.join(D,f),'-af',af,'-ar',str(SR),'-ac','1','-f','f32le','/tmp/_v.raw']
+    subprocess.run(cmd,check=True); x=np.fromfile('/tmp/_v.raw','<f4').astype(np.float64)
+    n=min(len(x),N-S(t0)); fd=np.minimum(np.minimum(np.arange(n)/(.03*SR),(n-np.arange(n))/(.05*SR)),1)
+    vo[S(t0):S(t0)+n]+=x[:n]*fd
+# VO placed on the picture events (hit frames: Boer 8.0s, Somali 27.25s, Ypres 48.67s, crash 67.7s)
+seg('v1new.mp3',0,None,0.1,1.3)            # 1899, Oxford, Perang Boer  -> ends at the shot
+seg('v1.mp3',11.8,None,8.4)                # Di sana, ia tertembak ...
+seg('v2.mp3',0,2.4,19.8)                   # Tahun 1914, di Somaliland
+seg('v2.mp3',2.55,10.1,26.0)               # Sebuah peluru menghantam wajahnya ... penutup mata
+seg('v2.mp3',10.9,None,34.3)               # Lukanya sembuh, tapi ...
+seg('v3.mp3',0,2.7,45.3)                   # Setahun kemudian, di Ypres
+seg('v3.mp3',3.1,4.8,48.3)                 # tangan kirinya hancur
+seg('v3.mp3',5.1,None,51.6)                # Ia terus kembali ... Delapan kali ia terluka
+seg('v4.mp3',0,None,58.9)                  # Victoria Cross
+seg('v5.mp3',0,4.5,64.5)                   # Tahun 1941, usianya 61
+seg('v5.mp3',4.85,7.0,68.8)                # Pesawatnya jatuh ...
+seg('v5.mp3',7.35,8.6,71.8)                # Ia berenang ke daratan
+seg('v5.mp3',8.75,None,78.6)               # lalu ditangkap pasukan Italia
+seg('v6.mp3',0,4.9,81.0)                   # Di kastil ... menggali terowongan
+seg('v6.mp3',5.15,None,88.3)               # Mereka berhasil kabur, tapi ... tertangkap kembali
 # reverb on wet bus (synthetic IR)
 ir_n=S(2.4); t=np.arange(ir_n)/SR
 irL=rng.standard_normal(ir_n)*np.exp(-t/0.55); irR=rng.standard_normal(ir_n)*np.exp(-t/0.55)
@@ -289,10 +309,10 @@ for fr in (192,654,1168):
     pre=np.clip((a-(t0-.35))/.35,0,1)*(a<t0)         # fade-out just before
     dip*=1-0.9*((a>=t0-.35)&(a<t0+.05))*np.clip((a-(t0-.35))/.3,0,1)
     dip*=1-0.8*((a>=t0+.05)&(a<t0+3.0))*np.exp(-(a-t0)/1.4)
-dv=np.convolve(np.abs(vo),np.ones(S(.12))/S(.12),'same'); duck=1-0.5*np.clip(dv/0.05,0,1); duck=np.convolve(duck,np.ones(S(.25))/S(.25),'same')
+dv=np.convolve(np.abs(vo),np.ones(S(.12))/S(.12),'same'); duck=1-0.78*np.clip(dv/0.04,0,1); duck=np.convolve(duck,np.ones(S(.25))/S(.25),'same')
 sfxL=(L+rl*1.0); sfxR=(R+rr*1.0)
-outL=vo*1.0+ (sfxL*0.9)*(0.5+0.5*duck) + (MUS*dip+AMB*dip*.9)*duck
-outR=vo*1.0+ (sfxR*0.9)*(0.5+0.5*duck) + (MUS*dip+AMB*dip*.9)*duck
+outL=vo*1.5+ (sfxL*0.40)*(0.35+0.65*duck) + (MUS*dip*.7+AMB*dip*.5)*duck
+outR=vo*1.5+ (sfxR*0.40)*(0.35+0.65*duck) + (MUS*dip*.7+AMB*dip*.5)*duck
 # gentle bus compression + limiter
 def comp(x):
     y=x.copy(); thr=.35; m=np.abs(y)>thr; y[m]=np.sign(y[m])*(thr+(np.abs(y[m])-thr)*.4); return y
