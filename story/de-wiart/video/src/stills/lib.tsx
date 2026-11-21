@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import {Post} from '../fx/Post';
 import {Cam, camT, H, mix, mulberry32, ridge, W} from '../world/util';
+import {clock} from '../rig/clock';
 import {Character} from '../rig/Character';
 import {SidePose} from '../rig/Side';
 import {Figure, FigureDefs, LightName} from '../rig/Figure';
@@ -9,9 +10,11 @@ import {Pal, SideOpts} from '../rig/Side';
 
 /** one full-frame still: svg children + grading/grain/vignette */
 export const CamCtx = React.createContext<Cam>({x: 0, y: 0, zoom: 1});
-export const Frame: React.FC<{grade?: string; night?: boolean; children: React.ReactNode; over?: React.ReactNode; cam?: Cam}> = ({grade, night, children, over, cam = {x: 0, y: 0, zoom: 1}}) => (
+export const Frame: React.FC<{grade?: string; night?: boolean; children: React.ReactNode; over?: React.ReactNode; cam?: Cam}> = ({grade, night, children, over, cam}) => {
+  const outer = React.useContext(CamCtx);
+  return (
   <AbsoluteFill style={{background: '#000', filter: grade}}>
-    <CamCtx.Provider value={cam}>
+    <CamCtx.Provider value={cam ?? outer}>
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{position: 'absolute', left: 0, top: 0}}>
       <FigureDefs />
       <DetailDefs /><MatDefs /><HouseDefs /><GroundDefs />
@@ -19,9 +22,10 @@ export const Frame: React.FC<{grade?: string; night?: boolean; children: React.R
     </svg>
     {over}
     </CamCtx.Provider>
-    <Post f={3} fade={1} night={night} />
+    <Post f={3 + Math.round(clock.t * 12)} fade={1} night={night} />
   </AbsoluteFill>
-);
+  );
+};
 
 export const Grad: React.FC<{id: string; stops: [number, string, number?][]; dir?: 'v' | 'h'}> = ({id, stops, dir = 'v'}) => (
   <linearGradient id={id} x1="0" y1="0" x2={dir === 'h' ? 1 : 0} y2={dir === 'v' ? 1 : 0}>
@@ -320,7 +324,7 @@ export const face = {
   smile: {smile: 1, squint: 0.2} as SidePose,
   laugh: {smile: 1, mouth: 0.6, squint: 0.7, head: -5} as SidePose,
   wonder: {wide: 0.6, brow: 0.6, smile: 0.25, head: -4} as SidePose,
-  talk: (f: number): SidePose => ({mouth: 0.15 + 0.5 * Math.abs(Math.sin(f * 0.9)), brow: 0.1}),
+  talk: (f: number): SidePose => ({mouth: 0.15 + 0.5 * Math.abs(Math.sin(f * 0.9 + clock.t * 9)), brow: 0.1}),
 };
 export const arms = {
   point: {uaN: -82, faN: -4, handN: 'point'} as SidePose,

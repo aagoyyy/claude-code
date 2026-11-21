@@ -1,11 +1,12 @@
 import React from 'react';
+import {clock} from './clock';
 import {mix} from '../world/util';
 
 /** Side-view (profile) rig. Local space: feet on y=0, figure faces +x, ~1270 tall. Mirror with `face='left'`. */
 export type Pal = {skin: string; hair: string; top: string; bottom: string; belt: string; boots: string; puttee?: string; metal?: string};
 export type HandKind = 'fist' | 'open' | 'point' | 'relaxed';
 export type Head = 'none' | 'bowler' | 'top' | 'mortar' | 'boater' | 'fez' | 'brodie' | 'pith' | 'slouch' | 'cap' | 'turban' | 'stahl' | 'bustina' | 'flatcap' | 'scarf' | 'nursecap';
-export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; hatLag?: number; slingLag?: number; packBounce?: number; spin?: number; mouth?: number; brow?: number; squint?: number; grimace?: number; smile?: number; wide?: number; handN?: HandKind; handF?: HandKind};
+export type SidePose = Partial<Record<'torso' | 'head' | 'uaN' | 'faN' | 'uaF' | 'faF' | 'thN' | 'shN' | 'ftN' | 'thF' | 'shF' | 'ftF', number>> & {dx?: number; dy?: number; br?: number; blink?: number; fall?: number; grip?: boolean; sling?: boolean; hatLag?: number; slingLag?: number; packBounce?: number; spin?: number; mouth?: number; brow?: number; squint?: number; grimace?: number; smile?: number; wide?: number; vx?: number; handN?: HandKind; handF?: HandKind};
 
 export type SideOpts = {
   pal: Pal;
@@ -700,32 +701,35 @@ export const SideArt: React.FC<{o: SideOpts; p: SidePose}> = ({o, p}) => {
   );
   const fk = p.fall || 0;
   const fa = Math.abs(fk);
-  return <g transform={`translate(${(p.dx || 0).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''} translate(0 ${(-(fk > 0 ? 114 : 130) * fa).toFixed(1)}) rotate(${(-88 * fk + (p.spin || 0)).toFixed(2)}) scale(1 ${o.stretch ?? 1})`}>{art}</g>;
+  return <g transform={`translate(${((p.dx || 0) + (p.vx ? (flip ? -1 : 1) * p.vx * clock.t : 0)).toFixed(1)} ${(p.dy || 0).toFixed(1)}) ${flip ? 'scale(-1 1)' : ''} translate(0 ${(-(fk > 0 ? 114 : 130) * fa).toFixed(1)}) rotate(${(-88 * fk + (p.spin || 0)).toFixed(2)}) scale(1 ${o.stretch ?? 1})`}>{art}</g>;
 };
 
 /** walking cycle (phase in radians); stride scales the swing */
-export const walkPose = (phase: number, stride = 1): SidePose => {
+const blinkNow = (off = 0): number | undefined => { if (clock.t <= 0) return undefined; const k = (clock.t + off + 1.3) % 3.8; return 1 - 0.95 * Math.max(0, 1 - Math.abs(k - 0.1) / 0.09); };
+export const walkPose = (phase0: number, stride = 1): SidePose => {
+  const phase = phase0 + clock.t * 5.2;
   const s = Math.sin(phase), c = Math.cos(phase), sF = Math.sin(phase + Math.PI), cF = Math.cos(phase + Math.PI);
   const leg = (sv: number, cv: number) => ({th: -27 * stride * sv, sh: 8 + 46 * stride * Math.max(0, cv) ** 2, ft: 0});
   const n = leg(s, c), f = leg(sF, cF);
   return {
     thN: n.th, shN: n.sh, ftN: -(n.th + n.sh) * 0.7, thF: f.th, shF: f.sh, ftF: -(f.th + f.sh) * 0.7,
     uaN: 24 * stride * s, faN: -22 - 10 * Math.max(0, -s), uaF: -24 * stride * s, faF: -22 - 10 * Math.max(0, s),
-    torso: -2.5 * s, head: 1.5 * s, dy: -9 * Math.abs(s) * stride, sling: true,
+    torso: -2.5 * s, head: 1.5 * s, dy: -9 * Math.abs(s) * stride, sling: true, vx: 110 * stride, blink: blinkNow(phase0),
   };
 };
-export const idlePose = (t: number): SidePose => ({torso: 0.6 * Math.sin(t), br: 1 + 0.006 * Math.sin(t), head: 0.8 * Math.sin(t * 0.7), uaN: 3, faN: -12, uaF: -2, faF: -10, shN: 3, shF: 3});
-export const aimPose = (t: number): SidePose => ({grip: true, torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)});
+export const idlePose = (t0: number): SidePose => { const t = t0 + clock.t * 1.5; return {blink: blinkNow(t0), torso: 0.6 * Math.sin(t), br: 1 + 0.006 * Math.sin(t), head: 0.8 * Math.sin(t * 0.7), uaN: 3, faN: -12, uaF: -2, faF: -10, shN: 3, shF: 3}; };
+export const aimPose = (t0: number): SidePose => { const t = t0 + clock.t * 1.2; return {blink: blinkNow(t0), grip: true, torso: -3, head: 4, uaN: -78, faN: -14, uaF: -70, faF: -30, thN: -4, thF: 6, shN: 6, shF: 4, br: 1 + 0.004 * Math.sin(t)}; };
 export const kneelPose = (t: number): SidePose => ({torso: -8, head: 10, thN: -88, shN: 88, ftN: 0, thF: 0, shF: 90, ftF: -70, uaN: -45, faN: -50, uaF: -38, faF: -40, dy: 316, br: 1 + 0.005 * Math.sin(t)});
 
-export const runPose = (phase: number): SidePose => {
+export const runPose = (phase0: number): SidePose => {
+  const phase = phase0 + clock.t * 9;
   const s = Math.sin(phase), c = Math.cos(phase), sF = Math.sin(phase + Math.PI), cF = Math.cos(phase + Math.PI);
   const leg = (sv: number, cv: number) => ({th: -48 * sv, sh: 18 + 78 * Math.max(0, cv) ** 1.5});
   const n = leg(s, c), f = leg(sF, cF);
   return {
     thN: n.th, shN: n.sh, ftN: -(n.th + n.sh) * 0.5, thF: f.th, shF: f.sh, ftF: -(f.th + f.sh) * 0.5,
     uaN: 36 * s, faN: -74 - 10 * Math.max(0, -s), uaF: -36 * s, faF: -74 - 10 * Math.max(0, s),   // arms pump; rifle slung on the shoulder
-    torso: 11 + 2 * s, head: -4, dy: -22 * Math.abs(s) - 6, sling: true,
+    torso: 11 + 2 * s, head: -4, dy: -22 * Math.abs(s) - 6, sling: true, vx: 220, blink: blinkNow(phase0),
   };
 };
 export const kneelAimPose = (t: number): SidePose => ({...kneelPose(t), grip: true, torso: -2, head: 2, uaN: -80, faN: -12, uaF: -72, faF: -28});
