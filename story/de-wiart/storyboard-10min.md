@@ -41,13 +41,13 @@ Kolom suara: musik (M), efek (SFX). VO mengacu ke `script-10min.md`.
 ## Bab 2. Perang Boer, 1899 (1:30)
 | # | Dur | Status | Visual dan kamera | Aksi | Suara |
 |---|----:|--------|-------------------|------|-------|
-| 2.1 | 8 | BARU | peta bergaya lama, garis merah London ke Cape Town | kapal kecil bergerak di peta | SFX: gores pena, ombak |
-| 2.2 | 12 | BARU | MS meja pendaftaran, dua figur | ia menaikkan umur, petugas curiga, mencoret nama, menandatangani nama samaran | SFX: pena, cap stempel |
-| 2.3 | 12 | ADA (BoerShot1, perpanjang) | WS savana, barisan maju | pasukan maju dan berlindung, tembakan, ledakan | SFX: tembakan, desing, ledakan |
+| 2.1 | 10 | BARU | peta bergaya lama, garis merah London ke Cape Town | kapal kecil bergerak di peta | SFX: gores pena, ombak |
+| 2.2 | 14 | BARU | MS meja pendaftaran, dua figur | ia menaikkan umur, petugas curiga, mencoret nama, menandatangani nama samaran | SFX: pena, cap stempel |
+| 2.3 | 16 | ADA (BoerShot1, perpanjang) | WS savana, barisan maju | pasukan maju dan berlindung, tembakan, ledakan | SFX: tembakan, desing, ledakan |
 | 2.4 | 8 | ADA (Boer, tampak depan) | MS Adrian | tembakan mengenainya, ia jatuh | SFX: tembakan keras, detak jantung, dengung |
-| 2.5 | 12 | ADA (BoerShot3, perpanjang) | WS | rekan menolong, mundur | SFX: tembakan jauh |
-| 2.6 | 10 | BARU | MS kapal rumah sakit, dek | ia berbaring, perawat lewat, ia menatap langit | M: cello; SFX: ombak, kain |
-| 2.7 | 10 | BARU | MS tenda perwira Afrika Selatan | Adrian berseragam perwira, memberi hormat, kembali ke medan | SFX: sepatu bot, terompet |
+| 2.5 | 14 | ADA (BoerShot3, perpanjang) | WS | rekan menolong, mundur | SFX: tembakan jauh |
+| 2.6 | 14 | BARU | MS kapal rumah sakit, dek | ia berbaring, perawat lewat, ia menatap langit | M: cello; SFX: ombak, kain |
+| 2.7 | 14 | BARU | MS tenda perwira Afrika Selatan | Adrian berseragam perwira, memberi hormat, kembali ke medan | SFX: sepatu bot, terompet |
 
 ## Bab 3. Antara dua perang (0:40)
 | # | Dur | Status | Visual dan kamera | Aksi | Suara |
@@ -129,5 +129,4 @@ Suara: timpani per luka, detak jantung yang makin cepat, tembakan teredam per lu
 | 11.4 | 5 | BARU | CU wajah tua, fade ke kartu penutup | kutipan akhir | M: cello habis, hening |
 
 ---
-Catatan: tabel Bab 2 punya baris "..." karena tujuh scene berjumlah 72 detik; sisa 18 detik untuk transisi dan jeda antar-adegan (peta, cross-dissolve) yang ditambahkan di timeline.
 Durasi per scene adalah target; waktu final diatur ulang mengikuti rekaman narasi.
