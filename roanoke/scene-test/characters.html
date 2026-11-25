@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Character preview</title>
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  #stage { position: relative; width: 1280px; height: 720px; }
+  .lbl { position: absolute; bottom: 26px; width: 300px; text-align: center; color: #fff; font-size: 17px; line-height: 1.35;
+         text-shadow: 0 2px 8px rgba(0,0,0,.9); transform: translateX(-50%); }
+  .lbl small { display: block; opacity: .7; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="lbl" style="left:16%">Soldier (raw)<small>Mixamo-derived, modern</small></div>
+  <div class="lbl" style="left:38%">Soldier as silhouette<small>how it would read in the scene</small></div>
+  <div class="lbl" style="left:62%">Cesium Man as silhouette<small>plain</small></div>
+  <div class="lbl" style="left:84%">Cesium Man + morion + cloak<small>small head, period gear</small></div>
+</div>
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+<script type="module" src="./characters.js"></script>
+</body>
+</html>

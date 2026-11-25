@@ -2,3 +2,4 @@ node_modules/
 out/frames/
 out/shots/
 out/render.log
+scene-test/assets/*.glb
