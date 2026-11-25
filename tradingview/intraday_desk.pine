@@ -1,0 +1,143 @@
+//@version=5
+// Intraday Crypto Desk: setup A (pullback EMA), B (sweep & reclaim), C (break & retest).
+// Logika disamakan dengan crypto-backtest/backtest.py. Pasang di chart 15m (BTCUSDT).
+// Slippage: di Properties isi sekitar 0.02% dari harga dalam tick (BTCUSDT tick 0.1 -> ~20 tick).
+strategy("Intraday Desk A/B/C", overlay = true, pyramiding = 0,
+     initial_capital = 1000, commission_type = strategy.commission.percent, commission_value = 0.05,
+     calc_on_every_tick = false, process_orders_on_close = false, max_bars_back = 500)
+
+// ---------------------------------------------------------------- input
+gSet   = "Setup"
+useA   = input.bool(true, "Setup A Pullback EMA", group = gSet)
+useB   = input.bool(true, "Setup B Sweep & reclaim", group = gSet)
+useC   = input.bool(true, "Setup C Break & retest", group = gSet)
+rr     = input.float(2.0, "Target R:R", minval = 0.5, step = 0.5, group = gSet)
+bufAtr = input.float(0.1, "Buffer SL (x ATR)", step = 0.05, group = gSet)
+rangeN = input.int(48, "Jumlah candle range (B, C)", minval = 10, group = gSet)
+maxGap = input.float(0.4, "B: maks jarak EMA20-EMA50 1H (%)", step = 0.05, group = gSet) / 100
+winC   = input.int(12, "C: jendela retest (candle)", group = gSet)
+tolC   = input.float(0.3, "C: toleransi retest (x ATR)", step = 0.1, group = gSet)
+htf    = input.timeframe("60", "Timeframe arah", group = gSet)
+
+gRisk  = "Risiko"
+riskPc = input.float(0.5, "Risiko per trade (% equity)", minval = 0.1, maxval = 2, step = 0.1, group = gRisk)
+maxLev = input.float(5.0, "Leverage maksimum", minval = 1, group = gRisk)
+maxDay = input.int(4, "Maks trade per hari", minval = 1, group = gRisk)
+stopR  = input.float(3.0, "Stop harian (R)", minval = 1, group = gRisk)
+maxHld = input.int(96, "Maks candle per trade", minval = 1, group = gRisk)
+tz     = input.string("Asia/Jakarta", "Zona waktu hari trading", group = gRisk)
+
+// ----------------------------------------------------------- indikator
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+atr   = ta.atr(14)
+
+// Arah 1H dari candle 1H yang sudah close ([1] + lookahead_on = tidak repaint)
+[hC, hE20, hE50, hE20p] = request.security(syminfo.tickerid, htf,
+     [close[1], ta.ema(close, 20)[1], ta.ema(close, 50)[1], ta.ema(close, 20)[4]],
+     lookahead = barmerge.lookahead_on)
+trend = hC > hE50 and hE20 > hE20p ? 1 : hC < hE50 and hE20 < hE20p ? -1 : 0
+gap   = math.abs(hE20 - hE50) / hC
+
+hiN = ta.highest(high, rangeN)[1]
+loN = ta.lowest(low, rangeN)[1]
+
+// ------------------------------------------------------ sinyal setup
+var int   side  = 0
+var float slPx  = na
+var string tag  = ""
+side := 0
+
+// A
+if useA and bar_index > 120
+    if trend == 1 and low[1] <= ema20[1] and close > open and close > ema20 and close > ema50
+        side := 1
+        slPx := ta.lowest(low, 6) - bufAtr * atr
+        tag := "A"
+    else if trend == -1 and high[1] >= ema20[1] and close < open and close < ema20 and close < ema50
+        side := -1
+        slPx := ta.highest(high, 6) + bufAtr * atr
+        tag := "A"
+
+// B
+if side == 0 and useB and bar_index > 120 and trend == 0 and gap <= maxGap
+    if low < loN and close > loN and close > open
+        side := 1
+        slPx := low - bufAtr * atr
+        tag := "B"
+    else if high > hiN and close < hiN and close < open
+        side := -1
+        slPx := high + bufAtr * atr
+        tag := "B"
+
+// C (keadaan menunggu retest)
+var int   pendSide = 0
+var float pendLvl  = na
+var int   pendExp  = na
+if useC and bar_index > 120
+    if pendSide == 0
+        if close > hiN
+            pendSide := 1
+            pendLvl := hiN
+            pendExp := bar_index + winC
+        else if close < loN
+            pendSide := -1
+            pendLvl := loN
+            pendExp := bar_index + winC
+    else
+        invalid = bar_index > pendExp or (pendSide == 1 and close < pendLvl - atr) or (pendSide == -1 and close > pendLvl + atr)
+        if invalid
+            pendSide := 0
+        else if pendSide == 1 and low <= pendLvl + tolC * atr and close > pendLvl and close > open
+            if side == 0
+                side := 1
+                slPx := math.min(low, pendLvl) - bufAtr * atr
+                tag := "C"
+            pendSide := 0
+        else if pendSide == -1 and high >= pendLvl - tolC * atr and close < pendLvl and close < open
+            if side == 0
+                side := -1
+                slPx := math.max(high, pendLvl) + bufAtr * atr
+                tag := "C"
+            pendSide := 0
+
+// ------------------------------------------------- aturan harian (WIB)
+dayKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+newDay = ta.change(dayKey) != 0
+var int   tradesToday = 0
+var float dayStartNet = 0.0
+var float dayRiskUsd  = 0.0
+if newDay
+    tradesToday := 0
+    dayStartNet := strategy.netprofit
+    dayRiskUsd := strategy.equity * riskPc / 100
+dayLocked = dayRiskUsd > 0 and (strategy.netprofit - dayStartNet) <= -stopR * dayRiskUsd
+
+// ------------------------------------------------------------- entri
+alertJson(act) => '{"action":"' + act + '","symbol":"' + syminfo.ticker + '","price":' + str.tostring(close) + ',"setup":"' + tag + '"}'
+
+flat = strategy.position_size == 0
+if side != 0 and flat and tradesToday < maxDay and not dayLocked and not na(slPx)
+    dist = (close - slPx) * side
+    if dist > 0 and dist / close >= 0.0005
+        qtyRisk = strategy.equity * riskPc / 100 / dist
+        qtyLev  = strategy.equity * maxLev / close
+        qty     = math.min(qtyRisk, qtyLev)
+        tpPx    = close + side * rr * dist
+        id      = side == 1 ? "L" + tag : "S" + tag
+        strategy.entry(id, side == 1 ? strategy.long : strategy.short, qty = qty,
+             alert_message = alertJson(side == 1 ? "buy" : "sell"))
+        strategy.exit("X" + id, id, stop = slPx, limit = tpPx,
+             alert_message = alertJson("exit"))
+        tradesToday += 1
+
+// keluar karena waktu
+if strategy.position_size != 0 and bar_index - strategy.opentrades.entry_bar_index(0) >= maxHld
+    strategy.close_all(comment = "TIME", alert_message = alertJson("exit"))
+
+// ------------------------------------------------------------- tampilan
+plot(ema20, "EMA 20", color = color.new(color.teal, 0))
+plot(ema50, "EMA 50", color = color.new(color.orange, 0))
+plotshape(side == 1 and flat, "Sinyal long", shape.triangleup, location.belowbar, color.green, size = size.tiny, text = tag)
+plotshape(side == -1 and flat, "Sinyal short", shape.triangledown, location.abovebar, color.red, size = size.tiny, text = tag)
+bgcolor(dayLocked ? color.new(color.red, 90) : na, title = "Stop harian aktif")
