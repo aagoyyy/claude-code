@@ -124,13 +124,28 @@ def atr(df, n=14):
     return tr.ewm(alpha=1 / n, adjust=False).mean()
 
 
+def adx(df, n=14):
+    up, dn = df["high"].diff(), -df["low"].diff()
+    plus = np.where((up > dn) & (up > 0), up, 0.0)
+    minus = np.where((dn > up) & (dn > 0), dn, 0.0)
+    pc = df["close"].shift(1)
+    tr = pd.concat([df["high"] - df["low"], (df["high"] - pc).abs(), (df["low"] - pc).abs()], axis=1).max(axis=1)
+    a = tr.ewm(alpha=1 / n, adjust=False).mean()
+    pdi = 100 * pd.Series(plus, index=df.index).ewm(alpha=1 / n, adjust=False).mean() / a
+    mdi = 100 * pd.Series(minus, index=df.index).ewm(alpha=1 / n, adjust=False).mean() / a
+    dx = 100 * (pdi - mdi).abs() / (pdi + mdi)
+    return dx.ewm(alpha=1 / n, adjust=False).mean()
+
+
 def prepare(df):
     d = df.copy()
     d["ema20"] = ema(d["close"], 20)
     d["ema50"] = ema(d["close"], 50)
     d["atr"] = atr(d)
     # tren 1H, hanya memakai candle 1H yang SUDAH close (shift 1)
-    h = d.set_index("ts")["close"].resample("1h").last().dropna().to_frame("c")
+    ohlc = d.set_index("ts").resample("1h").agg({"high": "max", "low": "min", "close": "last"}).dropna()
+    h = ohlc[["close"]].rename(columns={"close": "c"})
+    h["adx"] = adx(ohlc)
     h["e20"] = ema(h["c"], 20)
     h["e50"] = ema(h["c"], 50)
     h["e20_up"] = h["e20"] > h["e20"].shift(3)
@@ -138,7 +153,7 @@ def prepare(df):
     h["trend"] = np.where((h["c"] > h["e50"]) & h["e20_up"], 1,
                           np.where((h["c"] < h["e50"]) & h["e20_dn"], -1, 0))
     h["gap"] = (h["e20"] - h["e50"]).abs() / h["c"]
-    h = h[["trend", "gap"]].shift(1)
+    h = h[["trend", "gap", "adx"]].shift(1)
     # label 1H = awal jam, jadi setelah shift(1) nilainya baru terpakai saat jam berikutnya mulai
     return d.set_index("ts").join(h.reindex(d["ts"]).ffill()).reset_index()
 
