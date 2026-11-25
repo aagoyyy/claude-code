@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roanoke Scene Test</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
+    font-family: Georgia, "Times New Roman", "Iowan Old Style", serif; }
+  #stage { position: relative; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; }
+  #stage canvas { display: block; }
+  #vignette { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,.62) 100%); }
+  #fade { position: absolute; inset: 0; background: #000; pointer-events: none; opacity: 1; }
+
+  #hud-top { position: absolute; left: 44px; top: 34px; color: #efe3cc; pointer-events: none;
+    text-shadow: 0 2px 14px rgba(0,0,0,.85); }
+  #place { font: 600 15px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .3em; opacity: .9; }
+  #date { font: 400 46px/1.1 Georgia, "Times New Roman", serif; letter-spacing: .06em; margin-top: 10px; }
+  #found { position: absolute; right: 44px; top: 36px; text-align: right; color: #efe3cc; pointer-events: none;
+    text-shadow: 0 2px 14px rgba(0,0,0,.85); }
+  #found .k { font: 600 13px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .26em; opacity: .75; }
+  #found .v { font: 700 44px/1.1 ui-monospace, Menlo, Consolas, monospace; margin-top: 8px; color: #ffb56b; }
+  #found .v small { font-size: 22px; color: #efe3cc; opacity: .7; }
+
+  #caption { position: absolute; left: 0; right: 0; bottom: 46px; text-align: center; color: #fff;
+    font: italic 400 30px/1.35 Georgia, "Times New Roman", serif; padding: 0 140px;
+    text-shadow: 0 2px 14px rgba(0,0,0,.95), 0 0 3px rgba(0,0,0,.95); pointer-events: none; }
+
+  #title { position: absolute; left: 64px; top: 292px; text-align: left; color: #f6e8cd; opacity: 0;
+    pointer-events: none; font: 400 80px/1 Georgia, "Times New Roman", serif; letter-spacing: .2em;
+    text-shadow: 0 0 32px rgba(255,150,60,.55), 0 3px 18px rgba(0,0,0,.9); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="vignette"></div>
+  <div id="hud-top">
+    <div id="place">ROANOKE ISLAND</div>
+    <div id="date">August 1590</div>
+  </div>
+  <div id="found">
+    <div class="k">COLONISTS FOUND</div>
+    <div class="v">0 <small>/ 115</small></div>
+  </div>
+  <div id="title">CROATOAN</div>
+  <div id="caption"></div>
+  <div id="fade"></div>
+</div>
+<script type="importmap">{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/"
+} }</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
