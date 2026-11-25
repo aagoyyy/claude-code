@@ -137,13 +137,13 @@ def adx(df, n=14):
     return dx.ewm(alpha=1 / n, adjust=False).mean()
 
 
-def prepare(df):
+def prepare(df, htf="1h"):
     d = df.copy()
     d["ema20"] = ema(d["close"], 20)
     d["ema50"] = ema(d["close"], 50)
     d["atr"] = atr(d)
     # tren 1H, hanya memakai candle 1H yang SUDAH close (shift 1)
-    ohlc = d.set_index("ts").resample("1h").agg({"high": "max", "low": "min", "close": "last"}).dropna()
+    ohlc = d.set_index("ts").resample(htf).agg({"high": "max", "low": "min", "close": "last"}).dropna()
     h = ohlc[["close"]].rename(columns={"close": "c"})
     h["adx"] = adx(ohlc)
     h["e20"] = ema(h["c"], 20)
@@ -223,7 +223,7 @@ def signals(d, setup, p):
 
 
 # ------------------------------------------------------------- engine
-def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold, max_cost_r=None):
+def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold, max_cost_r=None, tp_fn=None):
     o, h, l = (d[k].to_numpy() for k in ("open", "high", "low"))
     ts = d["ts"]
     day = ts.dt.tz_convert(WIB).dt.date.to_numpy()
@@ -246,6 +246,10 @@ def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold, max_cos
         if max_cost_r is not None and 2 * cost_pct / 100 * entry / dist > max_cost_r:
             continue                         # stop terlalu rapat: biaya memakan terlalu banyak R
         tp = entry + side * rr * dist
+        if tp_fn is not None:
+            tp = tp_fn(e, side, entry, dist)
+            if tp is None:
+                continue                     # tidak ada level struktur yang memenuhi syarat
         exit_i, exit_px, reason = None, None, None
         for j in range(e, min(n, e + max_hold)):
             hit_sl = (l[j] <= sl) if side == 1 else (h[j] >= sl)
