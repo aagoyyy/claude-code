@@ -2,19 +2,25 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /* ------------------------------------------------------------------
-   The Lost Colony of Roanoke — visual test (Aug 1590)
+   The Lost Colony of Roanoke — visual test v2 (Aug 1590)
    Everything is a pure function of time t => deterministic frame export
    via window.__setTime(t).
 
-   Beats (seconds):
-     0  - 9   : John White's ship approaches the island through morning haze
-     9  - 15  : low glide over the beach toward the empty settlement
-     15 - 19  : camera settles in front of the gate post
-     18 - 27  : CROATOAN lights up letter by letter, title card, fade out
+   Shots:
+     1   0 –  7  wide sea, ship + gulls
+     2   7 – 11  POV from the bow
+     3  11 – 15.5 low glide through the surf
+     4  15.5 – 20 INSERT: footprints in the sand
+     5  20 – 25  aerial reveal of the empty settlement
+     6  25 – 30  plaza, house frames against the sun
+     7  30 – 34  INSERT: things left behind
+     8  34 – 40  approach to the gate post
+     9  40 – 43.5 INSERT: carved letters light up
+    10  43.5 – 50 final composition + title
 ------------------------------------------------------------------- */
 
 const W = 1280, H = 720;
-const T_END = 27;
+const T_END = 50;
 
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const smooth = (x, a, b) => THREE.MathUtils.smoothstep(x, a, b);
@@ -71,8 +77,9 @@ const HAZE = new THREE.Color('#9aa0a2');
 scene.background = HAZE.clone();
 scene.fog = new THREE.FogExp2(HAZE, 0.011);
 const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 4000);
+const timeU = { value: 0 };     // shared wind clock for grass / tree sway
 
-const SUN_DIR = new THREE.Vector3(0.1, 0.14, 1).normalize();   // sun sits low over the forest, behind the settlement
+const SUN_DIR = new THREE.Vector3(0.1, 0.14, 1).normalize();   // sun low over the forest, behind the settlement
 
 /* ---------- sky ---------- */
 const skyMat = new THREE.ShaderMaterial({
@@ -125,10 +132,10 @@ const lantern = new THREE.PointLight(0xffb06a, 0, 18, 2);
 scene.add(lantern);
 
 /* ---------- terrain ---------- */
+const shoreZ = (x) => 3.5 * Math.sin(x * 0.045) + 2 * Math.sin(x * 0.11 + 1.3);
 function clearingK(x, z) { return 1 - smooth(Math.hypot(x / 26, (z - 41) / 22), 0.85, 1.4); }
 function terrainH(x, z) {
-  const shore = 3.5 * Math.sin(x * 0.045) + 2 * Math.sin(x * 0.11 + 1.3);
-  const d = z - shore;
+  const d = z - shoreZ(x);
   let h = d < 0 ? 0.25 + d * 0.10 : 0.25 + 0.85 * (1 - Math.exp(-d * 0.18));
   if (d > 0) h += (fbm(x * 0.03 + 9, 0, z * 0.03 + 2) - 0.5) * 1.8 * smooth(d, 8, 30);
   return lerp(h, 1.05, clearingK(x, z));
@@ -147,7 +154,7 @@ const GROUND = 1.05;   // height of the flat clearing
     const x = pos.getX(i), z = pos.getZ(i);
     const h = terrainH(x, z); pos.setY(i, h);
     const n = fbm(x * 0.09 + 5, 0, z * 0.09);
-    const cl = 1 - smooth(Math.hypot(x / 26, (z - 41) / 22), 0.6, 1.9) ;   // much softer than the height flatten, so no visible edge
+    const cl = 1 - smooth(Math.hypot(x / 26, (z - 41) / 22), 0.6, 1.9);   // much softer than the height flatten, so no visible edge
     let r, g, b;
     if (h < 0.4) {                        // wet -> dry sand
       const k = smooth(h, 0.05, 0.4);
@@ -194,27 +201,98 @@ const waterBase = new Float32Array(waterPos.count * 2);
 const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({
   vertexColors: true, flatShading: true, roughness: 0.28, metalness: 0.05,
   emissive: 0x1f3342, emissiveIntensity: 0.7 }));   // lifts the backlit sea out of pure black
-water.receiveShadow = false;
 scene.add(water);
 
-/* ---------- trees & scrub (instanced) ---------- */
+/* ---------- surf: waves rolling in and breaking on the beach ---------- */
+const foamMat = new THREE.ShaderMaterial({
+  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uTime: { value: 0 } }]),
+  vertexShader: `
+    varying vec3 vW;
+    #include <fog_pars_vertex>
+    void main() {
+      vec4 wp = modelMatrix * vec4(position, 1.0);
+      vW = wp.xyz;
+      vec4 mvPosition = viewMatrix * wp;
+      gl_Position = projectionMatrix * mvPosition;
+      #include <fog_vertex>
+    }`,
+  fragmentShader: `
+    uniform float uTime; varying vec3 vW;
+    #include <fog_pars_fragment>
+    float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float vn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(h21(i), h21(i + vec2(1, 0)), f.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), f.x), f.y); }
+    float sh(float x) { return 3.5 * sin(x * 0.045) + 2.0 * sin(x * 0.11 + 1.3); }
+    void main() {
+      float d = vW.z - sh(vW.x);            // d = -2.5 is the still waterline
+      float acc = 0.0;
+      for (int k = 0; k < 3; k++) {
+        float fk = float(k);
+        float period = 6.5 + fk * 1.9;
+        float ph = fract(uTime / period + fk * 0.33 + 0.10 * sin(vW.x * 0.045 + fk * 1.7) + 0.03 * sin(vW.x * 0.31));
+        float front = mix(-12.0 - fk * 2.5, -1.2 + 0.4 * sin(vW.x * 0.15 + fk * 2.0), pow(ph, 0.8));
+        float dist = d - front;
+        float lead = exp(-pow(dist / 0.42, 2.0));
+        float lace = (1.0 - smoothstep(0.0, 4.2, -dist)) * step(dist, 0.0) * 0.45;
+        float life = smoothstep(0.0, 0.1, ph) * (1.0 - smoothstep(0.7, 1.0, ph));
+        acc += (lead * 0.95 + lace) * life;
+      }
+      float edge = exp(-pow((d + 2.5) / 0.4, 2.0)) * 0.35;
+      float n = vn(vW.xz * vec2(0.9, 2.4) + vec2(uTime * 0.15, 0.0));
+      float a = clamp(clamp(acc + edge, 0.0, 1.0) * (0.45 + 0.8 * n), 0.0, 1.0) * 0.9;
+      #ifdef USE_FOG
+        a *= 1.0 - 0.85 * (1.0 - exp(-fogDensity * fogDensity * vFogDepth * vFogDepth));
+      #endif
+      gl_FragColor = vec4(vec3(0.95, 0.97, 0.96), a);
+      #include <fog_fragment>
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`,
+  transparent: true, depthWrite: false, fog: true });
+{
+  const geo = new THREE.PlaneGeometry(480, 34, 240, 34);
+  geo.rotateX(-Math.PI / 2); geo.translate(0, 0, -5);
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setY(i, Math.max(terrainH(p.getX(i), p.getZ(i)), 0.12) + 0.03);
+  const foam = new THREE.Mesh(geo, foamMat);
+  foam.renderOrder = 2; foam.frustumCulled = false;
+  scene.add(foam);
+}
+
+/* ---------- wind helper: sway for instanced vegetation ---------- */
+function windPatch(mat, amp, freq) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = timeU;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uTime;')
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+        float sw = sin(uTime * ${freq.toFixed(2)} + instanceMatrix[3].x * 0.55 + instanceMatrix[3].z * 0.35);
+        float sw2 = sin(uTime * ${(freq * 1.7).toFixed(2)} + instanceMatrix[3].z * 0.8);
+        transformed.x += (sw * ${amp.toFixed(3)} + sw2 * ${(amp * 0.3).toFixed(3)}) * position.y * position.y;
+        transformed.z += sw * ${(amp * 0.45).toFixed(3)} * position.y * position.y;`);
+  };
+}
+
+/* ---------- trees & scrub (instanced, swaying) ---------- */
 {
   const rnd = mulberry32(7);
   const trunkGeo = new THREE.CylinderGeometry(0.16, 0.3, 1, 6); trunkGeo.translate(0, 0.5, 0);
   const coneGeo = new THREE.ConeGeometry(1, 1, 7); coneGeo.translate(0, 0.5, 0);
   const N = 420;
+  const canMat1 = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true });
+  const canMat2 = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true });
+  windPatch(canMat1, 0.10, 0.9); windPatch(canMat2, 0.14, 0.9);
   const trunks = new THREE.InstancedMesh(trunkGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true }), N);
-  const can1 = new THREE.InstancedMesh(coneGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true }), N);
-  const can2 = new THREE.InstancedMesh(coneGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true }), N);
+  const can1 = new THREE.InstancedMesh(coneGeo, canMat1, N);
+  const can2 = new THREE.InstancedMesh(coneGeo, canMat2, N);
   const d = new THREE.Object3D(), c = new THREE.Color();
   let k = 0, guard = 0;
   while (k < N && guard++ < 8000) {
     const x = (rnd() * 2 - 1) * 210, z = 6 + rnd() * 240;
-    if (z < 70 && rnd() < 0.55) continue;                       // thinner near the coast
-    const dz = z - (3.5 * Math.sin(x * 0.045) + 2 * Math.sin(x * 0.11 + 1.3));
-    if (dz < 7) continue;
-    if (Math.hypot(x / 29, (z - 41) / 25) < 1.0) continue;        // keep the clearing empty
-    if (Math.abs(x) < 11 && z < 36) continue;                      // keep the beach lane open
+    if (z < 70 && rnd() < 0.55) continue;
+    if (z - shoreZ(x) < 7) continue;
+    if (Math.hypot(x / 29, (z - 41) / 25) < 1.0) continue;
+    if (Math.abs(x) < 11 && z < 36) continue;
     const y = terrainH(x, z);
     const th = 6 + rnd() * 5, cr = 1.5 + rnd() * 1.1, ch = 4.2 + rnd() * 2.2;
     d.rotation.set(0, rnd() * 6.28, 0);
@@ -236,8 +314,7 @@ scene.add(water);
   let b = 0; guard = 0;
   while (b < M && guard++ < 6000) {
     const x = (rnd() * 2 - 1) * 200, z = 4 + rnd() * 50;
-    const shore = 3.5 * Math.sin(x * 0.045) + 2 * Math.sin(x * 0.11 + 1.3);
-    if (z - shore < 3) continue;
+    if (z - shoreZ(x) < 3) continue;
     if (Math.abs(x) < 8 && z < 34) continue;
     if (Math.hypot(x / 27, (z - 41) / 23) < 1.0) continue;
     const s = 0.35 + rnd() * 0.6;
@@ -248,6 +325,41 @@ scene.add(water);
   }
   bush.count = b; bush.castShadow = true; bush.receiveShadow = true; bush.frustumCulled = false;
   scene.add(bush);
+}
+
+/* ---------- dune grass (instanced blades that sway in the wind) ---------- */
+{
+  const rnd = mulberry32(31);
+  const blade = new THREE.BufferGeometry();
+  blade.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+    -0.05, 0, 0, 0.05, 0, 0, 0, 1, 0,
+    0, 0, -0.05, 0, 0, 0.05, 0, 1, 0]), 3));
+  blade.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(18).map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, side: THREE.DoubleSide, emissive: 0x2e2c16, emissiveIntensity: 0.55 });
+  windPatch(mat, 0.2, 1.9);
+  const N = 16000;
+  const grass = new THREE.InstancedMesh(blade, mat, N);
+  const d = new THREE.Object3D(), c = new THREE.Color();
+  let k = 0, guard = 0;
+  while (k < N && guard++ < 200000) {
+    const x = (rnd() * 2 - 1) * 70, z = 1 + rnd() * 80;
+    const dd = z - shoreZ(x);
+    if (dd < 2.2) continue;
+    if (Math.abs(x) < 1.8 && z < 29 && rnd() < 0.85) continue;      // keep the footpath readable
+    if (clearingK(x, z) > 0.45 && rnd() < 0.97) continue;            // trampled ground inside the settlement
+    if (z > 31 && z < 41 && Math.abs(x - 2) < 5) continue;           // keep the belongings close-up clean
+    const near = dd < 25 ? 1 : 0.6;
+    if (rnd() > near) continue;
+    const s = 0.14 + rnd() * 0.26;
+    d.position.set(x, terrainH(x, z) - 0.02, z);
+    d.rotation.set(0, rnd() * 3.14, 0);
+    d.scale.set(0.8 + rnd() * 0.6, s, 0.8 + rnd() * 0.6); d.updateMatrix(); grass.setMatrixAt(k, d.matrix);
+    const t = rnd();
+    c.setRGB(0.52 + t * 0.16, 0.50 + t * 0.10, 0.26 + t * 0.06, THREE.SRGBColorSpace); grass.setColorAt(k, c);
+    k++;
+  }
+  grass.count = k; grass.receiveShadow = true; grass.frustumCulled = false;
+  scene.add(grass);
 }
 
 /* ---------- palisade (broken, partly dismantled) ---------- */
@@ -261,7 +373,7 @@ const RECT = { x0: -15, x1: 15, z0: 28, z1: 54 };
     const len = Math.hypot(xb - xa, zb - za), n = Math.floor(len / 0.42);
     for (let i = 0; i <= n; i++) {
       const t = i / n, x = lerp(xa, xb, t), z = lerp(za, zb, t);
-      if (isFront && Math.abs(x) < GATE_X) continue;               // the gate gap
+      if (isFront && Math.abs(x) < GATE_X) continue;
       if (rnd() < skip) continue;
       const broken = rnd() < 0.2;
       list.push({ x: x + (rnd() - 0.5) * 0.08, z: z + (rnd() - 0.5) * 0.08,
@@ -293,13 +405,19 @@ const RECT = { x0: -15, x1: 15, z0: 28, z1: 54 };
   scene.add(mesh);
 }
 
-/* ---------- dismantled houses, props (merged, vertex coloured) ---------- */
+/* ---------- house frames, props and belongings (merged, vertex coloured) ---------- */
+const HOUSES = [[-10.5, 34, 6, 5, 0.08, 11], [-10.5, 45.5, 6.5, 5, -0.05, 12], [-4.5, 50.5, 5.5, 4.5, 0.02, 13],
+                [6, 49.5, 5.5, 5, -0.1, 14], [10, 37, 6, 5.5, 0.06, 15], [11.5, 46, 5, 4.5, 0.12, 16]];
 {
   const pieces = [];
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
   const boxU = new THREE.BoxGeometry(1, 1, 1);
   const cylU = new THREE.CylinderGeometry(0.5, 0.5, 1, 10);
   const discU = new THREE.CircleGeometry(1, 14);
+  const sphU = new THREE.SphereGeometry(1, 8, 6);
+  const domeU = new THREE.SphereGeometry(1, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2);
+  const torU = new THREE.TorusGeometry(1, 0.14, 5, 14);
+  const planeU = new THREE.PlaneGeometry(1, 1);
   const addPiece = (geo, x, y, z, rx, ry, rz, sx, sy, sz, color) => {
     _e.set(rx, ry, rz, 'YXZ'); _q.setFromEuler(_e); _p.set(x, y, z); _s.set(sx, sy, sz); _m.compose(_p, _q, _s);
     const g = geo.clone().applyMatrix4(_m);
@@ -308,25 +426,57 @@ const RECT = { x0: -15, x1: 15, z0: 28, z1: 54 };
     g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
     pieces.push(g);
   };
-  const wood = (r) => new THREE.Color().setRGB(0.26 + r * 0.1, 0.19 + r * 0.07, 0.13 + r * 0.05, THREE.SRGBColorSpace);
-  const stone = (r) => new THREE.Color().setRGB(0.36 + r * 0.12, 0.34 + r * 0.1, 0.30 + r * 0.08, THREE.SRGBColorSpace);
+  const rgb = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);
+  const wood = (r) => rgb(0.26 + r * 0.1, 0.19 + r * 0.07, 0.13 + r * 0.05);
+  const stone = (r) => rgb(0.36 + r * 0.12, 0.34 + r * 0.1, 0.30 + r * 0.08);
+  const straw = (r) => rgb(0.50 + r * 0.12, 0.42 + r * 0.1, 0.20 + r * 0.05);
 
+  /* timber-frame cottages with the cladding taken away: posts, A-frame gables, ridge, rafters,
+     a few wall boards, the chimney still standing. Tall enough to read above the palisade. */
   const house = (cx, cz, w, d, rot, seed) => {
     const r = mulberry32(seed), gy = terrainH(cx, cz), cs = Math.cos(rot), sn = Math.sin(rot);
     const L = (lx, lz) => [cx + lx * cs + lz * sn, cz - lx * sn + lz * cs];
-    const tall = {};
-    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      const h = r() < 0.35 ? 0.8 + r() * 0.9 : 2.2 + r() * 0.9;
-      tall[`${sx}${sz}`] = h;
-      const [x, z] = L(sx * w / 2, sz * d / 2);
-      addPiece(boxU, x, gy + h / 2, z, (r() - 0.5) * 0.06, rot, (r() - 0.5) * 0.06, 0.22, h, 0.22, wood(r()));
+    const PH = 2.7, RISE = 1.45;
+    const spots = [[-w / 2, -d / 2], [w / 2, -d / 2], [-w / 2, d / 2], [w / 2, d / 2], [0, -d / 2], [0, d / 2]];
+    const hts = spots.map((_, i) => (i < 4 && r() < 0.15) ? 0.9 + r() * 1.0 : PH);
+    spots.forEach(([lx, lz], i) => {
+      const [x, z] = L(lx, lz);
+      addPiece(boxU, x, gy + hts[i] / 2, z, (r() - 0.5) * 0.04, rot, (r() - 0.5) * 0.04, 0.22, hts[i], 0.22, wood(r()));
+    });
+    for (const sz of [-1, 1]) {                                   // wall plates where both end posts survive
+      const a = sz < 0 ? 0 : 2, b = sz < 0 ? 1 : 3;
+      if (hts[a] >= PH && hts[b] >= PH) { const [x, z] = L(0, sz * d / 2); addPiece(boxU, x, gy + PH + 0.05, z, 0, rot, 0, w + 0.3, 0.16, 0.2, wood(r())); }
     }
-    // ground sills (some gone)
-    for (const sz of [-1, 1]) if (r() > 0.25) { const [x, z] = L(0, sz * d / 2); addPiece(boxU, x, gy + 0.1, z, 0, rot, 0, w, 0.16, 0.2, wood(r())); }
-    for (const sx of [-1, 1]) if (r() > 0.25) { const [x, z] = L(sx * w / 2, 0); addPiece(boxU, x, gy + 0.1, z, 0, rot + Math.PI / 2, 0, d, 0.16, 0.2, wood(r())); }
-    // a surviving cross-beam where both posts stayed tall
-    for (const sz of [-1, 1]) if (tall[`-1${sz}`] > 2.2 && tall[`1${sz}`] > 2.2) {
-      const [x, z] = L(0, sz * d / 2); addPiece(boxU, x, gy + 2.15, z, 0, rot, 0, w, 0.18, 0.2, wood(r()));
+    const ang = Math.atan2(RISE, d / 2), Lr = Math.hypot(d / 2, RISE) + 0.25;
+    const gable = [r() < 0.9, r() < 0.9];
+    [-w / 2, w / 2].forEach((lx, i) => {
+      if (!gable[i]) return;
+      for (const s of [-1, 1]) { const [x, z] = L(lx, s * d / 4); addPiece(boxU, x, gy + PH + RISE / 2 + 0.05, z, s * ang, rot, 0, 0.14, 0.16, Lr, wood(r())); }
+      const [x, z] = L(lx, 0); addPiece(boxU, x, gy + PH + 0.05, z, 0, rot, 0, 0.14, 0.14, d, wood(r()));          // tie beam
+    });
+    if (gable[0] && gable[1]) {
+      const [x, z] = L(0, 0); addPiece(boxU, x, gy + PH + RISE + 0.05, z, 0, rot, 0, w + 0.5, 0.16, 0.16, wood(r()));   // ridge
+      for (let lx = -w / 2 + 1.3; lx < w / 2 - 0.8; lx += 1.3) if (r() < 0.75) {
+        for (const s of [-1, 1]) { const [x2, z2] = L(lx, s * d / 4); addPiece(boxU, x2, gy + PH + RISE / 2 + 0.05, z2, s * ang, rot, 0, 0.12, 0.14, Lr, wood(r())); }
+      }
+      if (seed === 12 || seed === 15) {                           // two houses keep a few strips of thatch
+        const s = r() < 0.5 ? -1 : 1;
+        for (let k = 0; k < 3; k++) {
+          const lx = -w / 2 + 0.9 + k * 1.7 + r() * 0.3; const [x2, z2] = L(lx, s * d / 4);
+          addPiece(boxU, x2, gy + PH + RISE / 2 + 0.2, z2, s * ang, rot, 0, 1.4, 0.12, Lr * 0.9, straw(r()));
+        }
+      }
+    }
+    // remaining wall boards
+    const sides = [[0, -d / 2, w, 0], [0, d / 2, w, 0], [-w / 2, 0, d, Math.PI / 2], [w / 2, 0, d, Math.PI / 2]];
+    for (const [lx, lz, len, turn] of sides) {
+      if (r() > 0.55) continue;
+      for (let u = -len / 2 + 0.3; u < len / 2 - 0.2; u += 0.33) {
+        if (r() < 0.4) continue;
+        const bh = 0.7 + r() * 1.9;
+        const [x, z] = turn ? L(lx, lz + u) : L(lx + u, lz);
+        addPiece(boxU, x, gy + bh / 2, z, 0, rot + turn, 0, 0.28, bh, 0.05, wood(r()));
+      }
     }
     // foundation stones
     const per = 2 * (w + d), ns = Math.floor(per / 0.8);
@@ -338,42 +488,116 @@ const RECT = { x0: -15, x1: 15, z0: 28, z1: 54 };
       const [x, z] = L(lx, lz);
       addPiece(boxU, x, gy + 0.1, z, r() * 0.3, r() * 3, r() * 0.3, 0.4 + r() * 0.15, 0.22, 0.36 + r() * 0.1, stone(r()));
     }
-    // chimney stub: the one thing that is still standing
-    const side = r() < 0.5 ? -1 : 1;
-    const [chx, chz] = L(side * (w / 2 + 0.5), 0);
-    addPiece(boxU, chx, gy + 1.3, chz, 0, rot, 0, 0.9, 2.6, 1.1, stone(0.4));
-    addPiece(boxU, chx, gy + 2.75, chz, 0, rot, 0, 0.7, 0.3, 0.9, stone(0.6));
-    // plank pile + cold hearth
+    // chimney: the one thing still fully standing
+    const sd = r() < 0.5 ? -1 : 1;
+    const [chx, chz] = L(sd * (w / 2 + 0.5), 0);
+    addPiece(boxU, chx, gy + 1.7, chz, 0, rot, 0, 0.9, 3.4, 1.1, stone(0.4));
+    addPiece(boxU, chx, gy + 3.55, chz, 0, rot, 0, 0.7, 0.3, 0.9, stone(0.6));
+    // plank pile, a fallen post, cold hearth
     const [px, pz] = L((r() - 0.5) * w, (r() > 0.5 ? 1 : -1) * (d / 2 + 0.9));
     for (let i = 0; i < 6; i++) addPiece(boxU, px + (r() - 0.5) * 0.4, gy + 0.05 + i * 0.07, pz + (r() - 0.5) * 0.4, 0, r() * 0.5 + rot, 0, 1.8, 0.05, 0.22, wood(r()));
+    const [fx, fz] = L((r() - 0.5) * w, d / 2 + 1.7);
+    addPiece(boxU, fx, gy + 0.11, fz, 0, rot + r(), 0, 2.4, 0.22, 0.22, wood(r()));
     const [hx, hz] = L(0, 0);
-    addPiece(discU, hx, gy + 0.03, hz, -Math.PI / 2, 0, 0, 1.0, 1.0, 1.0, new THREE.Color().setRGB(0.08, 0.075, 0.07, THREE.SRGBColorSpace));
+    addPiece(discU, hx, gy + 0.03, hz, -Math.PI / 2, 0, 0, 1.0, 1.0, 1.0, rgb(0.08, 0.075, 0.07));
   };
-  [[-10.5, 34, 6, 5, 0.08, 11], [-10.5, 45.5, 6.5, 5, -0.05, 12], [-4.5, 50.5, 5.5, 4.5, 0.02, 13],
-   [6, 49.5, 5.5, 5, -0.1, 14], [10, 37, 6, 5.5, 0.06, 15], [11.5, 46, 5, 4.5, 0.12, 16]].forEach((a) => house(...a));
+  HOUSES.forEach((a) => house(...a));
 
-  // props: barrels, crates, a cold fire ring in the square
+  /* props around the square */
   const pr = mulberry32(99);
   for (const [x, z] of [[-5.2, 36.4], [-5.9, 37.6], [6.4, 41.4], [4.2, 32.6]]) {
     addPiece(cylU, x, GROUND + 0.42, z, 0, pr() * 3, pr() > 0.7 ? 1.4 : 0, 0.76, 0.85, 0.76, wood(pr()));
   }
   for (const [x, z] of [[-6.5, 41.5], [3.2, 36.2]]) addPiece(boxU, x, GROUND + 0.35, z, 0, pr() * 3, 0, 0.8, 0.7, 0.8, wood(pr()));
-  addPiece(boxU, 0.6, GROUND + 0.18, 33.8, 0.15, 0.7, 0.4, 0.8, 0.7, 0.8, wood(0.5));   // toppled crate
-  addPiece(discU, 0, GROUND + 0.03, 44, -Math.PI / 2, 0, 0, 1.3, 1.3, 1.3, new THREE.Color().setRGB(0.07, 0.065, 0.06, THREE.SRGBColorSpace));
+  addPiece(boxU, -4.2, GROUND + 0.18, 32.8, 0.15, 0.7, 0.4, 0.8, 0.7, 0.8, wood(0.5));
+  addPiece(discU, 0, GROUND + 0.03, 44, -Math.PI / 2, 0, 0, 1.3, 1.3, 1.3, rgb(0.07, 0.065, 0.06));
   for (let i = 0; i < 9; i++) {
     const a = (i / 9) * Math.PI * 2;
     addPiece(boxU, Math.cos(a) * 1.4, GROUND + 0.14, 44 + Math.sin(a) * 1.4, 0, pr() * 3, 0, 0.4, 0.28, 0.34, stone(pr()));
   }
 
+  /* things people left behind (cluster 1 sits where the close-up shot looks) */
+  const G = GROUND;
+  const cloth = rgb(0.64, 0.57, 0.46), skin = rgb(0.74, 0.60, 0.46), iron = rgb(0.34, 0.34, 0.36), clay = rgb(0.50, 0.28, 0.18);
+  // a child's wooden doll, face up in the dirt
+  addPiece(cylU, 0.70, G + 0.075, 36.70, 0, 0, Math.PI / 2, 0.15, 0.26, 0.15, cloth);
+  addPiece(sphU, 0.93, G + 0.08, 36.70, 0, 0, 0, 0.075, 0.075, 0.075, skin);
+  addPiece(cylU, 0.74, G + 0.07, 36.70, Math.PI / 2, 0, 0, 0.045, 0.30, 0.045, cloth);
+  addPiece(cylU, 0.50, G + 0.05, 36.64, 0, 0, Math.PI / 2, 0.05, 0.16, 0.05, skin);
+  addPiece(cylU, 0.50, G + 0.05, 36.76, 0, 0, Math.PI / 2, 0.05, 0.16, 0.05, skin);
+  // a soldier's morion helmet on its side
+  addPiece(domeU, 1.55, G + 0.13, 37.25, 1.05, 0.4, 0, 0.19, 0.16, 0.19, iron);
+  addPiece(cylU, 1.55, G + 0.12, 37.25, 1.05, 0.4, 0, 0.44, 0.02, 0.44, iron);
+  // overturned stool
+  addPiece(boxU, 2.30, G + 0.19, 36.30, 0, 0.3, 0.1, 0.05, 0.38, 0.38, wood(0.3));
+  for (const dz of [-0.12, 0.0, 0.12]) addPiece(cylU, 2.5, G + 0.2 + dz * 0.4, 36.3 + dz, 0, 0, Math.PI / 2 - 0.1, 0.045, 0.42, 0.045, wood(0.5));
+  // broken clay pot + shards
+  addPiece(domeU, 1.90, G + 0.17, 38.05, Math.PI, 0, 0.2, 0.2, 0.17, 0.2, clay);
+  for (let i = 0; i < 6; i++) addPiece(boxU, 1.9 + (pr() - 0.5) * 0.9, G + 0.015, 38.05 + (pr() - 0.5) * 0.9, 0, pr() * 3, 0, 0.07 + pr() * 0.05, 0.02, 0.05 + pr() * 0.04, clay);
+  // rope coil, ledger, boot, spilled cloth
+  addPiece(torU, 0.20, G + 0.04, 37.90, Math.PI / 2, 0, 0, 0.24, 0.24, 0.24, rgb(0.56, 0.46, 0.28));
+  addPiece(boxU, 1.00, G + 0.02, 35.90, 0, 0.5, 0, 0.2, 0.035, 0.28, rgb(0.35, 0.22, 0.15));
+  addPiece(boxU, 1.01, G + 0.045, 35.91, 0, 0.5, 0, 0.18, 0.02, 0.26, rgb(0.80, 0.74, 0.60));
+  addPiece(cylU, 2.75, G + 0.09, 37.45, 0, 0, 1.45, 0.12, 0.22, 0.12, rgb(0.20, 0.13, 0.09));
+  addPiece(boxU, 2.88, G + 0.04, 37.5, 0, 0.3, 0, 0.12, 0.08, 0.22, rgb(0.20, 0.13, 0.09));
+  addPiece(planeU, 1.25, G + 0.02, 38.55, -Math.PI / 2, 0.4, 0, 0.9, 0.6, 1, rgb(0.50, 0.14, 0.12));
+  // open trunk and scattered goods near the barrels
+  addPiece(boxU, -4.0, G + 0.24, 39.2, 0, 0.5, 0, 0.9, 0.48, 0.52, wood(0.2));
+  addPiece(boxU, -4.38, G + 0.62, 39.35, 0, 0.5, 1.75, 0.9, 0.06, 0.52, wood(0.6));
+  addPiece(planeU, -3.4, G + 0.02, 39.9, -Math.PI / 2, 0.2, 0, 1.1, 0.7, 1, rgb(0.62, 0.55, 0.40));
+  addPiece(cylU, -2.2, G + 0.9, 33.6, 0.0, 0.0, 0.35, 0.05, 1.8, 0.05, wood(0.4));            // shovel leaning on nothing
+  addPiece(boxU, -2.55, G + 0.12, 33.6, 0.1, 0.0, 0.35, 0.22, 0.34, 0.03, iron);
+
   const merged = mergeGeometries(pieces, false);
-  const mesh = new THREE.Mesh(merged, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 }));
+  const mesh = new THREE.Mesh(merged, new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1, side: THREE.DoubleSide }));
   mesh.castShadow = true; mesh.receiveShadow = true;
+  scene.add(mesh);
+}
+
+/* ---------- footprints: the colony walking out of the gate, down to the beach, along the shore ---------- */
+{
+  const rr = mulberry32(55);
+  const list = [];
+  const walk = (pts, spacing, tracks) => {
+    let carry = 0, step = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x0, z0] = pts[i], [x1, z1] = pts[i + 1];
+      const len = Math.hypot(x1 - x0, z1 - z0), dx = (x1 - x0) / len, dz = (z1 - z0) / len;
+      let s = carry;
+      while (s < len) {
+        const px = x0 + dx * s, pz = z0 + dz * s, side = (step++ % 2) ? 1 : -1;
+        for (const tr of tracks) {
+          if (rr() < 0.05) continue;
+          const lat = tr.off + side * 0.13 + (rr() - 0.5) * tr.jit, lon = (rr() - 0.5) * 0.2;
+          list.push({ x: px - dz * lat + dx * lon, z: pz + dx * lat + dz * lon, yaw: Math.atan2(dx, dz) + (rr() - 0.5) * 0.25 });
+        }
+        s += spacing;
+      }
+      carry = s - len;
+    }
+  };
+  const main = [[0, 27.5], [0.4, 21], [1.6, 14], [3.2, 8.5]];
+  for (let x = 5; x <= 90; x += 5) main.push([x, shoreZ(x) + 0.9 + 0.3 * Math.sin(x * 0.3)]);
+  walk(main, 0.65, [{ off: -0.45, jit: 0.1 }, { off: 0.0, jit: 0.1 }, { off: 0.42, jit: 0.1 }, { off: 0.85, jit: 0.12 }]);
+  // everyone converging on the gate from inside
+  HOUSES.forEach(([cx, cz]) => walk([[cx, cz], [cx * 0.4, (cz + 29) / 2], [0, 29.5]], 0.7, [{ off: -0.2, jit: 0.15 }, { off: 0.3, jit: 0.15 }]));
+
+  const geo = new THREE.CircleGeometry(1, 10); geo.rotateX(-Math.PI / 2);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x4a3b2c, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const mesh = new THREE.InstancedMesh(geo, mat, list.length);
+  const d = new THREE.Object3D();
+  list.forEach((f, i) => {
+    d.position.set(f.x, terrainH(f.x, f.z) + 0.025, f.z);
+    d.rotation.set(0, f.yaw, 0); d.scale.set(0.055, 1, 0.14); d.updateMatrix(); mesh.setMatrixAt(i, d.matrix);
+  });
+  mesh.receiveShadow = true; mesh.frustumCulled = false;
   scene.add(mesh);
 }
 
 /* ---------- the post with CROATOAN ---------- */
 const POST = { x: -3.6, z: 28.4 };
 const letters = 'CROATOAN'.split('');
+const GLOW_T0 = 40.1, GLOW_DT = 0.4;
 const glowMats = [];
 {
   const woodCanvas = document.createElement('canvas'); woodCanvas.width = 128; woodCanvas.height = 512;
@@ -402,7 +626,6 @@ const glowMats = [];
   const topY = GROUND + 3.55, step = 0.32;
   letters.forEach((ch, i) => {
     const y = topY - step * (i + 0.5);
-    // carved (always there): dark cut + faint lit edge
     const carved = mk((x) => {
       x.fillStyle = 'rgba(235,205,160,0.35)'; x.fillText(ch, 66, 68);
       x.fillStyle = 'rgba(14,8,4,0.95)'; x.fillText(ch, 64, 66);
@@ -411,7 +634,6 @@ const glowMats = [];
       new THREE.MeshStandardMaterial({ map: carved, transparent: true, roughness: 1, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
     cm.position.set(POST.x, y, faceZ - 0.004); cm.rotation.y = Math.PI;
     scene.add(cm);
-    // glow reveal
     const glowTex = mk((x) => { x.shadowColor = '#ff8a1f'; x.shadowBlur = 16; x.fillStyle = '#ffb347'; x.fillText(ch, 64, 66); x.fillText(ch, 64, 66); });
     const gm = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
     const gmesh = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), gm);
@@ -420,22 +642,49 @@ const glowMats = [];
   });
 }
 
-/* ---------- ground mist ---------- */
-const mist = [];
-{
+/* ---------- ground mist + smoke ---------- */
+const softTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d'); const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
   gr.addColorStop(0, 'rgba(255,255,255,0.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
-  const tex = new THREE.CanvasTexture(c);
+  return new THREE.CanvasTexture(c);
+})();
+const mist = [];
+{
   const rnd = mulberry32(3);
   for (let i = 0; i < 44; i++) {
-    const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xc9d3da, transparent: true, opacity: 0.16 + rnd() * 0.08, depthWrite: false }));
-    const s = 16 + rnd() * 18, hh = s * 0.14;     // thin streaks that sit fully above the ground (no hard intersection line)
+    const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0xc9d3da, transparent: true, opacity: 0.16 + rnd() * 0.08, depthWrite: false }));
+    const s = 16 + rnd() * 18, hh = s * 0.14;
     const x = (rnd() * 2 - 1) * 45, z = -25 + rnd() * 95;
     m.scale.set(s, hh, 1);
     m.userData = { x, z, y: Math.max(terrainH(x, z), 0) + hh / 2 + 0.4 + rnd() * 1.2, ph: rnd() * 6.28, amp: 1 + rnd() * 3 };
     scene.add(m); mist.push(m);
+  }
+}
+// a thin column of smoke far behind the forest (someone is out there?) and wisps from the cold fire ring
+const SMOKE_FAR = { x: 58, z: 150, n: 36, life: 14 }; SMOKE_FAR.y = terrainH(SMOKE_FAR.x, SMOKE_FAR.z);
+const smokeFar = [], smokeFire = [];
+for (let i = 0; i < SMOKE_FAR.n; i++) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0x6e6b68, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+  s.userData = { i }; scene.add(s); smokeFar.push(s);
+}
+for (let i = 0; i < 14; i++) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex, color: 0x9a9a9a, transparent: true, opacity: 0, depthWrite: false }));
+  s.userData = { i }; scene.add(s); smokeFire.push(s);
+}
+function updateSmoke(t) {
+  for (const s of smokeFar) {
+    const i = s.userData.i, age = (((t / SMOKE_FAR.life + i / SMOKE_FAR.n) % 1) + 1) % 1;
+    s.position.set(SMOKE_FAR.x + age * age * 26 + Math.sin(age * 7 + i) * 1.4, SMOKE_FAR.y + age * 46, SMOKE_FAR.z + Math.cos(age * 5 + i) * 1.2);
+    const sc = 3 + age * 15; s.scale.set(sc, sc * 1.1, 1);
+    s.material.opacity = 0.34 * smooth(age, 0, 0.07) * (1 - smooth(age, 0.5, 1));
+  }
+  for (const s of smokeFire) {
+    const i = s.userData.i, age = (((t / 7 + i / 14) % 1) + 1) % 1;
+    s.position.set(0.25 * Math.sin(age * 9 + i) + age * age * 2.5, GROUND + 0.25 + age * 5.5, 44 + 0.2 * Math.cos(age * 7 + i));
+    const sc = 0.5 + age * 2.2; s.scale.set(sc, sc * 1.2, 1);
+    s.material.opacity = 0.17 * smooth(age, 0, 0.1) * (1 - smooth(age, 0.45, 1));
   }
 }
 
@@ -470,7 +719,6 @@ const ship = new THREE.Group();
   sail(3.2, 2.9, 3.2, 3.0, 0.45);
   const bow = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 3.2, 5), wood);
   bow.rotation.x = Math.PI / 2 - 0.25; bow.position.set(0, 2.1, 6.9); ship.add(bow);
-  // St George's cross
   const fc = document.createElement('canvas'); fc.width = 128; fc.height = 80;
   const fg = fc.getContext('2d'); fg.fillStyle = '#f2ede2'; fg.fillRect(0, 0, 128, 80);
   fg.fillStyle = '#c8102e'; fg.fillRect(54, 0, 20, 80); fg.fillRect(0, 30, 128, 20);
@@ -480,40 +728,105 @@ const ship = new THREE.Group();
   ship.scale.setScalar(1.15);
   scene.add(ship);
 }
+const SHIP_T = 16;
 function shipPose(t) {
-  const s = clamp(t / 9, 0, 1), e = 1 - Math.pow(1 - s, 2.2);
+  const s = clamp(t / SHIP_T, 0, 1), e = 1 - Math.pow(1 - s, 2.2);
   return { x: -14 + 2 * e, z: -85 + 47 * e };
 }
 
-/* ---------- camera rig ---------- */
-const KEYS = [   // t, cam xyz, look-at xyz
-  [0,    3, 2.4, -120,   -6, 5, -70],
-  [4,    2, 2.3,  -82,   -9, 5, -45],
-  [8,  1.5, 2.1,  -42,   -3, 4,   8],
-  [10.5, 0, 2.2,   -8,    0, 3,  30],
-  [13,   0, 2.7,   12,   -3, 3,  32],
-  [15.5, 0.2, 2.9, 18.5, -2.5, 3.3, POST.z],
-  // final composition: the post sits on the right third, the title card goes on the left
-  [19, -0.2, 3.0, 20.6,  -1.1, 3.35, POST.z],
-  [22, -0.4, 3.05, 20.2, -1.2, 3.35, POST.z],
-  [27, -0.4, 3.05, 21.0, -1.2, 3.35, POST.z],
+/* ---------- birds: gulls around the ship and the surf, crows over the empty settlement ---------- */
+const birds = [];
+function makeBird(color, scale) {
+  const g = new THREE.Group(); g.rotation.order = 'YXZ';
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 1, side: THREE.DoubleSide, flatShading: true });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22, 6, 5), mat); body.scale.set(0.9, 0.75, 2.1); g.add(body);
+  const wg = new THREE.BufferGeometry();                                  // swept, tapered wing (pivot at the body)
+  wg.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+    0, 0, 0.22, 0, 0, -0.22, 1.3, 0, -0.10,
+    0, 0, 0.22, 1.3, 0, -0.10, 1.05, 0, 0.12]), 3));
+  wg.computeVertexNormals();
+  const wl = new THREE.Mesh(wg, mat), wr = new THREE.Mesh(wg, mat); wr.scale.x = -1;
+  g.add(wl, wr); g.userData = { wl, wr }; g.scale.setScalar(scale);
+  scene.add(g); return g;
+}
+{
+  const rnd = mulberry32(77);
+  const add = (n, color, scale, mk) => { for (let i = 0; i < n; i++) birds.push({ obj: makeBird(color, scale), ...mk(i) }); };
+  add(8, 0xf3f1ea, 1.5, () => ({ follow: true, cx: (rnd() - 0.5) * 14, cz: (rnd() - 0.5) * 14 + 4, r: 10 + rnd() * 12, w: (rnd() < 0.5 ? -1 : 1) * (0.35 + rnd() * 0.3), h: 9 + rnd() * 9, ph: rnd() * 6.28, fs: 6 + rnd() * 3 }));
+  add(6, 0xf3f1ea, 1.5, () => ({ follow: false, cx: (rnd() - 0.5) * 60, cz: -10 + rnd() * 20, r: 10 + rnd() * 12, w: (rnd() < 0.5 ? -1 : 1) * (0.3 + rnd() * 0.25), h: 11 + rnd() * 9, ph: rnd() * 6.28, fs: 6 + rnd() * 3 }));
+  add(7, 0x15151a, 1.2, () => ({ follow: false, cx: -2 + (rnd() - 0.5) * 8, cz: 50 + (rnd() - 0.5) * 8, r: 6 + rnd() * 10, w: (rnd() < 0.5 ? -1 : 1) * (0.35 + rnd() * 0.3), h: 10 + rnd() * 7, ph: rnd() * 6.28, fs: 5 + rnd() * 2 }));
+}
+function updateBirds(t, sp) {
+  for (const b of birds) {
+    const a = b.w * t + b.ph;
+    const cx = b.cx + (b.follow ? sp.x : 0), cz = b.cz + (b.follow ? sp.z : 0);
+    const x = cx + Math.cos(a) * b.r, z = cz + Math.sin(a) * b.r, y = b.h + Math.sin(t * 0.7 + b.ph * 3) * 1.0;
+    const vx = -Math.sin(a) * b.w * b.r, vz = Math.cos(a) * b.w * b.r;
+    b.obj.position.set(x, y, z);
+    b.obj.rotation.set(0, Math.atan2(vx, vz), -0.35 * Math.sign(b.w));
+    const flap = 0.55 * Math.sin(t * b.fs + b.ph) * (0.55 + 0.45 * Math.sin(t * 0.5 + b.ph * 2));
+    b.obj.userData.wl.rotation.z = flap; b.obj.userData.wr.rotation.z = -flap;
+  }
+}
+
+/* ---------- camera: a list of shots ---------- */
+function keyShot(keys, rel = false) {
+  const pts = keys.map((k) => new THREE.Vector3(k[1], k[2], k[3]));
+  const lks = keys.map((k) => new THREE.Vector3(k[4], k[5], k[6]));
+  if (rel) { pts.forEach((p) => { p.y += terrainH(p.x, p.z); }); lks.forEach((p) => { p.y += terrainH(p.x, p.z); }); }
+  const pc = new THREE.CatmullRomCurve3(pts, false, 'centripetal'), lc = new THREE.CatmullRomCurve3(lks, false, 'centripetal');
+  const ts = keys.map((k) => k[0]);
+  return (t, P, L) => {
+    let i = 0;
+    while (i < ts.length - 2 && t > ts[i + 1]) i++;
+    const s = clamp((t - ts[i]) / (ts[i + 1] - ts[i]), 0, 1);
+    const e = lerp(s, s * s * (3 - 2 * s), 0.6);
+    const u = (i + e) / (ts.length - 1);
+    pc.getPoint(u, P); lc.getPoint(u, L);
+  };
+}
+const SHOTS = [
+  { t1: 7,    fov: 40, fog: 0.0105, shake: 1,
+    fn: keyShot([[0, 3, 2.4, -120, -6, 5, -70], [3.5, 2.4, 2.3, -98, -9, 5, -55], [7, 1.8, 2.2, -76, -10, 4.5, -45]]) },
+  { t1: 11,   fov: 42, fog: 0.0105, shake: 1.2,                                   // standing at the bow
+    fn: (t, P, L) => { const sp = shipPose(t); P.set(sp.x + 0.6, 3.9 + 0.1 * Math.sin(t * 1.1), sp.z + 4.1); L.set(-3, 4.4, 80); } },
+  { t1: 15.5, fov: 40, fog: 0.011, shake: 1,
+    fn: keyShot([[11, 1.5, 1.8, -34, 0, 2.2, 0], [13.2, 0.6, 1.5, -14, 3.5, 1.6, 10], [15.5, 2.0, 1.4, -3.5, 7, 1.4, 9]]) },
+  { t1: 20,   fov: 34, fog: 0.011, shake: 0.35,                                   // INSERT: footprints
+    fn: (t, P, L) => {
+      const u = smooth(t, 15.5, 20), x = lerp(2.0, 11.5, u);
+      P.set(x, terrainH(x, shoreZ(x) + 0.2) + 0.42, shoreZ(x) + 0.2);
+      const lx = x + 8; L.set(lx, terrainH(lx, shoreZ(lx) + 0.9) + 0.12, shoreZ(lx) + 0.9);
+    } },
+  { t1: 25,   fov: 46, fog: 0.0065, shake: 0.6, exp: 1.9,                          // aerial reveal (we look at the shaded side, so brighten)
+    fn: keyShot([[20, 10, 40, 1, 0, 0, 40], [25, -3, 30, 11, 0, 0, 42]]) },
+  { t1: 30,   fov: 40, fog: 0.013, shake: 1,                                      // plaza, house frames against the sun
+    fn: keyShot([[25, 0.5, 2.75, 30.5, -9, 3.7, 47], [30, -1.0, 2.75, 35, 8, 3.7, 48]]) },
+  { t1: 34,   fov: 32, fog: 0.014, shake: 0.35,                                   // INSERT: things left behind
+    fn: keyShot([[30, -0.9, 0.55, 33.2, 1.0, 0.2, 37.0], [34, 0.3, 0.5, 33.7, 0.9, 0.22, 37.1]], true) },
+  { t1: 40,   fov: 40, fog: 0.014, shake: 1,                                      // approach to the post
+    fn: keyShot([[34, 1.8, 2.8, 12.5, -2.5, 3.3, POST.z], [37, 0.8, 2.85, 17.5, -3, 3.3, POST.z], [40, -0.8, 3.0, 21.5, -3.4, 3.3, POST.z]]) },
+  { t1: 43.5, fov: 34, fog: 0.012, shake: 0.3,                                    // INSERT: carved letters, camera slides down the word
+    fn: (t, P, L) => {
+      const s = clamp((t - GLOW_T0) / (GLOW_DT * 7), 0, 1);
+      const y = GROUND + 3.39 - 0.32 * 7 * s;
+      P.set(-3.3, y, POST.z - 1.55); L.set(POST.x, y - 0.02, POST.z);
+    } },
+  { t1: 99,   fov: 40, fog: 0.012, shake: 1,                                      // final composition
+    fn: keyShot([[43.5, -0.2, 3.0, 20.6, -1.1, 3.35, POST.z], [50, -0.4, 3.05, 21.5, -1.2, 3.35, POST.z]]) },
 ];
-const posCurve = new THREE.CatmullRomCurve3(KEYS.map((k) => new THREE.Vector3(k[1], k[2], k[3])), false, 'centripetal');
-const lookCurve = new THREE.CatmullRomCurve3(KEYS.map((k) => new THREE.Vector3(k[4], k[5], k[6])), false, 'centripetal');
 const camP = new THREE.Vector3(), camL = new THREE.Vector3();
 function setCamera(t) {
-  let i = 0;
-  while (i < KEYS.length - 2 && t > KEYS[i + 1][0]) i++;
-  const s = clamp((t - KEYS[i][0]) / (KEYS[i + 1][0] - KEYS[i][0]), 0, 1);
-  const e = lerp(s, s * s * (3 - 2 * s), 0.6);
-  const u = (i + e) / (KEYS.length - 1);
-  posCurve.getPoint(u, camP); lookCurve.getPoint(u, camL);
-  // gentle hand-held drift
-  camP.x += 0.035 * Math.sin(t * 1.3) + 0.02 * Math.sin(t * 2.9);
-  camP.y += 0.03 * Math.sin(t * 1.7 + 1) + 0.015 * Math.sin(t * 3.3);
+  let s = SHOTS[SHOTS.length - 1];
+  for (const sh of SHOTS) if (t < sh.t1) { s = sh; break; }
+  s.fn(t, camP, camL);
+  camP.x += s.shake * (0.035 * Math.sin(t * 1.3) + 0.02 * Math.sin(t * 2.9));
+  camP.y += s.shake * (0.03 * Math.sin(t * 1.7 + 1) + 0.015 * Math.sin(t * 3.3));
+  if (camera.fov !== s.fov) { camera.fov = s.fov; camera.updateProjectionMatrix(); }
   camera.position.copy(camP);
   camera.lookAt(camL);
   camera.updateMatrixWorld(true);
+  return s;
 }
 
 /* ---------- HUD ---------- */
@@ -521,18 +834,21 @@ const elCap = document.getElementById('caption');
 const elTitle = document.getElementById('title');
 const elFade = document.getElementById('fade');
 const CAPS = [
-  [0, 4.5, 'August 1590. John White finally returns to Roanoke.'],
-  [4.5, 9, 'There is no sign of the settlement he remembered.'],
-  [9, 13, 'No people waiting for him. No welcoming signals.'],
-  [13, 15.5, 'The houses and fortifications had been dismantled.'],
-  [15.5, 18, 'No bodies. No sign of a struggle.'],
-  [18, 22, 'But then, White found something. A word carved into a wooden post:'],
-  [22, 99, 'But there was no cross beside the word.'],
+  [0, 5, 'August 1590. John White finally returns to Roanoke.'],
+  [5, 11, 'There is no sign of the settlement he remembered.'],
+  [11, 15.5, 'No people waiting for him. No welcoming signals.'],
+  [15.5, 20, 'Only an abandoned colony.'],
+  [20, 25, 'The houses and fortifications had been dismantled.'],
+  [25, 30, 'No obvious evidence of a violent struggle. No bodies were discovered.'],
+  [30, 34, 'No clear explanation for the disappearance.'],
+  [34, 40, 'But then, White found something. A word carved into a wooden post:'],
+  [40, 43.5, ''],
+  [43.5, 99, 'But there was no cross beside the word.'],
 ];
 function hud(t) {
   const c = CAPS.find((a) => t >= a[0] && t < a[1]);
   elCap.textContent = c ? c[2] : '';
-  elTitle.style.opacity = smooth(t, 21.4, 22.8);
+  elTitle.style.opacity = smooth(t, 44.6, 46);
   const fin = 1 - smooth(t, 0, 1.4), fout = smooth(t, T_END - 1.6, T_END);
   elFade.style.opacity = Math.max(fin, fout);
 }
@@ -540,6 +856,7 @@ function hud(t) {
 /* ---------- frame update ---------- */
 function update(t) {
   t = clamp(t, 0, T_END);
+  timeU.value = t; foamMat.uniforms.uTime.value = t;
 
   // sea
   const wp = waterPos;
@@ -552,35 +869,36 @@ function update(t) {
   ship.rotation.set(0.025 * Math.sin(t * 0.9 + 1), 0.03 * Math.sin(t * 0.4), 0.045 * Math.sin(t * 1.1));
   ship.userData.flag.rotation.y = Math.sin(t * 4) * 0.35;
 
-  // mist drifts
+  updateBirds(t, sp);
+  updateSmoke(t);
   for (const m of mist) {
     const u = m.userData;
     m.position.set(u.x + Math.sin(t * 0.12 + u.ph) * u.amp * 2, u.y + Math.sin(t * 0.2 + u.ph) * 0.2, u.z + Math.cos(t * 0.1 + u.ph) * u.amp);
   }
 
-  // letters light up one by one
   glowMats.forEach((m, i) => {
-    const s = clamp((t - (18.3 + 0.32 * i)) / 0.9, 0, 1);
+    const s = clamp((t - (GLOW_T0 + GLOW_DT * i)) / 0.9, 0, 1);
     m.opacity = smooth(s, 0, 1) * (0.55 + 0.15 * Math.sin(t * 2.2 + i));
   });
 
-  // haze thickens as we reach the settlement, then relaxes a touch
-  scene.fog.density = lerp(0.0105, 0.017, smooth(t, 6, 13)) * lerp(1, 0.8, smooth(t, 17, 21));
-
-  setCamera(t);
+  const shot = setCamera(t);
+  scene.fog.density = shot.fog;
+  renderer.toneMappingExposure = shot.exp ?? 1.05;
+  for (const b of birds) b.obj.visible = b.obj.position.distanceTo(camera.position) > 12;   // no giant bird flying through the lens
   sky.position.copy(camera.position);
   skyMat.uniforms.uTime.value = t;
 
-  // the lantern held by the camera operator
+  // the lantern held by the camera operator (dimmed in the macro of the carving)
   const flick = 1 + 0.06 * Math.sin(t * 13) + 0.04 * Math.sin(t * 23.7);
-  lantern.intensity = 9 * smooth(t, 12, 16) * flick;
+  const macro = (t >= 40 && t < 43.5) ? 0.22 : 1;
+  lantern.intensity = 9 * smooth(t, 29.5, 31) * flick * macro;
   lantern.position.copy(camera.position).add(new THREE.Vector3(0.4, -0.3, 0.6));
 
   hud(t);
   renderer.render(scene, camera);
 }
 
-window.__dbg = { scene, lantern, sun, mist, fill, renderer };   // handy for debugging from the console
+window.__dbg = { scene, lantern, sun, mist, fill, renderer, camera, birds };
 window.__T_END = T_END;
 window.__setTime = (t) => { update(t); return t; };
 window.__ready = true;
