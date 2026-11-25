@@ -8,7 +8,7 @@ const [page_, prefix, ...ts] = process.argv.slice(2);
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('console', (m) => console.log('[browser]', m.text()));
   page.on('pageerror', (e) => console.log('[pageerror]', e.message));
-  await page.goto(`http://localhost:${PORT}/${page_}?t=0`);
+  await page.goto(`http://localhost:${PORT}/${page_}`);
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 180000 });
   for (const t of ts) {
     await page.evaluate((t) => window.__setTime(Number(t)), t);

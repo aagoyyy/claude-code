@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { makeFigure } from './figures.js';
 
 /* ------------------------------------------------------------------
    The Lost Colony of Roanoke — visual test v2 (Aug 1590)
@@ -769,6 +771,80 @@ function updateBirds(t, sp) {
   }
 }
 
+/* ---------- people: crew on deck, the landing party, White and his men at the post ---------- */
+const FIGS = [];
+const STAND = 0.35;                       // animation frame with the feet closest together
+const WALK_SPEED = 1.4;                   // m/s at playback rate 1 (matches the clip's stride)
+let boat = null;
+try {
+  const gltf = await new Promise((res, rej) => new GLTFLoader().load('./assets/CesiumMan.glb', res, undefined, rej));
+  const addFig = (kind, height, parent, pose) => {
+    const f = makeFigure(gltf, kind, height);
+    if (parent === ship) f.group.scale.setScalar(1 / ship.scale.x);     // ship is scaled; keep people human-sized
+    parent.add(f.group); FIGS.push({ f, pose });
+  };
+  // crew on the ship (ride with it, small in the wide shot)
+  const deck = (kind, h, x, y, z, yaw) => addFig(kind, h, ship, () => ({ vis: true, x, y, z, yaw, anim: STAND }));
+  deck('sailor', 1.66, 0.8, 1.55, 1.7, 0.4); deck('sailor', 1.7, -0.8, 1.55, -1.0, 2.4);
+  deck('soldier', 1.78, 0.9, 1.55, 0.2, 0.0); deck('gentleman', 1.72, 0.2, 2.4, -3.6, 0.0);
+
+  // landing party wades ashore from the boat and walks up the beach toward the gate (shot 3)
+  const P0 = { x: 7.0, z: 0.4 }, GATE = { x: 0.0, z: 27.5 };
+  const dl = Math.hypot(GATE.x - P0.x, GATE.z - P0.z), dir = { x: (GATE.x - P0.x) / dl, z: (GATE.z - P0.z) / dl };
+  const walker = (ox, oz, delay) => (t) => {
+    const s = Math.max(0, t - 9.5 - delay) * WALK_SPEED;
+    const x = P0.x + ox + dir.x * s, z = P0.z + oz + dir.z * s;
+    return { vis: t >= 9 && t < 15.7, x, y: terrainH(x, z), z, yaw: Math.atan2(dir.x, dir.z), anim: t - 9.5 - delay };
+  };
+  const still = (x, z, yaw) => () => ({ vis: false, x, y: terrainH(x, z), z, yaw, anim: STAND });
+  addFig('gentleman', 1.72, scene, walker(0, 0.4, 0));
+  addFig('soldier', 1.78, scene, walker(1.2, -1.3, 0.4));
+  addFig('soldier', 1.78, scene, walker(-0.9, -2.4, 0.9));
+  for (const [x, z, yaw] of [[9.3, 0.3, 4.2], [6.5, -0.2, 1.1]]) {              // sailors hauling the boat
+    const st = still(x, z, yaw);
+    addFig('sailor', 1.66, scene, (t) => ({ ...st(), vis: t >= 9 && t < 15.7 }));
+  }
+
+  // White and two soldiers walk slowly ahead of the camera toward the post (shot 8)
+  const POSTV = { x: POST.x, z: POST.z };
+  const slow = (sx, sz, delay, ox, oz) => (t) => {
+    const rate = 0.6, tt = Math.max(0, t - 34 - delay);
+    const tx = POSTV.x + ox - sx, tz = POSTV.z - 3.2 - oz - sz, len = Math.hypot(tx, tz);
+    const s = Math.min(len, tt * WALK_SPEED * rate);
+    const x = sx + (tx / len) * s, z = sz + (tz / len) * s;
+    return { vis: t >= 33.9 && t < 40, x, y: terrainH(x, z), z, yaw: Math.atan2(POSTV.x - x, POSTV.z - z), anim: tt * rate };
+  };
+  addFig('gentleman', 1.72, scene, slow(-1.8, 18.0, 0, 0.9, 0));
+  addFig('soldier', 1.78, scene, slow(-2.9, 16.8, 0.4, 2.1, 0.8));
+  addFig('soldier', 1.78, scene, slow(-0.6, 17.0, 0.8, 2.9, -0.2));
+
+  // the boat that brought them
+  const wood = new THREE.MeshStandardMaterial({ color: 0x4d3a28, roughness: 1, flatShading: true });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x241b14, roughness: 1 });
+  boat = new THREE.Group();
+  const outline = new THREE.Shape();
+  [[0, -2.2], [0.78, -1.3], [0.84, 0.6], [0.46, 1.9], [0, 2.4], [-0.46, 1.9], [-0.84, 0.6], [-0.78, -1.3]].forEach(([x, y], i) => (i ? outline.lineTo(x, y) : outline.moveTo(x, y)));
+  const hull = new THREE.Mesh(new THREE.ExtrudeGeometry(outline, { depth: 0.55, bevelEnabled: false }), wood);
+  hull.rotation.x = -Math.PI / 2; boat.add(hull);
+  const inner = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.02, 3.4), dark); inner.position.set(0, 0.56, 0); boat.add(inner);
+  for (const z of [-0.9, 0.2, 1.1]) { const th = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.06, 0.2), wood); th.position.set(0, 0.45, z); boat.add(th); }
+  for (const sd of [-1, 1]) { const oar = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2.6, 5), wood); oar.rotation.z = Math.PI / 2; oar.rotation.y = sd * 0.25; oar.position.set(0, 0.62, sd * 0.4); boat.add(oar); }
+  boat.position.set(8.0, 0.12, 0.9); boat.rotation.set(-0.06, Math.PI + 0.12, 0.03);
+  boat.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  scene.add(boat);
+} catch (e) { console.warn('characters disabled:', e.message); }
+
+function updateFigures(t) {
+  if (boat) boat.visible = t < 15.7;
+  for (const { f, pose } of FIGS) {
+    const p = pose(t);
+    f.group.visible = p.vis;
+    if (!p.vis) continue;
+    f.group.position.set(p.x, p.y, p.z); f.group.rotation.y = p.yaw;
+    f.update(p.anim);
+  }
+}
+
 /* ---------- camera: a list of shots ---------- */
 function keyShot(keys, rel = false) {
   const pts = keys.map((k) => new THREE.Vector3(k[1], k[2], k[3]));
@@ -805,7 +881,7 @@ const SHOTS = [
   { t1: 34,   fov: 32, fog: 0.014, shake: 0.35,                                   // INSERT: things left behind
     fn: keyShot([[30, -0.9, 0.55, 33.2, 1.0, 0.2, 37.0], [34, 0.3, 0.5, 33.7, 0.9, 0.22, 37.1]], true) },
   { t1: 40,   fov: 40, fog: 0.014, shake: 1,                                      // approach to the post
-    fn: keyShot([[34, 1.8, 2.8, 12.5, -2.5, 3.3, POST.z], [37, 0.8, 2.85, 17.5, -3, 3.3, POST.z], [40, -0.8, 3.0, 21.5, -3.4, 3.3, POST.z]]) },
+    fn: keyShot([[34, 1.9, 2.8, 12.0, -2.5, 3.3, POST.z], [37, 1.3, 2.85, 14.0, -3, 3.3, POST.z], [40, 0.6, 2.95, 16.2, -3.4, 3.3, POST.z]]) },
   { t1: 43.5, fov: 34, fog: 0.012, shake: 0.3,                                    // INSERT: carved letters, camera slides down the word
     fn: (t, P, L) => {
       const s = clamp((t - GLOW_T0) / (GLOW_DT * 7), 0, 1);
@@ -868,6 +944,8 @@ function update(t) {
   ship.position.set(sp.x, waveH(sp.x, sp.z, t) * 0.8 + 0.1, sp.z);
   ship.rotation.set(0.025 * Math.sin(t * 0.9 + 1), 0.03 * Math.sin(t * 0.4), 0.045 * Math.sin(t * 1.1));
   ship.userData.flag.rotation.y = Math.sin(t * 4) * 0.35;
+  ship.updateMatrixWorld(true);
+  updateFigures(t);
 
   updateBirds(t, sp);
   updateSmoke(t);
