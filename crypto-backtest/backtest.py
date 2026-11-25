@@ -48,6 +48,31 @@ def fetch_ccxt(exchange, symbol, tf, days):
     return clean(df)
 
 
+def fetch_binance_public(symbol, tf, days):
+    """Candle Binance dari mirror data publik (tanpa API key, tanpa ccxt). symbol: BTCUSDT atau BTC/USDT."""
+    import json
+    import time
+    import urllib.request
+    sym = symbol.replace("/", "").upper()
+    step = {"1m": 60, "5m": 300, "15m": 900, "1h": 3600}[tf] * 1000
+    start = int(time.time() * 1000) - days * 86_400_000
+    rows = []
+    while True:
+        url = (f"https://data-api.binance.vision/api/v3/klines?symbol={sym}&interval={tf}"
+               f"&startTime={start}&limit=1000")
+        with urllib.request.urlopen(url, timeout=30) as r:
+            batch = json.load(r)
+        if not batch:
+            break
+        rows += [[k[0], float(k[1]), float(k[2]), float(k[3]), float(k[4]), float(k[5])] for k in batch]
+        start = batch[-1][0] + step
+        if len(batch) < 1000:
+            break
+    df = pd.DataFrame(rows, columns=["ts", "open", "high", "low", "close", "volume"])
+    # buang candle terakhir kalau belum close
+    return clean(df.iloc[:-1])
+
+
 def load_csv(path):
     df = pd.read_csv(path)
     df.columns = [c.lower() for c in df.columns]
@@ -183,7 +208,7 @@ def signals(d, setup, p):
 
 
 # ------------------------------------------------------------- engine
-def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold):
+def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold, max_cost_r=None):
     o, h, l = (d[k].to_numpy() for k in ("open", "high", "low"))
     ts = d["ts"]
     day = ts.dt.tz_convert(WIB).dt.date.to_numpy()
@@ -203,6 +228,8 @@ def simulate(d, sigs, rr, cost_pct, max_per_day, daily_stop_r, max_hold):
         dist = (entry - sl) * side
         if dist <= 0 or dist / entry < 0.0005:   # stop terbalik atau terlalu rapat (<0.05%)
             continue
+        if max_cost_r is not None and 2 * cost_pct / 100 * entry / dist > max_cost_r:
+            continue                         # stop terlalu rapat: biaya memakan terlalu banyak R
         tp = entry + side * rr * dist
         exit_i, exit_px, reason = None, None, None
         for j in range(e, min(n, e + max_hold)):
@@ -249,7 +276,7 @@ def fmt(name, s):
 # --------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--exchange", default="binance")
+    ap.add_argument("--exchange", default="binance-public", help="binance-public (tanpa key) atau nama exchange ccxt")
     ap.add_argument("--symbol", default="BTC/USDT")
     ap.add_argument("--tf", default="15m")
     ap.add_argument("--days", type=int, default=365)
@@ -260,6 +287,7 @@ def main():
     ap.add_argument("--slip", type=float, default=0.02, help="slippage per sisi, %%")
     ap.add_argument("--max-per-day", type=int, default=4)
     ap.add_argument("--daily-stop-r", type=float, default=3.0)
+    ap.add_argument("--max-cost-r", type=float, default=0.15, help="lewati trade jika biaya > X R (0 = nonaktif)")
     ap.add_argument("--max-hold", type=int, default=96, help="bar maksimal per trade")
     ap.add_argument("--oos", type=float, default=0.3, help="porsi data terakhir untuk out-of-sample")
     ap.add_argument("--out", default="trades.csv")
@@ -270,6 +298,8 @@ def main():
         print("!! DATA SINTETIS: hanya untuk tes kode, angkanya tidak bermakna.\n")
     elif a.csv:
         df = load_csv(a.csv)
+    elif a.exchange == "binance-public":
+        df = fetch_binance_public(a.symbol, a.tf, a.days)
     else:
         df = fetch_ccxt(a.exchange, a.symbol, a.tf, a.days)
     if len(df) < 500:
@@ -283,7 +313,7 @@ def main():
     for rr in a.rr:
         print(f"\n=== R:R target {rr} | biaya {cost:.3f}%/sisi | OOS mulai {split:%Y-%m-%d} ===")
         for s in "ABC":
-            t = simulate(d, signals(d, s, p), rr, cost, a.max_per_day, a.daily_stop_r, a.max_hold)
+            t = simulate(d, signals(d, s, p), rr, cost, a.max_per_day, a.daily_stop_r, a.max_hold, a.max_cost_r or None)
             if len(t):
                 t["setup"], t["rr"] = s, rr
                 all_trades.append(t)

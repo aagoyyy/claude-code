@@ -4,7 +4,7 @@ Tes setup A (pullback EMA), B (sweep & reclaim), C (break & retest) dari Intrada
 
 ```bash
 pip install -r requirements.txt
-python backtest.py --symbol BTC/USDT --days 365          # data Binance via ccxt
+python backtest.py --symbol BTCUSDT --days 730           # data Binance publik, tanpa API key
 python backtest.py --csv data.csv --rr 1.5 2 3           # CSV: ts/open/high/low/close/volume
 python backtest.py --synthetic                           # tes kode saja
 ```
