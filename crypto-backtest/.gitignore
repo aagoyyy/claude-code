@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 search_results.csv
 trades.csv
+daily_results.csv
