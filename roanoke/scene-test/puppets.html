@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Puppet characters</title>
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  #stage { position: relative; width: 1280px; height: 720px; }
+  .lbl { position: absolute; bottom: 20px; width: 360px; text-align: center; color: #2a2d31; font-size: 16px; line-height: 1.35; transform: translateX(-50%); }
+  .lbl small { display: block; opacity: .65; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="labels"></div></div>
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+<script type="module" src="./puppets-demo.js"></script>
+</body>
+</html>
