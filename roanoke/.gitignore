@@ -3,3 +3,6 @@ out/frames/
 out/shots/
 out/render.log
 scene-test/assets/*.glb
+out/frames-page/
+out/*.log
+out/clips.done

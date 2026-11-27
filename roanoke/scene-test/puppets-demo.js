@@ -7,7 +7,8 @@ const mode = params.get('mode') || 'idle';
 const W = 1280, H = 720;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setSize(W, H); renderer.setPixelRatio(1);
+const SS = parseFloat(params.get('ss') || '2');
+renderer.setPixelRatio(SS); renderer.setSize(W, H);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.getElementById('stage').prepend(renderer.domElement);
@@ -25,6 +26,12 @@ scene.add(sun);
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 30), new THREE.MeshStandardMaterial({ color: 0xcfd3d6, roughness: 0.9 }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
+// ground ticks that scroll under the walkers (a treadmill), so the stride is judged against the floor
+const ticks = new THREE.Group(); scene.add(ticks);
+if (mode !== 'idle') {
+  const g = new THREE.BoxGeometry(0.5, 0.004, 0.06), m = new THREE.MeshStandardMaterial({ color: 0xaab0b5, roughness: 1 });
+  for (let i = -20; i < 20; i++) for (const z of [-0.8, 0.8]) { const t = new THREE.Mesh(g, m); t.position.set(i * 1.0, 0.003, z); t.receiveShadow = true; ticks.add(t); }
+}
 const labels = document.getElementById('labels');
 const label = (x, a, b) => { const d = document.createElement('div'); d.className = 'lbl'; d.style.left = x + '%'; d.innerHTML = `${a}<small>${b}</small>`; labels.appendChild(d); };
 
@@ -41,7 +48,8 @@ if (mode === 'strip') {
   add('gentleman', -2.0, 0.25); add('soldier', 0, 0); add('sailor', 2.0, -0.25);
   label(24, 'Gentleman (John White)', 'idle: breathing, weight shift, glancing'); label(50, 'Soldier', ''); label(76, 'Sailor', '');
 }
-function update(t) { items.forEach(({ p, phase }) => p.pose(t, mode === 'idle' ? 'idle' : 'walk', phase)); renderer.render(scene, camera); }
+const SPEED = 1.62;   // m/s: matches the stride of the walk cycle
+function update(t) { if (mode !== 'idle') ticks.position.x = -((t * SPEED) % 1.0); items.forEach(({ p, phase }) => p.pose(t, mode === 'idle' ? 'idle' : 'walk', phase)); renderer.render(scene, camera); }
 window.__setTime = (t) => { update(t); return t; };
 window.__ready = true;
 update(parseFloat(params.get('t') || '0.4'));
