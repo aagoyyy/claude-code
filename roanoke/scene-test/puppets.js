@@ -14,6 +14,11 @@ const D = {                       // key heights (m)
   headH: 0.32, headW: 0.27, torsoW: 0.33, torsoD: 0.22,
   shoulderY: 1.30, upperArm: 0.36, foreArm: 0.32,
 };
+// Gait: one foot is planted for BETA of the cycle and moves backwards (in the body frame) at exactly the ground speed,
+// so the foot never skates. SPEED must match whatever moves the character through the world.
+export const WALK = { cadence: 1.0, beta: 0.62, halfStride: 0.25 };
+WALK.speed = (2 * WALK.halfStride) / (WALK.beta / WALK.cadence);      // m/s
+
 const PAL = {
   gentleman: { top: 0x2b2622, legs: 0x6a3b32, shoes: 0x1c1815, skin: 0xc89a73, hair: 0x2a1f18 },
   soldier:   { top: 0x7a6a45, legs: 0x58563f, shoes: 0x2a211a, skin: 0xc19067, hair: 0x2f2419 },
@@ -145,24 +150,42 @@ export function makePuppet(kind, scale = 1.0) {
     for (const e of eyes) e.scale.y = 1 - 0.92 * bl;
 
     if (mode === 'walk') {
-      const ph = t * Math.PI * 2 * 0.95 + phase, s = Math.sin(ph), c = Math.cos(ph);
-      const side = (sg, cs) => {
-        const hpx = -0.5 * s * sg - 0.04 * Math.sin(2 * ph + 0.6 * sg);
-        const swing = Math.pow(Math.max(0, cs * sg), 1.5);
-        const knx = 0.07 + 0.9 * swing + 0.1 * Math.max(0, -s * sg);
-        const L = legs[sg > 0 ? 'L' : 'R'];
-        L.hp.rotation.x = hpx; L.kn.rotation.x = knx;
-        L.ank.rotation.x = -(hpx + knx) + 0.28 * Math.max(0, -hpx / 0.5) - 0.55 * Math.max(0, hpx / 0.5 - 0.35);
-        L.hp.rotation.z = 0.0;
+      const ph = t * Math.PI * 2 * WALK.cadence + phase, s = Math.sin(ph);
+      const { beta, halfStride: a } = WALK, L1 = D.thigh, L2 = D.shin, ground = D.ankle;
+      const u0 = (((ph / (Math.PI * 2)) % 1) + 1) % 1;
+      // hips: lowest at double support, highest at mid-stance; tiny sideways sway
+      hips.position.y = 0.665 - 0.021 * Math.cos(4 * Math.PI * u0);
+      hips.position.x = 0.012 * s; hips.rotation.y = 0.07 * s; hips.rotation.z = 0.02 * s;
+      const hermite = (x, p0, p1, m0, m1) => { const x2 = x * x, x3 = x2 * x; return (2 * x3 - 3 * x2 + 1) * p0 + (x3 - 2 * x2 + x) * m0 + (-2 * x3 + 3 * x2) * p1 + (x3 - x2) * m1; };
+      const foot = (u) => {                                  // ankle target + foot pitch for cycle position u (0..1), hip-relative z (forward)
+        if (u < beta) {                                      // stance: planted, sliding back at ground speed
+          const k = u / beta;
+          const heel = 0.05 * sstep(0.55, 1.0, k);           // heel rises before toe-off
+          const pitch = 0.25 * (1 - sstep(0, 0.14, k)) - 0.55 * sstep(0.62, 1.0, k);   // heel strike (toe up) -> flat -> toe-off (toe down)
+          return { z: a - 2 * a * k, y: ground + heel, pitch };
+        }
+        const sw = (u - beta) / (1 - beta);                  // swing: starts and ends at the ground velocity (no jerk at the hand-over)
+        const slope = (-2 * a / beta) * (1 - beta);
+        return { z: hermite(sw, -a, a, slope, slope), y: ground + 0.09 * Math.pow(Math.sin(Math.PI * sw), 2), pitch: -0.55 + 0.8 * sstep(0, 1, sw) };
       };
-      side(1, c); side(-1, c);
-      hips.position.y = D.hipY + 0.02 * Math.cos(2 * ph) - 0.011;
-      hips.position.x = 0.018 * s; hips.rotation.y = 0.09 * s; hips.rotation.z = 0.03 * s;
-      torso.rotation.y = -0.15 * s; torso.rotation.x = 0.04 + 0.01 * Math.cos(2 * ph); torso.rotation.z = -0.025 * s;
-      head.rotation.y = 0.06 * s; head.rotation.x = -0.03 + 0.012 * Math.cos(2 * ph);
-      arms.L.sh.rotation.x = 0.46 * s + 0.07 * Math.sin(2 * ph); arms.R.sh.rotation.x = -0.46 * s + 0.07 * Math.sin(2 * ph);
+      const solve = (leg, f) => {
+        let zt = f.z, yt = f.y - hips.position.y, dist = Math.hypot(zt, yt);
+        const maxR = (L1 + L2) * 0.998; if (dist > maxR) { zt *= maxR / dist; yt *= maxR / dist; dist = maxR; }
+        const thD = Math.atan2(-zt, -yt);
+        const alpha = Math.acos(THREE.MathUtils.clamp((L1 * L1 + dist * dist - L2 * L2) / (2 * L1 * dist), -1, 1));
+        const beta2 = Math.acos(THREE.MathUtils.clamp((L1 * L1 + L2 * L2 - dist * dist) / (2 * L1 * L2), -1, 1));
+        const th = thD - alpha, kappa = Math.PI - beta2;     // knee points forward
+        leg.hp.rotation.x = th; leg.kn.rotation.x = kappa; leg.ank.rotation.x = -(th + kappa) + f.pitch; leg.hp.rotation.z = 0;
+      };
+      const fL = foot(u0), fR = foot((u0 + 0.5) % 1);
+      solve(legs.L, fL); solve(legs.R, fR);
+      // torso / head / arms follow the feet (arms counter-swing with the opposite leg)
+      torso.rotation.y = -0.12 * s; torso.rotation.x = 0.04 + 0.008 * Math.cos(4 * Math.PI * u0); torso.rotation.z = -0.02 * s;
+      head.rotation.y = 0.05 * s; head.rotation.x = -0.03 + 0.01 * Math.cos(4 * Math.PI * u0);
+      const aL = fL.z / a, aR = fR.z / a;
+      arms.L.sh.rotation.x = 0.42 * aL; arms.R.sh.rotation.x = 0.42 * aR;
       arms.L.sh.rotation.z = 0.02; arms.R.sh.rotation.z = -0.02;
-      arms.L.el.rotation.x = -0.2 - 0.4 * sstep(0, 1, Math.max(0, -s)); arms.R.el.rotation.x = -0.2 - 0.4 * sstep(0, 1, Math.max(0, s));
+      arms.L.el.rotation.x = -0.2 - 0.38 * sstep(0, 1, Math.max(0, -aL)); arms.R.el.rotation.x = -0.2 - 0.38 * sstep(0, 1, Math.max(0, -aR));
       cloakPivot.rotation.x = 0.12 + 0.09 * Math.sin(ph - 1.0) + 0.03 * Math.sin(2 * ph - 0.5);
       for (const p of sway) p.g.rotation.x = p.ax + 0.035 * Math.sin(2 * ph - 0.8);
     } else {

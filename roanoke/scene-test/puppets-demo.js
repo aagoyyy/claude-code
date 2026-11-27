@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makePuppet } from './puppets.js';
+import { makePuppet, WALK } from './puppets.js';
 
 // ?mode=idle (front, breathing + glancing)  |  walk (profile, 3 characters)  |  strip (one soldier, 8 phases of the walk cycle)
 const params = new URLSearchParams(location.search);
@@ -40,7 +40,7 @@ const add = (kind, x, yaw, phase = 0) => { const p = makePuppet(kind); p.root.po
 
 if (mode === 'strip') {
   for (let i = 0; i < 8; i++) add('soldier', (i - 3.5) * 1.5, Math.PI / 2, (i / 8) * Math.PI * 2);
-  label(50, 'Walk cycle, 8 phases (profile)', 'pure sine functions: hip swing, knee bend, opposite arm swing, body bob, torso twist');
+  label(50, 'Walk cycle, 8 phases (profile)', 'foot-planted IK gait: heel strike, flat stance, toe-off, swing; feet never slide');
 } else if (mode === 'walk') {
   add('gentleman', -2.2, Math.PI / 2, 0); add('soldier', 0, Math.PI / 2, 1.2); add('sailor', 2.2, Math.PI / 2, 2.4);
   label(24, 'Gentleman', 'hat, ruff, cloak, rapier'); label(50, 'Soldier', 'morion, breastplate, musket'); label(76, 'Sailor', 'cap, bag, oar');
@@ -48,8 +48,9 @@ if (mode === 'strip') {
   add('gentleman', -2.0, 0.25); add('soldier', 0, 0); add('sailor', 2.0, -0.25);
   label(24, 'Gentleman (John White)', 'idle: breathing, weight shift, glancing'); label(50, 'Soldier', ''); label(76, 'Sailor', '');
 }
-const SPEED = 1.62;   // m/s: matches the stride of the walk cycle
+const SPEED = WALK.speed;   // m/s: the gait plants each foot at exactly this speed
 function update(t) { if (mode !== 'idle') ticks.position.x = -((t * SPEED) % 1.0); items.forEach(({ p, phase }) => p.pose(t, mode === 'idle' ? 'idle' : 'walk', phase)); renderer.render(scene, camera); }
 window.__setTime = (t) => { update(t); return t; };
+window.__items = items;
 window.__ready = true;
 update(parseFloat(params.get('t') || '0.4'));
